@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Acquisizione Documento Remota</title>
+    <style>
+        html, body { 
+            height: 100%; 
+            margin: 0; 
+            padding: 5px; 
+            box-sizing: border-box; 
+            overflow: hidden; 
+        }
+        body { 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
+            background: #343a40; 
+            color: white; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-around; 
+            align-items: center; 
+            position: relative;
+        }
+        h3 { margin: 2px 0; font-size: 15px; }
+
+        /* Versione in alto a destra */
+        .versione-app {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 11px;
+            color: #868e96;
+            font-weight: bold;
+            user-select: none;
+        }
+
+        /* Contenitore video cliccabile */
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 380px;
+            max-height: 58vh;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 3px solid #ffc107; /* Bordo iniziale (Fronte) */
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: border-color 0.2s ease;
+        }
+
+        video { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: contain; 
+            display: block;
+        }
+
+        /* Testo in sovrimpressione */
+        .overlay-testo {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            padding: 10px 5px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            transition: background 0.2s;
+        }
+        .video-container:active .overlay-testo {
+            background: rgba(40, 167, 69, 0.85); 
+        }
+
+        #istruzioniStep { 
+            font-size: 14px; 
+            font-weight: bold; 
+            margin: 0;
+        }
+
+        /* Stile evidenziatore per il FRONTE */
+        .evidenziatore-fronte {
+            background-color: #ffc107;
+            color: #000;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        /* Stile evidenziatore per il RETRO */
+        .evidenziatore-retro {
+            background-color: #17a2b8;
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .suggerimento-tap {
+            font-size: 11px;
+            color: #e9ecef;
+            margin-top: 4px;
+        }
+
+        canvas { display: none; }
+        
+        #loadingRemoto { 
+            display: none; 
+            font-size: 14px; 
+            font-weight: bold; 
+            color: #17a2b8; 
+            margin: 2px 0; 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="versione-app">Ver. 01.30</div>
+
+    <div>
+        <h3 id="titoloSoggetto">Acquisizione Documento</h3>
+    </div>
+
+    <div class="video-container" id="videoContainer" onclick="scattaEInviaRemota()">
+        <video id="webcamVideo" autoplay playsinline muted></video>
+        
+        <div class="overlay-testo">
+            <div id="istruzioniStep">Tap per scattare la foto del <span class="evidenziatore-fronte" id="testoLato">FRONTE</span></div>
+            <div class="suggerimento-tap">📸 Tocca l'immagine per catturare</div>
+        </div>
+    </div>
+
+    <canvas id="webcamCanvas"></canvas>
+
+    <div>
+        <div id="loadingRemoto">Caricamento in corso...</div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getStorage, ref as storageRef, uploadString } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+        const k1 = "AIzaSyCjfPICynrV";
+        const k2 = "SeeVr4ifXoBoWi74nVGEt5Q";
+        const firebaseConfig = {
+            apiKey: k1 + k2,
+            authDomain: "dbiscrizioni.firebaseapp.com",
+            projectId: "dbiscrizioni",
+            storageBucket: "dbiscrizioni.firebasestorage.app",
+            messagingSenderId: "803347064813",
+            appId: "1:803347064813:web:430a3fc4d0d1a3aa72e9e4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const storage = getStorage(app);
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const idPersona = urlParams.get('id');
+        const soggetto = urlParams.get('soggetto');
+
+        let streamWebcam = null;
+        let slotCorrente = 1; // 1 = Fronte, 2 = Retro
+        let inAcquisizione = false;
+
+        document.getElementById('titoloSoggetto').textContent = `Documento (${soggetto ? soggetto.toUpperCase() : ''})`;
+
+        async function avviaCameraRemota() {
+            try {
+                streamWebcam = await navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "environment" }
+                });
+                document.getElementById('webcamVideo').srcObject = streamWebcam;
+            } catch (err) {
+                try {
+                    streamWebcam = await navigator.mediaDevices.getUserMedia({ video: true });
+                    document.getElementById('webcamVideo').srcObject = streamWebcam;
+                } catch (e) {
+                    alert("Impossibile accedere alla fotocamera dello smartphone: " + e.message);
+                }
+            }
+        }
+
+        avviaCameraRemota();
+
+        function riduciImmagineBase64(dataUrl, maxWidth = 1024, quality = 0.6) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.src = dataUrl;
+                img.onload = () => {
+                    let width = img.width, height = img.height;
+                    if (width > maxWidth) {
+                        height = Math.round((height * maxWidth) / width);
+                        width = maxWidth;
+                    }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    resolve(canvas.toDataURL('image/jpeg', quality));
+                };
+            });
+        }
+
+        window.scattaEInviaRemota = async function() {
+            if (inAcquisizione) return;
+            if (!idPersona || !soggetto) {
+                alert("Parametri mancanti nell'URL.");
+                return;
+            }
+
+            inAcquisizione = true;
+            const video = document.getElementById('webcamVideo');
+            const canvas = document.getElementById('webcamCanvas');
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 480;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            let base64Originale = canvas.toDataURL('image/jpeg', 0.9);
+            
+            const container = document.getElementById('videoContainer');
+            const testoLato = document.getElementById('testoLato');
+            const loader = document.getElementById('loadingRemoto');
+
+            container.style.borderColor = "#28a745";
+            testoLato.textContent = slotCorrente === 1 ? "FRONTE ACQUISITO" : "RETRO ACQUISITO";
+            loader.style.display = 'block';
+            loader.textContent = "Caricamento su Cloud...";
+
+            try {
+                let base64Compresso = await riduciImmagineBase64(base64Originale, 800, 0.5);
+                
+                const sRef = storageRef(storage, `documenti_iscritti/${idPersona}_${soggetto}_img${slotCorrente}.jpg`);
+                await uploadString(sRef, base64Compresso, 'data_url');
+
+                loader.style.display = 'none';
+
+                // L'attesa di 1 secondo è stata rimossa completamente (tempo di attesa azzerato)
+
+                if (slotCorrente === 1) {
+                    slotCorrente = 2;
+                    container.style.borderColor = "#17a2b8";
+                    testoLato.className = "evidenziatore-retro";
+                    testoLato.textContent = "RETRO";
+                    inAcquisizione = false;
+                } else {
+                    document.getElementById('istruzioniStep').textContent = "✅ Fatto!";
+                    window.close();
+                }
+            } catch (error) {
+                loader.style.display = 'none';
+                container.style.borderColor = slotCorrente === 1 ? "#ffc107" : "#17a2b8";
+                alert("Errore durante l'invio della foto: " + error.message);
+                inAcquisizione = false;
+            }
+        };
+    </script>
+</body>
+</html>
