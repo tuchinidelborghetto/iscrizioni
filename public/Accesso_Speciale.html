@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tuchini del Borghetto - Accesso Speciale Configurabile</title>
+    <!-- Libreria QRCode.js locale stabile -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            text-align: center; 
+            padding: 20px 16px; 
+            background: #f4f7fc; 
+            color: #1f2937; 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            min-height: 100vh; 
+        }
+        .card { 
+            background: white; 
+            padding: 25px 22px; 
+            border-radius: 24px; 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06); 
+            max-width: 420px; 
+            width: 100%; 
+            margin: auto; 
+            border: 1px solid rgba(0,0,0,0.02);
+        }
+        
+        .logo-aziendale { max-width: 130px; height: auto; margin-bottom: 10px; }
+        h2 { font-size: 20px; color: #111827; font-weight: 700; margin-top: 0; margin-bottom: 4px; }
+        .sottotitolo { font-size: 13px; color: #6b7280; margin-bottom: 16px; line-height: 1.4; }
+
+        /* Stile per il selettore del ritardo */
+        .config-box {
+            background: #f9fafb;
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1.5px solid #e5e7eb;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .config-box label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+        }
+        .config-box select {
+            padding: 8px 12px;
+            font-size: 15px;
+            font-weight: 700;
+            border-radius: 8px;
+            border: 1.5px solid #d1d5db;
+            background: #fff;
+            color: #374151;
+            outline: none;
+            cursor: pointer;
+        }
+
+        #qrcode {
+            background: #ffffff;
+            padding: 16px;
+            border-radius: 16px;
+            display: inline-block;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 2px solid #fef3c7;
+            margin-bottom: 16px;
+            min-width: 220px;
+            min-height: 220px;
+        }
+        #qrcode img, #qrcode canvas {
+            display: block;
+            margin: 0 auto;
+        }
+        
+        .timer-box {
+            font-size: 13px;
+            color: #4b5563;
+            background: #f9fafb;
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .barra-progresso {
+            width: 100%;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            margin-top: 12px;
+            overflow: hidden;
+        }
+        #progressoFill {
+            width: 100%;
+            height: 100%;
+            background: #d97706;
+            transition: width 1s linear;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <img src="logotuchini.png" alt="Logo" class="logo-aziendale">
+        
+        <h2>Accesso Speciale</h2>
+        <p class="sottotitolo"> </p>
+
+        <!-- Selettore del ritardo in minuti -->
+        <div class="config-box">
+            <label for="selectRitardo">Ritardo in coda:</label>
+            <select id="selectRitardo" onchange="cambiaRitardo()">
+                <option value="5">5 minuti</option>
+                <option value="10" selected>10 minuti</option>
+                <option value="15">15 minuti</option>
+                <option value="20">20 minuti</option>
+                <option value="30">30 minuti</option>
+            </select>
+        </div>
+
+        <!-- Contenitore del QR Code -->
+        <div id="qrcode"></div>
+
+        <div class="timer-box">
+            <span>Prossimo aggiornamento tra:</span>
+            <strong id="secondiRimanenti" style="color: #d97706; font-size: 15px;">15s</strong>
+        </div>
+
+        <div class="barra-progresso">
+            <div id="progressoFill"></div>
+        </div>
+    </div>
+
+    <script>
+        let secondiCount = 15;
+        let qrcodeInstance = null;
+
+        function generaNuovoQRCode() {
+            const timestampCorrente = Date.now();
+            const ritardoScelto = document.getElementById('selectRitardo').value;
+            
+            // URL fisso di GitHub Pages con token, timestamp dinamico e ritardo selezionato
+            const urlBase = "https://iscrizionituchini.web.app/ticket_doppia_fila.html";
+            const urlCompleto = `${urlBase}?t=tuchini2027&ts=${timestampCorrente}&ritardo=${ritardoScelto}`;
+
+            const containerQR = document.getElementById("qrcode");
+            containerQR.innerHTML = ""; // Pulisce il QR precedente
+
+            // Generazione del QR code
+            try {
+                new QRCode(containerQR, {
+                    text: urlCompleto,
+                    width: 200,
+                    height: 200,
+                    colorDark: "#111827",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+            } catch (e) {
+                console.error("Errore generazione QR:", e);
+            }
+
+            secondiCount = 15;
+            aggiornaBarraProgresso();
+        }
+
+        // Funzione richiamata immediatamente se cambi il menu a tendina
+        window.cambiaRitardo = function() {
+            generaNuovoQRCode();
+        }
+
+        function aggiornaBarraProgresso() {
+            const fill = document.getElementById("progressoFill");
+            const percentuale = (secondiCount / 15) * 100;
+            fill.style.width = percentuale + "%";
+            document.getElementById("secondiRimanenti").textContent = secondiCount + "s";
+        }
+
+        // Avvio immediato
+        generaNuovoQRCode();
+
+        // Timer di aggiornamento ogni 15 secondi
+        setInterval(() => {
+            secondiCount--;
+            if (secondiCount <= 0) {
+                generaNuovoQRCode();
+            } else {
+                aggiornaBarraProgresso();
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

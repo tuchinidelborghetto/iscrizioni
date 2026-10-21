@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gestionale Iscritti</title>
+    <title>Adulti</title>
     <style>
 		
 		/* Nasconde la dashboard a pulsanti quando si attiva la ricerca */
@@ -601,9 +601,16 @@
 
             <!-- SEZIONE 0: VISUALIZZAZIONE STANDARD -->
             <div id="sezione_visualizzazione_standard" class="sezione-app attiva">
-                <h2>Elenco Iscritti</h2>
-                <p style="color: #666; font-size: 14px;">Digita almeno 2 lettere del cognome per cercare nel database.</p>
-                
+				<div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-bottom: 15px; gap: 10px;">
+					<div>
+						<h2 style="margin-bottom: 4px;">Elenco Iscritti (14+ anni)</h2>
+						<p style="color: #666; font-size: 14px; margin: 0;">Digita almeno 2 lettere del cognome per cercare nel database.</p>
+					</div>
+					<div id="headerBambiniBox" style="display: none; align-items: center; gap: 10px; justify-content: center; flex: 1;">
+						<img src="bambini.png" alt="Bambini" style="max-height: 55px; object-fit: contain; opacity: 0.75;">
+					</div>
+					<div style="width: 150px;"></div>
+				</div>
                 <!-- DASHBOARD MOBILE PER ADMIN -->
                 <div class="admin-mobile-dashboard">
                     
@@ -985,10 +992,10 @@
 
                     <!-- DOCUMENTO ISCRITTO -->
                     <div id="gruppoSezioneDocumento" style="display: none; margin-top: 10px;">
-                        <div class="collapsible-header" onclick="toggleCollapsible('corpoDocIscritto', this); apriQRCapture('iscritto');">
-                            <span>🪪 Documento d'Identità (Iscritto)</span>
-                            <span>▼</span>
-                        </div>
+                        <div class="collapsible-header" onclick="toggleCollapsibleDoc('corpoDocIscritto', this, 'iscritto');">
+							<span>🪪 Documento d'Identità (Iscritto)</span>
+							<span>▼</span>
+						</div>
                         <div id="corpoDocIscritto" class="collapsible-content">
                             <div class="form-row" style="margin-bottom: 10px;">
                                 <div class="form-group col-medium">
@@ -1055,67 +1062,55 @@
                         </div>
 
                         <div id="gruppoGen1Doc" style="display: none; margin-bottom: 10px;">
-                            <div class="collapsible-header" style="background: #fff9db; border-color: #f59f00; color: #b7791f;" onclick="toggleCollapsible('corpoDocGen1', this)">
-                                <span>🪪 Documento d'Identità (Genitore 1)</span>
-                                <span>▼</span>
-                            </div>
-                            <div id="corpoDocGen1" class="collapsible-content" style="background: #fffdf5;">
-                                <div class="form-row" style="margin-bottom: 10px;">
-                                    <div class="form-group col-medium">
-                                        <label style="font-size: 11px;">Tipo Documento:</label>
-                                        <select id="editGenitore1TipoDoc" style="padding: 4px; font-size: 11px; margin: 2px 0 0 0;">
-                                            <option value="">-- Seleziona --</option>
-                                            <option value="Passaporto">Passaporto</option>
-                                            <option value="Patente">Patente</option>
-                                            <option value="Carta di identità">Carta di identità</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group col-medium">
-                                        <label style="font-size: 11px;">N. Documento:</label>
-                                        <input type="text" id="editGenitore1NumDoc" style="padding: 4px; font-size: 11px; margin: 2px 0 0 0;">
-                                    </div>
-                                    <div class="form-group col-medium">
-                                        <label style="font-size: 11px;">Scadenza:</label>
-                                        <input type="date" id="editGenitore1ScadenzaDoc" style="padding: 4px; font-size: 11px; margin: 2px 0 0 0;">
-                                    </div>
-                                </div>
+							<div class="collapsible-header" style="background: #fff3cd; color: #b7791f;" onclick="toggleCollapsible('corpoDocGen1', this); apriQRCapture('gen1');">
+								<span>🪪 Documento d'Identità (Genitore 1)</span>
+								<span>▼</span>
+							</div>
+							<div id="corpoDocGen1" class="collapsible-content" style="background: #fffdf5;">
+								<div class="form-row" style="margin-bottom: 10px;">
+									<div class="form-group col-medium">
+										<label style="font-size: 11px;">Tipo Documento:</label>
+										<select id="editGenitore1TipoDoc" style="padding: 4px; font-size: 11px; margin: 2px 0 0 0;">
+											<option value="">-- Seleziona --</option>
+											<option value="Passaporto">Passaporto</option>
+											<option value="Patente">Patente</option>
+											<option value="Carta di identità">Carta di identità</option>
+										</select>
+									</div>
+									<div class="form-group col-medium">
+										<label style="font-size: 11px;">N. Documento:</label>
+										<input type="text" id="editGenitore1NumDoc" style="padding: 4px; font-size: 11px; margin: 2px 0 0 0;">
+									</div>
+									<div class="form-group col-medium">
+										<label style="font-size: 11px;">Scadenza:</label>
+										<input type="date" id="editGenitore1ScadenzaDoc" style="padding: 4px; font-size: 11px; margin: 2px 0 0 0;">
+									</div>
+								</div>
 
-                                <div style="margin-top: 10px; border-top: 1px dashed #f59f00; padding-top: 10px;">
-                                    <label style="font-size: 12px; font-weight: bold; color: #b7791f;">Immagine 1 (Fronte):</label>
-                                    <div style="display: flex; gap: 8px; align-items: center; margin-top: 5px; flex-wrap: wrap;">
-                                        <button type="button" class="btn-azione" style="background-color: #007bff; padding: 6px 10px; font-size: 11px;" onclick="avviaWebcam('gen1', 1)">📷 Webcam</button>
-                                        <label class="btn-azione" style="background-color: #17a2b8; padding: 6px 10px; font-size: 11px; cursor: pointer; margin: 0; display: inline-block;">
-                                            📂 Carica File <input type="file" accept="image/*,application/pdf" style="display: none;" onchange="caricaFileLocale('gen1', 1, this)">
-                                        </label>
-                                    </div>
-                                    <div style="margin-top: 8px;">
-                                        <div id="boxAnteprima_gen1_1" style="display: none;">
-                                            <a id="linkAnteprima_gen1_1" href="#" target="_blank" style="font-size: 12px; color: #007bff; text-decoration: underline; display: block; margin-bottom: 4px;">Visualizza Immagine 1</a>
-                                            <button type="button" class="btn-azione btn-elimina-storico" onclick="rimuoviFileDocumento('gen1', 1)">Rimuovi</button>
-                                        </div>
-                                        <input type="hidden" id="editUrl_gen1_1">
-                                    </div>
-                                </div>
+								<!-- Box QR Code Smartphone -->
+								<div style="margin: 5px 0; background: #fff8e1; padding: 6px; border-radius: 6px; border: 1px solid #ffe8cc; text-align: center;">
+									<div id="boxContainerQR_gen1" style="display: none; margin: 0 auto; background: #fff; padding: 6px; border: 1px solid #ffe8cc; border-radius: 6px; text-align: center; max-width: 140px;"></div>
+								</div>
 
-                                <div style="margin-top: 10px; border-top: 1px dashed #f59f00; padding-top: 10px;">
-                                    <label style="font-size: 12px; font-weight: bold; color: #b7791f;">Immagine 2 (Retro):</label>
-                                    <div style="display: flex; gap: 8px; align-items: center; margin-top: 5px; flex-wrap: wrap;">
-                                        <button type="button" class="btn-azione" style="background-color: #007bff; padding: 6px 10px; font-size: 11px;" onclick="avviaWebcam('gen1', 2)">📷 Webcam</button>
-                                        <label class="btn-azione" style="background-color: #17a2b8; padding: 6px 10px; font-size: 11px; cursor: pointer; margin: 0; display: inline-block;">
-                                            📂 Carica File <input type="file" accept="image/*,application/pdf" style="display: none;" onchange="caricaFileLocale('gen1', 2, this)">
-                                        </label>
-                                    </div>
-                                    <div style="margin-top: 8px;">
-                                        <div id="boxAnteprima_gen1_2" style="display: none;">
-                                            <a id="linkAnteprima_gen1_2" href="#" target="_blank" style="font-size: 12px; color: #007bff; text-decoration: underline; display: block; margin-bottom: 4px;">Visualizza Immagine 2</a>
-                                            <button type="button" class="btn-azione btn-elimina-storico" onclick="rimuoviFileDocumento('gen1', 2)">Rimuovi</button>
-                                        </div>
-                                        <input type="hidden" id="editUrl_gen1_2">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
+								<div style="margin-top: 10px; border-top: 1px dashed #f59f00; padding-top: 10px;">
+									<label style="font-size: 12px; font-weight: bold; color: #b7791f;">Immagini Documento:</label>
+									<div style="margin-top: 8px;" id="boxContainerImmagini_gen1">
+										<div id="linkAnteprima_gen1_1_wrap" style="display: none; margin-bottom: 4px;">
+											<a id="linkAnteprima_gen1_1" href="#" target="_blank" style="font-size: 12px; color: #007bff; text-decoration: underline;">Visualizza Immagine (Fronte)</a>
+										</div>
+										<div id="linkAnteprima_gen1_2_wrap" style="display: none; margin-bottom: 8px;">
+											<a id="linkAnteprima_gen1_2" href="#" target="_blank" style="font-size: 12px; color: #007bff; text-decoration: underline;">Visualizza Immagine (Retro)</a>
+										</div>
+										<div id="msgNessunaImmagine_gen1" style="font-size: 12px; color: #666; font-style: italic; margin-bottom: 6px;">Nessun documento caricato.</div>
+										
+										<button type="button" id="btnRimuoviEntrambi_gen1" class="btn-azione btn-elimina-storico" style="display: none;" onclick="rimuoviEntrambiFileDocumento('gen1')">🗑️ Rimuovi Documenti</button>
+									</div>
+									<input type="hidden" id="editUrl_gen1_1">
+									<input type="hidden" id="editUrl_gen1_2">
+								</div>
+							</div>
+						</div>
+						
                         <p style="font-size: 13px; font-weight: bold; color: #856404; margin: 15px 0 5px 0;">Genitore 2</p>
                         <div class="form-row">
                             <div class="form-group col-medium"><label style="font-size: 11px;">Cognome:</label><input type="text" id="editGenitore2Cognome" class="campo-controllo-genitore" style="padding: 5px; font-size: 12px;"></div>
@@ -1134,80 +1129,54 @@
                         </div>
 
                         <div id="gruppoGen2Doc" style="display: none; margin-top: 5px; margin-bottom: 0;">
-                            <div class="collapsible-header" style="background: #fff9db; border-color: #f59f00; color: #b7791f;" onclick="toggleCollapsible('corpoDocGen2', this)">
-                                <span>🪪 Documento d'Identità (Genitore 2)</span>
-                                <span>▼</span>
-                            </div>
-                            <div id="corpoDocGen2" class="collapsible-content" style="background: #fffdf5;">
-                                <div class="form-row" style="margin-bottom: 10px;">
-                                    <div class="form-group col-medium">
-                                        <label style="font-size: 11px;">Tipo Documento:</label>
-                                        <select id="editGenitore2TipoDoc" style="padding: 4px; font-size: 11px; margin: 2px 0 0 0;">
-                                            <option value="">-- Seleziona --</option>
-                                            <option value="Passaporto">Passaporto</option>
-                                            <option value="Patente">Patente</option>
-                                            <option value="Carta di identità">Carta di identità</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group col-medium">
-                                        <label style="font-size: 11px;">N. Documento:</label>
-                                        <input type="text" id="editGenitore2NumDoc" style="padding: 4px; font-size: 11px; margin: 2px 0 0 0;">
-                                    </div>
-                                    <div class="form-group col-medium">
-                                        <label style="font-size: 11px;">Scadenza:</label>
-                                        <input type="date" id="editGenitore2ScadenzaDoc" style="padding: 4px; font-size: 11px; margin: 2px 0 0 0;">
-                                    </div>
-                                </div>
+							<div class="collapsible-header" style="background: #fff3cd; color: #b7791f;" onclick="toggleCollapsible('corpoDocGen2', this); apriQRCapture('gen2');">
+								<span>🪪 Documento d'Identità (Genitore 2)</span>
+								<span>▼</span>
+							</div>
+							<div id="corpoDocGen2" class="collapsible-content" style="background: #fffdf5;">
+								<div class="form-row" style="margin-bottom: 10px;">
+									<div class="form-group col-medium">
+										<label style="font-size: 11px;">Tipo Documento:</label>
+										<select id="editGenitore2TipoDoc" style="padding: 4px; font-size: 11px; margin: 2px 0 0 0;">
+											<option value="">-- Seleziona --</option>
+											<option value="Passaporto">Passaporto</option>
+											<option value="Patente">Patente</option>
+											<option value="Carta di identità">Carta di identità</option>
+										</select>
+									</div>
+									<div class="form-group col-medium">
+										<label style="font-size: 11px;">N. Documento:</label>
+										<input type="text" id="editGenitore2NumDoc" style="padding: 4px; font-size: 11px; margin: 2px 0 0 0;">
+									</div>
+									<div class="form-group col-medium">
+										<label style="font-size: 11px;">Scadenza:</label>
+										<input type="date" id="editGenitore2ScadenzaDoc" style="padding: 4px; font-size: 11px; margin: 2px 0 0 0;">
+									</div>
+								</div>
 
-                                <div style="margin-top: 10px; border-top: 1px dashed #f59f00; padding-top: 10px;">
-                                    <label style="font-size: 12px; font-weight: bold; color: #b7791f;">Immagine 1 (Fronte):</label>
-                                    <div style="display: flex; gap: 8px; align-items: center; margin-top: 5px; flex-wrap: wrap;">
-                                        <button type="button" class="btn-azione" style="background-color: #007bff; padding: 6px 10px; font-size: 11px;" onclick="avviaWebcam('gen2', 1)">📷 Webcam</button>
-                                        <label class="btn-azione" style="background-color: #17a2b8; padding: 6px 10px; font-size: 11px; cursor: pointer; margin: 0; display: inline-block;">
-                                            📂 Carica File <input type="file" accept="image/*,application/pdf" style="display: none;" onchange="caricaFileLocale('gen2', 1, this)">
-                                        </label>
-                                    </div>
-                                    <div style="margin-top: 8px;">
-                                        <div id="boxAnteprima_gen2_1" style="display: none;">
-                                            <a id="linkAnteprima_gen2_1" href="#" target="_blank" style="font-size: 12px; color: #007bff; text-decoration: underline; display: block; margin-bottom: 4px;">Visualizza Immagine 1</a>
-                                            <button type="button" class="btn-azione btn-elimina-storico" onclick="rimuoviFileDocumento('gen2', 1)">Rimuovi</button>
-                                        </div>
-                                        <input type="hidden" id="editUrl_gen2_1">
-                                    </div>
-                                </div>
+								<!-- Box QR Code Smartphone -->
+								<div style="margin: 5px 0; background: #fff8e1; padding: 6px; border-radius: 6px; border: 1px solid #ffe8cc; text-align: center;">
+									<div id="boxContainerQR_gen2" style="display: none; margin: 0 auto; background: #fff; padding: 6px; border: 1px solid #ffe8cc; border-radius: 6px; text-align: center; max-width: 140px;"></div>
+								</div>
 
-                                <div style="margin-top: 10px; border-top: 1px dashed #f59f00; padding-top: 10px;">
-                                    <label style="font-size: 12px; font-weight: bold; color: #b7791f;">Immagine 2 (Retro):</label>
-                                    <div style="display: flex; gap: 8px; align-items: center; margin-top: 5px; flex-wrap: wrap;">
-                                        <button type="button" class="btn-azione" style="background-color: #007bff; padding: 6px 10px; font-size: 11px;" onclick="avviaWebcam('gen2', 2)">📷 Webcam</button>
-                                        <label class="btn-azione" style="background-color: #17a2b8; padding: 6px 10px; font-size: 11px; cursor: pointer; margin: 0; display: inline-block;">
-                                            📂 Carica File <input type="file" accept="image/*,application/pdf" style="display: none;" onchange="caricaFileLocale('gen2', 2, this)">
-                                        </label>
-                                    </div>
-                                    <div style="margin-top: 8px;">
-                                        <div id="boxAnteprima_gen2_2" style="display: none;">
-                                            <a id="linkAnteprima_gen2_2" href="#" target="_blank" style="font-size: 12px; color: #007bff; text-decoration: underline; display: block; margin-bottom: 4px;">Visualizza Immagine 2</a>
-                                            <button type="button" class="btn-azione btn-elimina-storico" onclick="rimuoviFileDocumento('gen2', 2)">Rimuovi</button>
-                                        </div>
-                                        <input type="hidden" id="editUrl_gen2_2">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Box Webcam Condiviso -->
-                    <div id="boxContainerWebcamGenerale" style="display: none; margin-top: 15px; background: #fff; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-                        <p style="margin: 0 0 5px 0; font-size: 12px; font-weight: bold;" id="titoloWebcamAttiva">Acquisizione Webcam</p>
-                        <video id="webcamVideo" autoplay playsinline style="width: 100%; max-width: 320px; display: block; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 5px;"></video>
-                        <canvas id="webcamCanvas" style="display: none;"></canvas>
-                        <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-                            <button type="button" class="btn-azione" style="background-color: #6c757d; padding: 6px 12px; font-size: 12px;" onclick="invertiCamera()">🔄 Cambia Fotocamera</button>
-                        </div>
-                        <div style="display: flex; gap: 8px;">
-                            <button type="button" class="btn-azione" style="background-color: #28a745; padding: 6px 12px; font-size: 12px;" onclick="scattaFotoWebcam()">📸 Scatta e Salva</button>
-                            <button type="button" class="btn-azione" style="background-color: #dc3545; padding: 6px 12px; font-size: 12px;" onclick="fermaWebcam()">❌ Annulla</button>
-                        </div>
+								<div style="margin-top: 10px; border-top: 1px dashed #f59f00; padding-top: 10px;">
+									<label style="font-size: 12px; font-weight: bold; color: #b7791f;">Immagini Documento:</label>
+									<div style="margin-top: 8px;" id="boxContainerImmagini_gen2">
+										<div id="linkAnteprima_gen2_1_wrap" style="display: none; margin-bottom: 4px;">
+											<a id="linkAnteprima_gen2_1" href="#" target="_blank" style="font-size: 12px; color: #007bff; text-decoration: underline;">Visualizza Immagine (Fronte)</a>
+										</div>
+										<div id="linkAnteprima_gen2_2_wrap" style="display: none; margin-bottom: 8px;">
+											<a id="linkAnteprima_gen2_2" href="#" target="_blank" style="font-size: 12px; color: #007bff; text-decoration: underline;">Visualizza Immagine (Retro)</a>
+										</div>
+										<div id="msgNessunaImmagine_gen2" style="font-size: 12px; color: #666; font-style: italic; margin-bottom: 6px;">Nessun documento caricato.</div>
+										
+										<button type="button" id="btnRimuoviEntrambi_gen2" class="btn-azione btn-elimina-storico" style="display: none;" onclick="rimuoviEntrambiFileDocumento('gen2')">🗑️ Rimuovi Documenti</button>
+									</div>
+									<input type="hidden" id="editUrl_gen2_1">
+									<input type="hidden" id="editUrl_gen2_2">
+								</div>
+							</div>
+						</div>	
                     </div>
 
                     <!-- Pulsante Salva Anagrafica in basso a sinistra -->
@@ -1353,8 +1322,9 @@
     </div>
 
     <script type="module">
+		
         import { initializeApp, getApps, initializeApp as initializeSecondaryApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, setDoc, addDoc, deleteDoc, query, where, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, setDoc, addDoc, deleteDoc, query, where, getDoc, updateDoc, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getStorage, ref as storageRef, uploadString, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
         import { getDatabase, ref as dbRef, set, update, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -1369,6 +1339,7 @@
         const k1 = "AIzaSyCjfPICynrV";
         const k2 = "SeeVr4ifXoBoWi74nVGEt5Q";
 
+        // Configurazioni dei due database
         const firebaseConfig = {
             apiKey: k1 + k2,
             authDomain: "dbiscrizioni.firebaseapp.com",
@@ -1383,7 +1354,23 @@
         const auth = getAuth(app);
         const storage = getStorage(app);
         const provider = new GoogleAuthProvider();
+		
+		// Imposta 'adulti' oppure 'anniverdirossi' a seconda del gestionale desiderato
+		const TIPO_GESTIONALE = 'adulti'; // o 'anniverdirossi'
+		const IS_ANNIVERDIROSSI = (TIPO_GESTIONALE === 'anniverdirossi');
+		if (IS_ANNIVERDIROSSI) {
+			const bBox = document.getElementById('headerBambiniBox');
+			if (bBox) bBox.style.display = 'flex';
+		}
 
+		const NOME_COLL_ANAGRAFICA = TIPO_GESTIONALE === 'anniverdirossi' ? "anagrafica_vr" : "anagrafica";
+		const NOME_COLL_STORICO = TIPO_GESTIONALE === 'anniverdirossi' ? "storico_vr" : "storico";
+		const NOME_COLL_LOG = TIPO_GESTIONALE === 'anniverdirossi' ? "log_attivita_vr" : "log_attivita";
+
+		// Definiamo correttamente i riferimenti Firestore (CollectionReference)
+		const COLLECTION_ANAGRAFICA = collection(db, NOME_COLL_ANAGRAFICA);
+		const COLLECTION_STORICO = collection(db, NOME_COLL_STORICO);
+		
         let timeoutRicerca = null;
         let timeoutRuntime = null;
         let modalitaCorrente = 'user';
@@ -1506,6 +1493,13 @@
             }
 
             const tr = document.createElement('tr');
+           let htmlNumId = '';
+            if (!IS_ANNIVERDIROSSI) {
+                htmlNumId = `<td><input type="text" class="input-storico input-num" id="inputNuovoNumId" placeholder="Numero..."></td>`;
+            } else {
+                htmlNumId = `<td style="display: none;"><input type="text" class="input-storico input-num" id="inputNuovoNumId" value="N/D"></td>`;
+            }
+
             tr.innerHTML = `
                 <td>${annoHtml}</td>
                 <td>
@@ -1533,7 +1527,7 @@
                 const azioneCompleta = azione + (dettaglioAnagrafica ? ' - ' + dettaglioAnagrafica : '');
                 const rigaFormattata = `${dataStr};${oraStr};${azioneCompleta};${emailUtente}, ${aliasUtente}`;
 
-                await addDoc(collection(db, "log_attivita"), {
+                await addDoc(collection(db, NOME_COLL_LOG), {
                     data: dataStr,
                     ora: oraStr,
                     email: emailUtente,
@@ -1557,42 +1551,48 @@
         };
 
         async function caricaDatiLog() {
-            const tbody = document.getElementById('corpoTabellaLog');
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Caricamento log...</td></tr>';
-            try {
-                const snap = await getDocs(collection(db, "log_attivita"));
-                tbody.innerHTML = '';
-                if (snap.empty) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; font-style:italic;">Nessun log registrato.</td></tr>';
-                    return;
-                }
+			const tbody = document.getElementById('corpoTabellaLog');
+			tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Caricamento log...</td></tr>';
+			try {
+				// Esegue la query ordinata per timestamp decrescente sull'intera collezione
+				const q = query(
+					collection(db, NOME_COLL_LOG), 
+					orderBy("timestamp", "desc")
+				);
+				
+				const snap = await getDocs(q);
+				tbody.innerHTML = '';
+				
+				if (snap.empty) {
+					tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; font-style:italic;">Nessun log registrato.</td></tr>';
+					return;
+				}
 
-                let logList = [];
-                snap.forEach(docSnap => {
-                    logList.push(docSnap.data());
-                });
+				let htmlFrammenti = "";
+				snap.forEach(docSnap => {
+					const l = docSnap.data();
+					htmlFrammenti += `
+						<tr>
+							<td>${l.data || ''}</td>
+							<td>${l.ora || ''}</td>
+							<td>${l.email || ''}</td>
+							<td><strong>${l.azione || ''}</strong></td>
+							<td><code>${l.formattato || ''}</code></td>
+						</tr>
+					`;
+				});
 
-                logList.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+				tbody.innerHTML = htmlFrammenti;
 
-                logList.forEach(l => {
-                    tbody.innerHTML += `
-                        <tr>
-                            <td>${l.data}</td>
-                            <td>${l.ora}</td>
-                            <td>${l.email}</td>
-                            <td><strong>${l.azione}</strong></td>
-                            <td><code>${l.formattato}</code></td>
-                        </tr>
-                    `;
-                });
-            } catch (error) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Errore caricamento log: ${error.message}</td></tr>`;
-            }
-        }
-
+			} catch (error) {
+				console.error("Errore caricamento log:", error);
+				tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Errore caricamento log: ${error.message}</td></tr>`;
+			}
+		}
+		
         window.esportaLogCSV = async function() {
             try {
-                const snap = await getDocs(collection(db, "log_attivita"));
+                const snap = await getDocs(collection(db, NOME_COLL_LOG));
                 if (snap.empty) {
                     alert("Nessun log da esportare.");
                     return;
@@ -1658,51 +1658,6 @@
             if (fill) fill.style.width = '0%';
             document.getElementById('loadingOverlay').style.display = 'none';
         };
-		
-        window.avviaWebcam = async function(soggetto, slot) {
-			targetWebcamSoggetto = soggetto;
-			targetWebcamSlot = slot;
-			
-			if (streamWebcam) {
-				streamWebcam.getTracks().forEach(track => track.stop());
-			}
-
-			try {
-				const constraints = {
-					video: {
-						width: { ideal: 1280 },
-						height: { ideal: 720 },
-						facingMode: usaCameraPosteriore ? { exact: "environment" } : "user"
-					}
-				};
-
-				streamWebcam = await navigator.mediaDevices.getUserMedia(constraints);
-				const video = document.getElementById('webcamVideo');
-				video.srcObject = streamWebcam;
-				document.getElementById('titoloWebcamAttiva').textContent = `Acquisizione Webcam (${soggetto.toUpperCase()} - Immagine ${slot})`;
-				document.getElementById('boxContainerWebcamGenerale').style.display = 'block';
-			} catch (err) {
-				try {
-					const fallbackConstraints = {
-						video: {
-							width: { ideal: 1280 },
-							height: { ideal: 720 },
-							facingMode: usaCameraPosteriore ? "environment" : "user"
-						}
-					};
-					streamWebcam = await navigator.mediaDevices.getUserMedia(fallbackConstraints);
-					document.getElementById('webcamVideo').srcObject = streamWebcam;
-					document.getElementById('boxContainerWebcamGenerale').style.display = 'block';
-				} catch (fallbackErr) {
-					alert("Impossibile accedere alla fotocamera: " + fallbackErr.message);
-				}
-			}
-		};
-
-		window.invertiCamera = async function() {
-			usaCameraPosteriore = !usaCameraPosteriore;
-			await avviaWebcam(targetWebcamSoggetto, targetWebcamSlot);
-		};
 
         function riduciImmagineBase64(dataUrl, maxWidth = 1024, quality = 1) {
             return new Promise((resolve) => {
@@ -1727,112 +1682,6 @@
                 };
             });
         }
-
-        window.scattaFotoWebcam = async function() {
-            const video = document.getElementById('webcamVideo');
-            const canvas = document.getElementById('webcamCanvas');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            
-            let base64Image = canvas.toDataURL('image/jpeg', 0.9);
-            base64Image = await riduciImmagineBase64(base64Image, 1024, 0.6);
-            fermaWebcam();
-
-            let idPersona = document.getElementById('editIdPersona').value;
-            if (!idPersona) {
-                idPersona = "temp_" + Date.now();
-                document.getElementById('editIdPersona').value = idPersona;
-            }
-            
-            try {
-                mostraCaricamento(`Caricamento foto su Storage...`);
-                const sRef = storageRef(storage, `documenti_iscritti/${idPersona}_${targetWebcamSoggetto}_img${targetWebcamSlot}.jpg`);
-                await uploadString(sRef, base64Image, 'data_url');
-                const downloadUrl = await getDownloadURL(sRef);
-                
-                document.getElementById(`editUrl_${targetWebcamSoggetto}_${targetWebcamSlot}`).value = downloadUrl;
-                const link = document.getElementById(`linkAnteprima_${targetWebcamSoggetto}_${targetWebcamSlot}`);
-                link.href = downloadUrl;
-                link.textContent = `Visualizza Immagine ${targetWebcamSlot} (Webcam)`;
-                document.getElementById(`boxAnteprima_${targetWebcamSoggetto}_${targetWebcamSlot}`).style.display = 'block';
-                
-                alert("Immagine caricata con successo!");
-            } catch (error) {
-                alert("Errore durante l'upload: " + error.message);
-            } finally {
-                nascondiCaricamento();
-            }
-        };
-
-        window.caricaFileLocale = async function(soggetto, slot, inputElement) {
-            const file = inputElement.files[0];
-            if (!file) return;
-
-            let idPersona = document.getElementById('editIdPersona').value;
-            if (!idPersona) {
-                idPersona = "temp_" + Date.now();
-                document.getElementById('editIdPersona').value = idPersona;
-            }
-
-            const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith('.pdf');
-
-            try {
-                mostraCaricamento(`Caricamento file su Storage...`);
-                
-                let uploadTaskRef;
-                if (isPdf) {
-                    const sRef = storageRef(storage, `documenti_iscritti/${idPersona}_${soggetto}_img${slot}.pdf`);
-                    await uploadBytes(sRef, file);
-                    uploadTaskRef = sRef;
-                } else {
-                    const reader = new FileReader();
-                    const base64Originale = await new Promise((resolve) => {
-                        reader.onload = (e) => resolve(e.target.result);
-                        reader.readAsDataURL(file);
-                    });
-
-                    let base64Compresso = await riduciImmagineBase64(base64Originale, 1024, 0.6);
-                    const sRef = storageRef(storage, `documenti_iscritti/${idPersona}_${soggetto}_img${slot}.jpg`);
-                    await uploadString(sRef, base64Compresso, 'data_url');
-                    uploadTaskRef = sRef;
-                }
-
-                const downloadUrl = await getDownloadURL(uploadTaskRef);
-
-                document.getElementById(`editUrl_${soggetto}_${slot}`).value = downloadUrl;
-				const link = document.getElementById(`linkAnteprima_${soggetto}_${slot}`);
-
-				// Forziamo l'apertura pulita dell'URL dell'immagine
-				link.href = downloadUrl;
-				link.setAttribute('target', '_blank');
-				link.setAttribute('rel', 'noopener noreferrer');
-				link.textContent = `Visualizza Immagine ${slot}`;
-				document.getElementById(`boxAnteprima_${soggetto}_${slot}`).style.display = 'block';
-
-                alert("File caricato con successo!");
-            } catch (error) {
-                alert("Errore durante il caricamento del file: " + error.message);
-            } finally {
-                nascondiCaricamento();
-                inputElement.value = "";
-            }
-        };
-
-        window.fermaWebcam = function() {
-			// Se c'è un controllo QR attivo in background, lo stoppo
-			if (typeof intervalloVerificaQR !== 'undefined' && intervalloVerificaQR) {
-				clearInterval(intervalloVerificaQR);
-				intervalloVerificaQR = null;
-			}
-
-			if (streamWebcam) {
-				streamWebcam.getTracks().forEach(track => track.stop());
-				streamWebcam = null;
-			}
-			document.getElementById('boxContainerWebcamGenerale').style.display = 'none';
-		};
 
         window.rimuoviFileDocumento = async function(soggetto, slot) {
             if (!confirm("Vuoi rimuovere questo documento?")) return;
@@ -2200,11 +2049,11 @@
                 mostraCaricamento("Connessione al database...", 10);
                 
                 // 1. Download Anagrafica (es. 40%)
-                const snapAnag = await getDocs(collection(db, "anagrafica"));
+                const snapAnag = await getDocs(COLLECTION_ANAGRAFICA);
                 mostraCaricamento("Aggiornamento dati anagrafici...", 40);
                 
                 // 2. Download Storico (es. 70%)
-                const snapStorico = await getDocs(collection(db, "storico"));
+                const snapStorico = await getDocs(COLLECTION_STORICO);
                 mostraCaricamento("Elaborazione storico iscrizioni...", 70);
                 
                 let mappaStorico = {};
@@ -2452,7 +2301,7 @@
             
             try {
                 // Esegue una query mirata filtrando per lo stato salvato in anagrafica
-                const q = query(collection(db, "anagrafica"), where("stato_onorificenza", "==", valoreStato));
+                const q = query(COLLECTION_ANAGRAFICA, where("stato_onorificenza", "==", valoreStato));
                 const snapAnagrafica = await getDocs(q);
 
                 let risultati = [];
@@ -2535,8 +2384,8 @@
                 const annoCarnevaleNum = parseInt(annoCarnevaleCorrente, 10) || 2027;
                 const annoLimitePreventivo = annoCarnevaleNum - 1;
 
-                const snapAnagrafica = await getDocs(collection(db, "anagrafica"));
-                const snapStorico = await getDocs(collection(db, "storico"));
+                const snapAnagrafica = await getDocs(COLLECTION_ANAGRAFICA);
+                const snapStorico = await getDocs(COLLECTION_STORICO);
 
                 let anagraficaMap = {};
                 snapAnagrafica.forEach(docSnap => {
@@ -2863,8 +2712,8 @@
             mostraCaricamento("Estrazione prelazioni in corso...");
 
             try {
-                const snapAnagrafica = await getDocs(collection(db, "anagrafica"));
-                const snapStorico = await getDocs(collection(db, "storico"));
+                const snapAnagrafica = await getDocs(COLLECTION_ANAGRAFICA);
+                const snapStorico = await getDocs(COLLECTION_STORICO);
 
                 let anagraficaMap = {};
                 snapAnagrafica.forEach(docSnap => {
@@ -3291,8 +3140,8 @@
 				// Scarica la cache una sola volta all'avvio se è vuota
 				if (cacheTuttiIscritti.length === 0) {
 					mostraCaricamento("Prima indicizzazione database in corso...");
-					const snapAnag = await getDocs(collection(db, "anagrafica"));
-					const snapStorico = await getDocs(collection(db, "storico"));
+					const snapAnag = await getDocs(COLLECTION_ANAGRAFICA);
+					const snapStorico = await getDocs(COLLECTION_STORICO);
 					let mappaStorico = {};
 					
 					snapStorico.forEach(d => {
@@ -3452,23 +3301,19 @@
 			document.getElementById('editGenitore1NumDoc').value = pulisciTesto(p.genitore1_num_doc);
 			document.getElementById('editGenitore1ScadenzaDoc').value = formattaDataPerInputDate(p.genitore1_scadenza_doc);
 
-			const urlGen1_1 = p.immagine_documento_gen1_1 || "";
+			// Genitore 1
+			const urlGen1_1 = formattaUrlFirebase(p.immagine_documento_gen1_1 || "");
+			const urlGen1_2 = formattaUrlFirebase(p.immagine_documento_gen1_2 || "");
 			document.getElementById('editUrl_gen1_1').value = urlGen1_1;
-			if (urlGen1_1) {
-				document.getElementById('linkAnteprima_gen1_1').href = urlGen1_1;
-				document.getElementById('boxAnteprima_gen1_1').style.display = 'block';
-			} else {
-				document.getElementById('boxAnteprima_gen1_1').style.display = 'none';
-			}
-
-			const urlGen1_2 = p.immagine_documento_gen1_2 || "";
 			document.getElementById('editUrl_gen1_2').value = urlGen1_2;
-			if (urlGen1_2) {
-				document.getElementById('linkAnteprima_gen1_2').href = urlGen1_2;
-				document.getElementById('boxAnteprima_gen1_2').style.display = 'block';
-			} else {
-				document.getElementById('boxAnteprima_gen1_2').style.display = 'none';
-			}
+			aggiornaStatoUIImmagini('gen1');
+
+			// Genitore 2
+			const urlGen2_1 = formattaUrlFirebase(p.immagine_documento_gen2_1 || "");
+			const urlGen2_2 = formattaUrlFirebase(p.immagine_documento_gen2_2 || "");
+			document.getElementById('editUrl_gen2_1').value = urlGen2_1;
+			document.getElementById('editUrl_gen2_2').value = urlGen2_2;
+			aggiornaStatoUIImmagini('gen2');
 			
 			document.getElementById('editGenitore2Cognome').value = pulisciTesto(p.genitore2_cognome);
 			document.getElementById('editGenitore2Nome').value = pulisciTesto(p.genitore2_nome);
@@ -3478,24 +3323,6 @@
 			document.getElementById('editGenitore2TipoDoc').value = mappaTipoDocumento(p.genitore2_tipo_doc);
 			document.getElementById('editGenitore2NumDoc').value = pulisciTesto(p.genitore2_num_doc);
 			document.getElementById('editGenitore2ScadenzaDoc').value = formattaDataPerInputDate(p.genitore2_scadenza_doc);
-
-			const urlGen2_1 = p.immagine_documento_gen2_1 || "";
-			document.getElementById('editUrl_gen2_1').value = urlGen2_1;
-			if (urlGen2_1) {
-				document.getElementById('linkAnteprima_gen2_1').href = urlGen2_1;
-				document.getElementById('boxAnteprima_gen2_1').style.display = 'block';
-			} else {
-				document.getElementById('boxAnteprima_gen2_1').style.display = 'none';
-			}
-
-			const urlGen2_2 = p.immagine_documento_gen2_2 || "";
-			document.getElementById('editUrl_gen2_2').value = urlGen2_2;
-			if (urlGen2_2) {
-				document.getElementById('linkAnteprima_gen2_2').href = urlGen2_2;
-				document.getElementById('boxAnteprima_gen2_2').style.display = 'block';
-			} else {
-				document.getElementById('boxAnteprima_gen2_2').style.display = 'none';
-			}
 
 			let statoSalvato = p.stato_onorificenza;
 			if (!statoSalvato) {
@@ -3616,7 +3443,7 @@
             
             try {
                 mostraCaricamento("Creazione anagrafica in corso...");
-                const docRef = await addDoc(collection(db, "anagrafica"), dati);
+                const docRef = await addDoc(COLLECTION_ANAGRAFICA, dati);
                 document.getElementById('editIdPersona').value = docRef.id;
 
                 await registraLog("Modifica Anagrafica", `Nuova: ${dati.cognome} ${dati.nome}`);
@@ -3681,7 +3508,7 @@
                     }
                     
                     // Elimina lo storico iscrizioni
-                    const snap = await getDocs(query(collection(db, "storico"), where("id_persona", "==", id)));
+                    const snap = await getDocs(query(COLLECTION_STORICO, where("id_persona", "==", id)));
                     await Promise.all(snap.docs.map(d => deleteDoc(doc(db, "storico", d.id))));
                     
                     // Elimina l'anagrafica principale
@@ -3716,7 +3543,7 @@
             let anniCompleteList = [];
 
             try {
-                const snap = await getDocs(query(collection(db, "storico"), where("id_persona", "==", id)));
+                const snap = await getDocs(query(COLLECTION_STORICO, where("id_persona", "==", id)));
                 
                 if (snap.empty) { 
                     div.style.display = 'block';
@@ -3852,7 +3679,7 @@
                 mostraCaricamento("Verifica duplicati e salvataggio...");
                 
                 if (nuovoTipo !== "Socio Sostenitore" && nuovoNum) {
-                    const snapStoricoAnno = await getDocs(query(collection(db, "storico"), where("anno", "==", String(nuovoAnno))));
+                    const snapStoricoAnno = await getDocs(query(COLLECTION_STORICO, where("anno", "==", String(nuovoAnno))));
                     let duplicatoTrovato = false;
                     
                     snapStoricoAnno.forEach(d => {
@@ -3902,9 +3729,11 @@
                 const cognomePersona = document.getElementById('editCognome').value.trim();
                 const nomePersona = document.getElementById('editNome').value.trim();
                 const nomeCompleto = `${cognomePersona} ${nomePersona}`;
+                const numIdPulito = (numIdentificativo && numIdentificativo !== "undefined") ? numIdentificativo : "N/D";
 
-                await deleteDoc(doc(db, "storico", storicoId));
-                await registraLog("Eliminata iscrizione", `${nomeCompleto} - Anno: ${annoIscrizione} ID: ${numIdentificativo}`);
+                // Utilizza COLLECTION_STORICO per puntare correttamente a "storico" o "storico_vr"
+                await deleteDoc(doc(db, NOME_COLL_STORICO, storicoId));
+                await registraLog("Eliminata iscrizione", `${nomeCompleto} - Anno: ${annoIscrizione} ID: ${numIdPulito}`);
 
                 await aggiornaIscrizioniPersonaInCache(idPersona);
                 await caricaStoricoPersona(idPersona);
@@ -3952,9 +3781,9 @@
             const tipoScelto = selectTipo ? selectTipo.value : "Iscrizione Completa";
             
             const inputNum = tr.querySelector('.input-num');
-            const num = inputNum ? inputNum.value.trim() : "";
+            const num = inputNum ? inputNum.value.trim() : (IS_ANNIVERDIROSSI ? "N/D" : "");
             
-            if (tipoScelto !== "Socio Sostenitore" && !num) {
+            if (!IS_ANNIVERDIROSSI && tipoScelto !== "Socio Sostenitore" && !num) {
                 return alert("Inserisci il numero identificativo.");
             }
 
@@ -3962,7 +3791,7 @@
                 mostraCaricamento("Verifica duplicati e salvataggio...");
 
                 if (tipoScelto !== "Socio Sostenitore" && num) {
-                    const snapStoricoAnno = await getDocs(query(collection(db, "storico"), where("anno", "==", String(annoScelto))));
+                    const snapStoricoAnno = await getDocs(query(COLLECTION_STORICO, where("anno", "==", String(annoScelto))));
                     let duplicatoTrovato = false;
 
                     snapStoricoAnno.forEach(d => {
@@ -3980,9 +3809,9 @@
                     }
                 }
 
-                const numIdentificativoFinale = tipoScelto === "Socio Sostenitore" ? "N/D" : num;
+                const numIdentificativoFinale = (IS_ANNIVERDIROSSI || tipoScelto === "Socio Sostenitore") ? "N/D" : num;
 
-                await addDoc(collection(db, "storico"), { 
+                await addDoc(COLLECTION_STORICO, { 
                     id_persona: idPersona, 
                     anno: String(annoScelto), 
                     tipo_iscrizione: tipoScelto, 
@@ -4008,7 +3837,6 @@
         };
 		
         document.getElementById('btnChiudiX').addEventListener('click', () => {
-            fermaWebcam();
             modal.style.display = 'none';
         });
 
@@ -4133,47 +3961,76 @@
             }
         }
         
-        async function gestisciSalvataggioEsistente() {
-			const id = document.getElementById('editIdPersona').value;
-			const dati = raccogliDatiAnagrafica();
-			
-			if (!dati.cognome || !dati.nome) {
-				alert("Inserisci Cognome e Nome.");
-				return;
-			}
-
-			try {
-				await setDoc(doc(db, "anagrafica", id), dati, { merge: true });
-				registraLog("Modifica Anagrafica", `${dati.cognome} ${dati.nome}`);
-
-				modal.style.display = 'none';
-				
-				// Aggiorna puntualmente l'elemento nella cache senza azzerarla[cite: 10]
-				const indexCache = cacheTuttiIscritti.findIndex(p => p.id === id);
-				if (indexCache !== -1) {
-					cacheTuttiIscritti[indexCache] = { 
-						id: id, 
-						...dati, 
-						iscrizioni: cacheTuttiIscritti[indexCache].iscrizioni || [] 
-					};
-				}
-				
-				const filtroCognomeVal = document.getElementById('filtroCognome').value;
-				if (filtroCognomeVal) {
-					cercaIscritti(filtroCognomeVal);
-				}
-			} catch (error) {
-				alert("Errore durante il salvataggio: " + error.message);
-			}
+        // Funzione di utilità sicura per leggere i valori senza generare errori se l'elemento non esiste
+		function getVal(id) {
+			let el = document.getElementById(id);
+			return el ? el.value : "";
 		}
 
+		window.gestisciSalvataggioEsistente = async function() {
+			let idPersona = document.getElementById('editIdPersona').value;
+			if (!idPersona || idPersona.startsWith('temp_')) return;
+
+			try {
+				mostraCaricamento("Salvataggio modifiche anagrafica...");
+
+				// 1. Raccoglie tutti i dati aggiornati dal form
+				let datiAggiornati = raccogliDatiAnagrafica();
+				datiAggiornati.dataAggiornamento = new Date();
+
+				// 2. Salva sul database Firestore
+				const docRef = doc(db, NOME_COLL_ANAGRAFICA, idPersona);
+				await setDoc(docRef, datiAggiornati, { merge: true });
+
+				// 3. AGGIORNAMENTO CRUCIALE DELLA CACHE IN MEMORIA
+				const indexCache = cacheTuttiIscritti.findIndex(p => p.id === idPersona);
+				if (indexCache !== -1) {
+					// Mantiene lo storico esistente associato a questa persona nella cache
+					let storicoEsistente = cacheTuttiIscritti[indexCache].iscrizioni || [];
+					cacheTuttiIscritti[indexCache] = {
+						id: idPersona,
+						...cacheTuttiIscritti[indexCache],
+						...datiAggiornati,
+						iscrizioni: storicoEsistente
+					};
+				} else {
+					// Se per qualsiasi motivo non era in cache, lo aggiunge al volo
+					cacheTuttiIscritti.push({
+						id: idPersona,
+						...datiAggiornati,
+						iscrizioni: []
+					});
+				}
+
+				// 4. Aggiorna i dati originali di controllo per resettare lo stato del pulsante Salva
+				datiAnagraficaOriginali = raccogliDatiAnagrafica();
+				aggiornaStatoPulsanteSalva();
+
+				await registraLog("Modifica Anagrafica", `${datiAggiornati.cognome} ${datiAggiornati.nome}`);
+
+				nascondiCaricamento();
+				alert("✅ Anagrafica salvata e aggiornata in memoria con successo!");
+
+				// 5. Se l'utente stava usando la ricerca testuale, aggiorna i risultati a schermo in tempo reale
+				const campoFiltro = document.getElementById('filtroCognome');
+				if (campoFiltro && campoFiltro.value.trim().length >= 2) {
+					cercaIscritti(campoFiltro.value);
+				}
+
+			} catch (error) {
+				nascondiCaricamento();
+				console.error("Errore durante il salvataggio dell'anagrafica:", error);
+				alert("Errore durante il salvataggio: " + error.message);
+			}
+		};
+		
 		window.eseguiAggiornamentoMassivoOnorificenze = async function() {
 			if (!confirm("Vuoi ricalcolare e aggiornare lo stato dell'onorificenza per TUTTI gli iscritti nel database?")) return;
 			
 			mostraCaricamento("Aggiornamento massivo onorificenze in corso...");
 			try {
-				const snapAnagrafica = await getDocs(collection(db, "anagrafica"));
-				const snapStorico = await getDocs(collection(db, "storico"));
+				const snapAnagrafica = await getDocs(COLLECTION_ANAGRAFICA);
+				const snapStorico = await getDocs(COLLECTION_STORICO);
 
 				let storicoPerPersona = {};
 				snapStorico.forEach(docSnap => {
@@ -4227,12 +4084,17 @@
 		
 		let intervalloVerificaQR = null;
 		
-		
 		window.apriQRCapture = function(soggetto) {
 			let idPersona = document.getElementById('editIdPersona').value;
 			if (!idPersona || idPersona.startsWith('temp_')) {
 				alert("Prima di scansionare con il cellulare, salva l'anagrafica di base!");
 				return;
+			}
+			
+			let url1Esistente = document.getElementById(`editUrl_${soggetto}_1`).value.trim();
+			let url2Esistente = document.getElementById(`editUrl_${soggetto}_2`).value.trim();
+			if (url1Esistente && url2Esistente) {
+				return; // I documenti sono già salvati, non avviare il QR capture
 			}
 
 			let percorsoBase = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
@@ -4280,6 +4142,10 @@
 							chiudiQRCapture(soggetto);
 							
 							alert("✅ Acquisizione completata! Fronte e Retro salvati con successo.");
+
+							if (typeof gestisciSalvataggioEsistente === 'function') {
+								gestisciSalvataggioEsistente();
+							}
 						}
 					}
 				} catch (e) {}
@@ -4344,38 +4210,43 @@
         };
 
         window.rimuoviEntrambiFileDocumento = async function(soggetto) {
-            if (!confirm("Vuoi rimuovere entrambi i documenti associati?")) return;
-            let idPersona = document.getElementById('editIdPersona').value;
-            
-            try {
-                mostraCaricamento("Eliminazione file in corso...");
-                
-                if (idPersona && !idPersona.startsWith('temp_')) {
-                    for (let slot = 1; slot <= 2; slot++) {
-                        for (let ext of ['jpg', 'jpeg', 'png', 'pdf']) {
-                            try {
-                                const fileRef = storageRef(storage, `documenti_iscritti/${idPersona}_${soggetto}_img${slot}.${ext}`);
-                                await deleteObject(fileRef);
-                            } catch (err) {
-                                // Ignora se il file specifico non esiste
-                            }
-                        }
-                    }
-                }
+			if (!confirm("Vuoi rimuovere entrambi i documenti associati?")) return;
+			let idPersona = document.getElementById('editIdPersona').value;
+			
+			try {
+				mostraCaricamento("Eliminazione file in corso...");
+				
+				if (idPersona && !idPersona.startsWith('temp_')) {
+					for (let slot = 1; slot <= 2; slot++) {
+						for (let ext of ['jpg', 'jpeg', 'png', 'pdf']) {
+							try {
+								const fileRef = storageRef(storage, `documenti_iscritti/${idPersona}_${soggetto}_img${slot}.${ext}`);
+								await deleteObject(fileRef);
+							} catch (err) {
+								// Ignora se il file specifico non esiste
+							}
+						}
+					}
+				}
 
-                // Svuota i campi nascosti
-                document.getElementById(`editUrl_${soggetto}_1`).value = "";
-                document.getElementById(`editUrl_${soggetto}_2`).value = "";
+				// Svuota i campi nascosti
+				document.getElementById(`editUrl_${soggetto}_1`).value = "";
+				document.getElementById(`editUrl_${soggetto}_2`).value = "";
 
-                // Aggiorna la grafica
-                aggiornaStatoUIImmagini(soggetto);
-            } catch (error) {
-                console.error("Errore rimozione:", error);
-                alert("Errore durante la rimozione: " + error.message);
-            } finally {
-                nascondiCaricamento();
-            }
-        };
+				// Aggiorna la grafica
+				aggiornaStatoUIImmagini(soggetto);
+
+				// Lancia automaticamente il salvataggio anagrafica per memorizzare la rimozione dei link
+				if (typeof gestisciSalvataggioEsistente === 'function') {
+					gestisciSalvataggioEsistente();
+				}
+			} catch (error) {
+				console.error("Errore rimozione:", error);
+				alert("Errore durante la rimozione: " + error.message);
+			} finally {
+				nascondiCaricamento();
+			}
+		};
 		
 		let statoOrdinamentoPrelazioni = { indice: -1, crescente: true };
 		ultimiRisultatiPrelazioniCache = [];
@@ -4705,7 +4576,7 @@
 		async function aggiornaIscrizioniPersonaInCache(idPersona) {
             const personaCache = cacheTuttiIscritti.find(p => p.id === idPersona);
             if (personaCache) {
-                const snap = await getDocs(query(collection(db, "storico"), where("id_persona", "==", idPersona)));
+                const snap = await getDocs(query(COLLECTION_STORICO, where("id_persona", "==", idPersona)));
                 let nuovoStorico = [];
                 snap.forEach(d => {
                     let st = d.data();
@@ -4722,6 +4593,23 @@
             }
         };
 		
+		window.toggleCollapsibleDoc = function(idContenuto, headerElement, soggetto) {
+			toggleCollapsible(idContenuto, headerElement);
+			const contenuto = document.getElementById(idContenuto);
+			
+			// Se il box è ora aperto e non ci sono già i documenti salvati, avvia il QR Code
+			if (contenuto.classList.contains('aperto')) {
+				let url1 = document.getElementById(`editUrl_${soggetto}_1`).value.trim();
+				let url2 = document.getElementById(`editUrl_${soggetto}_2`).value.trim();
+				if (!url1 || !url2) {
+					apriQRCapture(soggetto);
+				}
+			} else {
+				// Se viene chiuso, ferma il polling
+				chiudiQRCapture(soggetto);
+			}
+		};
+		
 		window.caricaElencoCapitani = async function() {
 			const container = document.getElementById('sezione_onorificenze_capitani');
 			container.innerHTML = `<h2>🏆 Capitani di Piazza</h2><div style="text-align:center; color:#666; padding:20px; font-style:italic;">Caricamento Capitani di Piazza in corso...</div>`;
@@ -4729,7 +4617,7 @@
 			
 			try {
 				// Query mirata sul campo booleano capitano_piazza
-				const q = query(collection(db, "anagrafica"), where("capitano_piazza", "==", true));
+				const q = query(COLLECTION_ANAGRAFICA, where("capitano_piazza", "==", true));
 				const snapAnagrafica = await getDocs(q);
 
 				let risultati = [];
@@ -4800,7 +4688,7 @@
 			
 			try {
 				// Query mirata sul campo booleano tigre
-				const q = query(collection(db, "anagrafica"), where("tigre", "==", true));
+				const q = query(COLLECTION_ANAGRAFICA, where("tigre", "==", true));
 				const snapAnagrafica = await getDocs(q);
 
 				let risultati = [];

@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tuchini del Borghetto - Iscrizioni 2027 </title>
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            text-align: center; 
+            padding: 20px 16px; 
+            background: #f4f7fc; 
+            color: #1f2937; 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            min-height: 100vh; 
+        }
+        .card { 
+            background: white; 
+            padding: 30px 22px; 
+            border-radius: 24px; 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06); 
+            max-width: 420px; 
+            width: 100%; 
+            margin: auto; 
+            border: 1px solid rgba(0,0,0,0.02);
+        }
+        
+        .logo-aziendale { max-width: 140px; height: auto; margin-bottom: 12px; }
+        h2 { font-size: 22px; color: #111827; font-weight: 700; margin-top: 0; margin-bottom: 6px; }
+        .sottotitolo { font-size: 14px; color: #6b7280; margin-bottom: 24px; line-height: 1.4; }
+
+        input[type="text"] { 
+            width: 100%; 
+            padding: 16px; 
+            margin-top: 12px; 
+            font-size: 16px; 
+            border-radius: 14px; 
+            border: 1.5px solid #e5e7eb; 
+            outline: none; 
+            background: #f9fafb;
+            transition: all 0.2s ease;
+        }
+        input[type="text"]:focus { 
+            border-color: #2563eb; 
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); 
+        }
+        
+        .delega-container { 
+            text-align: left; 
+            margin-top: 18px; 
+            font-size: 14px; 
+            font-weight: 500;
+            color: #4b5563;
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            cursor: pointer; 
+            background: #f9fafb;
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1.5px solid #e5e7eb;
+        }
+        .delega-container input { width: 20px; height: 20px; margin: 0; cursor: pointer; accent-color: #2563eb; }
+
+        #containerDelegato, #containerDelegatoRiserva { display: none; margin-top: 10px; }
+
+        /* Sezione Metodo di Pagamento */
+        .sezione-pagamento {
+            text-align: left;
+            margin-top: 18px;
+            background: #f9fafb;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1.5px solid #e5e7eb;
+        }
+        .sezione-pagamento label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+        .opzioni-pagamento {
+            display: flex;
+            gap: 10px;
+        }
+        .opzione-radio {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #fff;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1.5px solid #d1d5db;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .opzione-radio input { accent-color: #2563eb; cursor: pointer; }
+        .avviso-satispay {
+            font-size: 11px;
+            color: #dc2626;
+            margin-top: 8px;
+            font-weight: 600;
+            text-align: left;
+        }
+
+        button { 
+            width: 100%;
+            background: #2563eb; 
+            color: white; 
+            border: none; 
+            font-weight: 600; 
+            font-size: 16px;
+            cursor: pointer; 
+            min-height: 52px; 
+            border-radius: 14px;
+            margin-top: 20px;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3); 
+            transition: background 0.2s, transform 0.1s; 
+        }
+        button:active { background: #1d4ed8; transform: scale(0.98); }
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+        
+        #schermataForm { display: none; }
+        
+        #schermataAttesa { 
+            display: none; 
+            background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%); 
+            border: 1px solid #fde68a; 
+            padding: 24px 16px; 
+            border-radius: 20px; 
+            margin-top: 10px; 
+        }
+        
+        #schermataChiamata { 
+            display: none; 
+            background: linear-gradient(135deg, #dcfce7 0%, #f0fdf4 100%); 
+            border: 2px solid #86efac; 
+            padding: 28px 16px; 
+            border-radius: 20px; 
+            margin-top: 10px; 
+            color: #166534; 
+            animation: bounceIn 0.6s ease, pulseGlow 2s infinite; 
+        }
+        
+        #schermataIscritto { 
+            display: none; 
+            background: linear-gradient(135deg, #dcfce7 0%, #f0fdf4 100%); 
+            border: 1px solid #bbf7d0; 
+            padding: 28px 16px; 
+            border-radius: 20px; 
+            margin-top: 10px; 
+            color: #166534; 
+        }
+        
+        #schermataPiena { 
+            display: none; 
+            background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%); 
+            border: 1px solid #fde68a; 
+            padding: 22px 16px; 
+            border-radius: 20px; 
+            margin-top: 10px; 
+            color: #92400e; 
+            text-align: left; 
+        }
+        
+        .badge-numero {
+            background: white;
+            color: #2563eb;
+            display: inline-block;
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-size: 15px;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin: 8px 0;
+        }
+
+        .numero-evidenza { 
+            font-size: 36px; 
+            font-weight: 800; 
+            color: #1e3a8a; 
+            margin: 10px 0; 
+            letter-spacing: -1px;
+        }
+        
+        .turno-chiamata { font-size: 20px; font-weight: 700; color: #166534; margin-top: 10px; line-height: 1.4; }
+
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(34, 197, 94, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <img src="logotuchini.png" alt="Logo" class="logo-aziendale">
+        
+        <h2>Iscrizioni 2027</h2>
+        <p class="sottotitolo">Sistema di gestione coda digitale</p>
+
+        <!-- FASE 1: Inserimento Dati (Coda Normale) -->
+        <div id="schermataForm">
+            <input type="text" id="nomeUtente" placeholder="Cognome e Nome" autocomplete="name" oninput="validaForm()">
+            
+            <label class="delega-container">
+                <input type="checkbox" id="checkDelega" onchange="toggleDelega()">
+                <span>Iscrizione con delega</span>
+            </label>
+
+            <div id="containerDelegato">
+                <input type="text" id="nomeDelegato" placeholder="Cognome e Nome del delegante" autocomplete="off" oninput="validaForm()">
+            </div>
+
+            <!-- Selezione Metodo di Pagamento -->
+            <div class="sezione-pagamento" style="display: none;">
+                <label>Metodo di pagamento:</label>
+                <div class="opzioni-pagamento">
+                    <label class="opzione-radio">
+                        <input type="radio" name="pagamentoUtente" value="bancomat" checked> Bancomat
+                    </label>
+                    <label class="opzione-radio">
+                        <input type="radio" name="pagamentoUtente" value="contanti"> Contanti
+                    </label>
+                </div>
+                <div class="avviso-satispay">⚠️ Satispay non è accettato</div>
+            </div>
+
+            <button id="btnInvia" onclick="registraInCoda()" disabled>Prendi il Numero</button>
+        </div>
+
+        <!-- LISTA DI RISERVA -->
+        <div id="schermataPiena">
+            <h3 style="margin-top:0; color: #b45309; text-align: center; font-size: 18px;">⚠️ Coda Al Completo</h3>
+            <p style="font-size: 13px; line-height: 1.4; margin-bottom: 16px;">Siamo momentaneamente al completo. Puoi iscriverti alla <strong>lista di riserva</strong>: verrai spostato automaticamente appena si libera un posto.</p>
+            
+            <input type="text" id="nomeUtenteRiserva" placeholder="Cognome e Nome" autocomplete="name" oninput="validaRiserva()">
+            
+            <label class="delega-container" style="background: #fff; border-color: #fde68a;">
+                <input type="checkbox" id="checkDelegaRiserva" onchange="toggleDelegaRiserva()">
+                <span>Iscrizione con delega</span>
+            </label>
+
+            <div id="containerDelegatoRiserva">
+                <input type="text" id="nomeDelegatoRiserva" placeholder="Cognome e Nome del delegante" autocomplete="off" oninput="validaRiserva()">
+            </div>
+
+            <!-- Selezione Metodo di Pagamento Riserva -->
+            <div class="sezione-pagamento" style="background: #fff; border-color: #fde68a; display: none;">
+                <label>Metodo di pagamento:</label>
+                <div class="opzioni-pagamento">
+                    <label class="opzione-radio" style="background: #fffcf0;">
+                        <input type="radio" name="pagamentoRiserva" value="bancomat" checked> Bancomat
+                    </label>
+                    <label class="opzione-radio" style="background: #fffcf0;">
+                        <input type="radio" name="pagamentoRiserva" value="contanti"> Contanti
+                    </label>
+                </div>
+                <div class="avviso-satispay">⚠️ Satispay non è accettato</div>
+            </div>
+
+            <button id="btnInviaRiserva" onclick="registraInRiserva()" style="background: #d97706; box-shadow: 0 4px 14px rgba(217, 119, 6, 0.3); margin-top: 18px;" disabled>Iscriviti alla Riserva</button>
+        </div>
+
+        <!-- FASE 2: In Attesa -->
+        <div id="schermataAttesa">
+            <p style="margin:0; font-size: 15px; color: #78350f;">Ciao <span id="marioNome" style="font-weight:700;"></span>,</p>
+            <div id="mioNumeroBiglietto" class="badge-numero">Il tuo biglietto è il N° -</div>
+            <div class="numero-evidenza" id="personeDavanti">...</div>
+            <p style="font-size: 13px; color: #92400e; margin-bottom:0; line-height: 1.4;">Tieni questa pagina aperta. Lo schermo rimarrà attivo e ti avviseremo al tuo turno.</p>
+        </div>
+
+        <!-- FASE 3: Turno Arrivato -->
+        <div id="schermataChiamata">
+            <h3 style="margin-top:0; color: #166534; font-size: 24px; letter-spacing: -0.5px;">📢 È IL TUO TURNO!</h3>
+            <div class="turno-chiamata"><span id="nomeChiamato" style="font-weight: 800;"></span> è il tuo turno!<br><span style="font-size: 16px; font-weight: 500; color: #15803d;">Presentati al banco con il numero <span id="numeroChiamato" style="font-weight: 700;"></span></span></div>
+        </div>
+
+        <!-- FASE 4: Iscrizione Effettuata -->
+        <div id="schermataIscritto">
+            <h3 style="margin-top:0; color: #166534; font-size: 20px;">🟢 ISCRIZIONE COMPLETATA</h3>
+            <p style="font-size: 14px; line-height: 1.5; color: #166534;">Complimenti <span id="nomeUtenteIscritto" style="font-weight: 700;"></span>!<br>Passa al banco per ritirare la busta e completare l'anagrafica.</p>
+        </div>
+    </div>
+
+    <!-- Script Firebase, Wake Lock e Gestione UI -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+        import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+
+        let wakeLock = null;
+
+        async function attivaWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                }
+            } catch (err) {
+                console.log("Wake Lock non disponibile:", err);
+            }
+        }
+
+        function suonaCampanello() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+                gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.4);
+            } catch(e) {}
+        }
+
+        window.toggleDelega = function() {
+            const check = document.getElementById('checkDelega').checked;
+            document.getElementById('containerDelegato').style.display = check ? 'block' : 'none';
+            if (!check) document.getElementById('nomeDelegato').value = ''; 
+            validaForm();
+        };
+
+        window.toggleDelegaRiserva = function() {
+            const check = document.getElementById('checkDelegaRiserva').checked;
+            document.getElementById('containerDelegatoRiserva').style.display = check ? 'block' : 'none';
+            if (!check) document.getElementById('nomeDelegatoRiserva').value = ''; 
+            validaRiserva();
+        };
+
+        window.validaForm = function() {
+            const nome = document.getElementById('nomeUtente').value.trim();
+            const conDelega = document.getElementById('checkDelega').checked;
+            const nomeDelegato = document.getElementById('nomeDelegato').value.trim();
+            const btn = document.getElementById('btnInvia');
+
+            if (!nome || (conDelega && !nomeDelegato)) {
+                btn.disabled = true;
+            } else {
+                btn.disabled = false;
+            }
+        };
+
+        window.validaRiserva = function() {
+            const nome = document.getElementById('nomeUtenteRiserva').value.trim();
+            const conDelega = document.getElementById('checkDelegaRiserva').checked;
+            const nomeDelegato = document.getElementById('nomeDelegatoRiserva').value.trim();
+            const btn = document.getElementById('btnInviaRiserva');
+
+            if (!nome || (conDelega && !nomeDelegato)) {
+                btn.disabled = true;
+            } else {
+                btn.disabled = false;
+            }
+        };
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const tokenUrl = urlParams.get('t');
+        const timestampUrl = parseInt(urlParams.get('ts') || '0');
+        const debugUrl = urlParams.get('debug');
+        const minutiRitardo = parseInt(urlParams.get('ritardo') || '0', 10);
+		
+        const giaRegistrato = localStorage.getItem('coda_id_utente');
+        const tokenSessioneLocale = sessionStorage.getItem('qr_verificato');		
+
+        const oraCorrente = Date.now();
+        const TEMPO_VALIDITA_MS = 30000;
+
+        let accessoConsentito = false;
+
+        if (debugUrl === '1' || giaRegistrato || tokenSessioneLocale === 'true') {
+            accessoConsentito = true;
+        } else if (tokenUrl === 'tuchini2027' && !isNaN(timestampUrl) && (oraCorrente - timestampUrl < TEMPO_VALIDITA_MS)) {
+            sessionStorage.setItem('qr_verificato', 'true');
+            accessoConsentito = true;
+        }
+
+        if (!accessoConsentito) {
+            document.body.innerHTML = `
+                <div class="card">
+                    <h2 style="color: #dc2626; margin-top: 0;">⚠️ Accesso non consentito</h2>
+                    <p style="font-size: 14px; color: #4b5563; line-height: 1.5;">Inquadra il QR code ufficiale esposto al banco iscrizioni per accedere alla coda.</p>
+                </div>
+            `;
+            throw new Error("Accesso bloccato.");
+        }
+
+        const firebaseConfig = {
+			  apiKey: "AIzaSyCKfb2IDqE-y4Ln_1tUIYm09VVMqRRruvQ",
+			  authDomain: "ticketdispensertuchini.firebaseapp.com",
+			  databaseURL: "https://ticketdispensertuchini-default-rtdb.europe-west1.firebasedatabase.app",
+			  projectId: "ticketdispensertuchini",
+			  storageBucket: "ticketdispensertuchini.firebasestorage.app",
+			  messagingSenderId: "582164145424",
+			  appId: "1:582164145424:web:41a6df5056265e19ddf195"
+			};
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const codaRef = ref(db, 'coda');
+        const limiteRef = ref(db, 'config/limiteMassimo');
+
+        if (giaRegistrato) {
+            attivaModalitaAttesa(giaRegistrato, localStorage.getItem('coda_nome_utente'));
+        } else {
+            onValue(limiteRef, (limiteSnapshot) => {
+                const limiteMax = limiteSnapshot.val() || 10;
+
+                onValue(codaRef, (codaSnapshot) => {
+                    if (localStorage.getItem('coda_id_utente')) return;
+
+                    const data = codaSnapshot.val();
+                    let postiOccupati = 0;
+
+                    if (data) {
+                        Object.keys(data).forEach(id => {
+                            const item = data[id];
+                            if ((item.stato || 'attesa') !== 'riserva') {
+                                postiOccupati += item.delega ? 2 : 1;
+                            }
+                        });
+                    }
+
+                    if (postiOccupati >= limiteMax) {
+                        document.getElementById('schermataForm').style.display = 'none';
+                        document.getElementById('schermataPiena').style.display = 'block';
+                    } else {
+                        document.getElementById('schermataPiena').style.display = 'none';
+                        document.getElementById('schermataForm').style.display = 'block';
+                    }
+                }, { onlyOnce: true });
+            }, { onlyOnce: true });
+        }
+
+		window.registraInCoda = function() {
+			const nome = document.getElementById('nomeUtente').value.trim();
+			const conDelega = document.getElementById('checkDelega').checked;
+			const nomeDelegato = document.getElementById('nomeDelegato').value.trim();
+			const pagamento = document.querySelector('input[name="pagamentoUtente"]:checked').value;
+
+			if(!nome || (conDelega && !nomeDelegato)) return;
+
+			onValue(codaRef, (snapshot) => {
+				const data = snapshot.val();
+				let timestampCalcolato = Date.now();
+				let prossimoNumero = 1;
+
+				if (data) {
+					// Filtra i ticket attivi in coda
+					let arrayAttiva = Object.keys(data)
+						.filter(id => data[id] !== null && (data[id].stato || 'attesa') !== 'riserva')
+						.map(id => ({ id, ...data[id] }))
+						.sort((a, b) => a.timestamp - b.timestamp);
+
+					// Se è stato specificato un ritardo nell'URL (es. ?ritardo=10) e c'è almeno qualcuno in coda
+					if (minutiRitardo > 0 && arrayAttiva.length > 0) {
+						const primoInCodaTimestamp = arrayAttiva[0].timestamp;
+						// Converte i minuti in millisecondi (minuti * 60 * 1000)
+						const msRitardo = minutiRitardo * 60 * 1000;
+						timestampCalcolato = primoInCodaTimestamp + msRitardo;
+					}
+
+					// Calcola il numero progressivo del ticket
+					let maxNum = 0;
+					Object.keys(data).forEach(id => {
+						const item = data[id];
+						if (item && item.numero && typeof item.numero === 'number') {
+							if (item.numero > maxNum) maxNum = item.numero;
+						}
+					});
+					prossimoNumero = maxNum > 0 ? maxNum + 1 : Object.keys(data).length + 1;
+				}
+
+				const nuovoTicket = push(codaRef, {
+					numero: prossimoNumero,
+					nome: nome, 
+					telefono: "", 
+					delega: conDelega, 
+					delegato: conDelega ? nomeDelegato : "", 
+					pagamento: pagamento, 
+					timestamp: timestampCalcolato, // <--- Usa il timestamp normale o traslato in base al parametro URL
+					stato: 'attesa'
+				});
+
+				localStorage.setItem('coda_id_utente', nuovoTicket.key);
+				localStorage.setItem('coda_nome_utente', nome);
+				attivaModalitaAttesa(nuovoTicket.key, nome);
+			}, { onlyOnce: true });
+		}
+
+        window.registraInRiserva = function() {
+            const nome = document.getElementById('nomeUtenteRiserva').value.trim();
+            const conDelega = document.getElementById('checkDelegaRiserva').checked;
+            const nomeDelegato = document.getElementById('nomeDelegatoRiserva').value.trim();
+            const pagamento = document.querySelector('input[name="pagamentoRiserva"]:checked').value;
+
+            if(!nome || (conDelega && !nomeDelegato)) return;
+
+            onValue(codaRef, (snapshot) => {
+                const data = snapshot.val();
+                let prossimoNumero = 1;
+
+                if (data) {
+                    const keys = Object.keys(data);
+                    let maxNum = 0;
+                    keys.forEach(id => {
+                        const item = data[id];
+                        if (item && item.numero && typeof item.numero === 'number') {
+                            if (item.numero > maxNum) maxNum = item.numero;
+                        }
+                    });
+                    prossimoNumero = maxNum > 0 ? maxNum + 1 : keys.length + 1;
+                }
+
+                const nuovoTicket = push(codaRef, {
+                    numero: prossimoNumero, // <--- Salviamo il numero progressivo anche per la riserva
+                    nome: nome, 
+                    telefono: "", 
+                    delega: conDelega, 
+                    delegato: conDelega ? nomeDelegato : "", 
+                    pagamento: pagamento, 
+                    timestamp: Date.now(), 
+                    stato: 'riserva'
+                });
+
+                localStorage.setItem('coda_id_utente', nuovoTicket.key);
+                localStorage.setItem('coda_nome_utente', nome);
+                attivaModalitaAttesa(nuovoTicket.key, nome);
+            }, { onlyOnce: true });
+        }
+
+        function attivaModalitaAttesa(idMioTicket, nome) {
+            attivaWakeLock();
+            document.getElementById('schermataForm').style.display = 'none';
+            document.getElementById('schermataPiena').style.display = 'none';
+            document.getElementById('marioNome').innerText = nome;
+            document.getElementById('nomeUtenteIscritto').innerText = nome;
+            document.getElementById('schermataAttesa').style.display = 'block';
+
+            onValue(codaRef, (snapshot) => {
+                const data = snapshot.val();
+                
+                if (!data || !data[idMioTicket]) {
+                    document.body.innerHTML = `
+                        <div class="card">
+                            <h2>Operazione Conclusa</h2>
+                            <p style="font-size:14px; color:#4b5563; line-height: 1.5;">La tua pratica è stata completata al banco. Grazie e arrivederci!</p>
+                        </div>
+                    `;
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    return;
+                }
+
+                const mioOggetto = data[idMioTicket];
+                const mioStato = mioOggetto.stato || 'attesa';
+
+                if (mioStato === 'riserva') {
+                    document.getElementById('schermataAttesa').style.display = 'block';
+                    document.getElementById('mioNumeroBiglietto').innerText = `In Lista di Riserva`;
+                    document.getElementById('personeDavanti').innerHTML = `<span style="font-size: 15px; font-weight: 500; color: #b45309;">Verrai spostato in coda attiva non appena si libera un posto.</span>`;
+                    return;
+                }
+
+                // NUOVO: Gestione dello stato delay (saltato al turno di chiamata e rimesso in coda)
+                if (mioStato === 'delay') {
+                    document.getElementById('schermataAttesa').style.display = 'block';
+                    document.getElementById('schermataChiamata').style.display = 'none';
+                    document.getElementById('mioNumeroBiglietto').innerText = `Il tuo biglietto è il N° ${mioOggetto.numero || '-'}`;
+                    document.getElementById('personeDavanti').innerHTML = `<span style="font-size: 15px; font-weight: 600; color: #d97706; line-height: 1.4; display: block;">⚠️ Non ti sei presentato al tuo turno.<br>Sei stato rimesso in coda più indietro. Attendi la prossima chiamata!</span>`;
+                    document.getElementById('personeDavanti').style.color = "#d97706";
+                    return;
+                }
+
+                const arrayAttiva = Object.keys(data)
+                    .filter(id => data[id] !== null && typeof data[id] === 'object' && (data[id].stato || 'attesa') !== 'riserva')
+                    .map(id => ({ id, ...data[id] }))
+                    .sort((a, b) => a.timestamp - b.timestamp);
+
+                const numeroMioBiglietto = arrayAttiva.findIndex(p => p.id === idMioTicket) + 1;
+
+                if (mioStato === 'iscritto') {
+                    document.getElementById('schermataAttesa').style.display = 'none';
+                    document.getElementById('schermataChiamata').style.display = 'none';
+                    document.getElementById('schermataIscritto').style.display = 'block';
+                    return;
+                }
+
+                if (mioStato === 'chiamato') {
+                    document.getElementById('schermataAttesa').style.display = 'none';
+                    document.getElementById('schermataChiamata').style.display = 'block';
+                    document.getElementById('nomeChiamato').innerText = nome;
+                    document.getElementById('numeroChiamato').innerText = mioOggetto.numero || (numeroMioBiglietto > 0 ? numeroMioBiglietto : '-');
+                    
+                    suonaCampanello();
+                    if (navigator.vibrate) navigator.vibrate([600, 200, 600, 200, 600]);
+                    return;
+                }
+                let personeDavanti = 0;
+				const mioTimestamp = mioOggetto.timestamp;
+
+				// Calcolo unificato sulla fila unica in base al timestamp cronologico
+				arrayAttiva.forEach((item) => {
+					const statoItem = item.stato || 'attesa';
+					
+					if (item.timestamp < mioTimestamp && (statoItem === 'attesa' || statoItem === 'chiamato')) {
+						personeDavanti += item.delega ? 2 : 1;
+					}
+				});
+
+                const numeroDb = mioOggetto.numero !== undefined && mioOggetto.numero !== null ? mioOggetto.numero : numeroMioBiglietto;
+				document.getElementById('mioNumeroBiglietto').innerText = `Il tuo biglietto è il N° ${numeroDb}`;
+                const boxPersone = document.getElementById('personeDavanti');
+                if (personeDavanti === 0) {
+                    boxPersone.innerHTML = `<span style="color: #16a34a; font-size: 24px;">Sei il prossimo! 🎯</span>`;
+                } else {
+                    boxPersone.innerHTML = `${personeDavanti} <span style="font-size: 16px; font-weight: 500; color: #4b5563;">${personeDavanti === 1 ? 'persona davanti' : 'persone davanti'}</span>`;
+                    boxPersone.style.color = "#1e3a8a";
+                }
+            });
+        }
+    </script>
+</body>
+</html>

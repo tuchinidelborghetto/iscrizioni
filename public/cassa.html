@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cassa</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            background-color: #f4f4f9; 
+            padding: 0; 
+        }
+        .container { 
+            width: 100%; 
+            min-height: 100vh;
+            background: white; 
+            padding: 16px 12px; 
+            border-radius: 0; 
+            box-shadow: none; 
+            margin: 0; 
+        }
+        
+        @media (min-width: 768px) {
+            .container {
+                max-width: 700px;
+                min-height: auto;
+                margin: 20px auto;
+                border-radius: 8px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                padding: 25px;
+            }
+            body {
+                padding: 20px;
+            }
+        }
+
+        h2, h3 { color: #333; border-bottom: 2px solid #007BFF; padding-bottom: 5px; }
+        
+        .box-sezione { background: #f8f9fa; padding: 15px; border-radius: 6px; border: 1px solid #e9ecef; margin-bottom: 20px; }
+        
+        .importi-grid { display: flex; gap: 10px; margin-bottom: 15px; }
+        .btn-importo { flex: 1; padding: 12px 8px; font-size: 15px; font-weight: bold; background-color: #e7f5ff; border: 2px solid #74c0fc; color: #1864ab; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
+        .btn-importo:hover { background-color: #74c0fc; color: white; }
+
+        .metodo-grid { display: flex; gap: 10px; }
+        .btn-metodo { flex: 1; padding: 12px; font-size: 16px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; color: white; }
+        .btn-contanti { background-color: #28a745; }
+        .btn-contanti:hover { background-color: #218838; }
+        .btn-bancomat { background-color: #17a2b8; }
+        .btn-bancomat:hover { background-color: #138496; }
+
+        .selezionato-info { background: #fff3cd; padding: 12px; border-radius: 4px; border: 1px solid #ffeeba; margin-bottom: 12px; }
+        .selezionato-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .btn-pulisci-selezione { background: #dc3545; color: white; border: none; padding: 5px 10px; font-size: 12px; border-radius: 4px; cursor: pointer; }
+        .btn-pulisci-selezione:hover { background: #c82333; }
+        
+        .lista-voci-correnti { margin: 0 0 10px 0; padding-left: 18px; font-size: 13px; color: #856404; }
+        .lista-voci-correnti li { margin-bottom: 2px; }
+
+        .totale-sezione { font-size: 16px; font-weight: bold; color: #d97706; border-top: 1px solid #ffeeba; padding-top: 8px; text-align: right; }
+
+        .table-responsive { width: 100%; overflow-x: auto; margin-top: 15px; }
+        table { width: 100%; border-collapse: collapse; background: white; }
+        th, td { border: 1px solid #dee2e6; padding: 10px 10px; text-align: left; font-size: 13px; }
+        th { background-color: #f1f1f1; color: #495057; }
+        tbody tr { cursor: pointer; }
+        tbody tr:hover { background-color: #f8f9fa; }
+
+        .btn-chiusura { background-color: #dc3545; color: white; border: none; padding: 12px 20px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; width: 100%; margin-top: 15px; }
+        .btn-chiusura:hover { background-color: #c82333; }
+        
+        .btn-reset { background-color: #6c757d; color: white; border: none; padding: 8px 15px; font-size: 13px; border-radius: 4px; cursor: pointer; margin-top: 10px; width: 100%; }
+        .btn-reset:hover { background-color: #5a6268; }
+
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; padding: 15px; }
+        .modal-content { background-color: white; padding: 25px 20px; border-radius: 8px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        .risultato-riga { display: flex; justify-content: space-between; font-size: 16px; margin: 10px 0; padding: 8px; background: #f8f9fa; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Registratore di Cassa</h2>
+        
+        <!-- SEZIONE 1: SCELTA IMPORTO -->
+        <div class="box-sezione">
+            <h3>1. Componi l'importo</h3>
+            <div class="importi-grid">
+                <button type="button" class="btn-importo" onclick="aggiungiImporto('Anni VR', 30)">Anni VR<br>30€</button>
+                <button type="button" class="btn-importo" onclick="aggiungiImporto('30+', 50)">30+<br>50€</button>
+				<button type="button" class="btn-importo" onclick="aggiungiImporto('Adulto', 120)">Adulto<br>120€</button>
+            </div>
+            
+            <div class="selezionato-info">
+                <div class="selezionato-header">
+                    <span style="font-weight: bold; color: #856404; font-size: 14px;">Voci selezionate:</span>
+                    <button type="button" class="btn-pulisci-selezione" onclick="azzeraSelezione()">Annulla</button>
+                </div>
+                <ul id="listaVoci" class="lista-voci-correnti" style="display: none;"></ul>
+                <div class="totale-sezione" id="infoSelezionato">Totale da incassare: € 0,00</div>
+            </div>
+        </div>
+
+        <!-- SEZIONE 2: SCELTA METODO DI PAGAMENTO -->
+        <div class="box-sezione">
+            <h3>2. Incassa con</h3>
+            <div class="metodo-grid">
+                <button type="button" class="btn-metodo btn-contanti" onclick="registraPagamento('Contanti')">💵 Contanti</button>
+                <button type="button" class="btn-metodo btn-bancomat" onclick="registraPagamento('Bancomat')">💳 Bancomat</button>
+            </div>
+        </div>
+
+        <!-- SEZIONE 3: AZIONI E CHIUSURA -->
+        <button type="button" class="btn-chiusura" onclick="eseguiChiusuraCassa()">🔒 Effettua Chiusura Cassa</button>
+        <button type="button" class="btn-reset" onclick="azzeraCassa()">🗑️ Pulisci Storico Giornata</button>
+
+        <!-- STORICO TRANSAZIONI -->
+        <h3 style="margin-top: 30px;">Ultime Transazioni <span style="font-size: 11px; font-weight: normal; color: #666;">(Doppio click per eliminare)</span></h3>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Orario</th>
+                        <th>Dettaglio Voci</th>
+                        <th>Importo</th>
+                        <th>Metodo</th>
+                    </tr>
+                </thead>
+                <tbody id="corpoTabella">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- MODALE CHIUSURA CASSA -->
+    <div id="modalChiusura" class="modal">
+        <div class="modal-content">
+            <h3 style="color: #007BFF; margin-top:0;">Riepilogo Chiusura Cassa</h3>
+            
+            <div class="risultato-riga">
+                <span>Totale Contanti:</span>
+                <strong id="totaleContantiModal" style="color: #28a745;">€ 0,00</strong>
+            </div>
+            <div class="risultato-riga">
+                <span>Totale Bancomat:</span>
+                <strong id="totaleBancomatModal" style="color: #17a2b8;">€ 0,00</strong>
+            </div>
+            <div class="risultato-riga" style="border-top: 2px solid #ccc; margin-top: 15px; padding-top: 10px;">
+                <span>Incasso Totale:</span>
+                <strong id="totaleGeneraleModal">€ 0,00</strong>
+            </div>
+
+            <button type="button" class="btn-importo" style="width: 100%; margin-top: 20px; padding: 12px; font-size: 15px;" onclick="chiudiModale()">Chiudi</button>
+        </div>
+    </div>
+
+    <script>
+        let importoSelezionato = 0;
+        let vociSelezionate = [];
+        let transazioni = JSON.parse(localStorage.getItem('cassa_transazioni')) || [];
+
+        // Funzione per emettere un suono in stile "tintinnio monete / cassa"
+        function suonaConferma() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Primo tono metallico acuto (moneta)
+                const osc1 = ctx.createOscillator();
+                const gain1 = ctx.createGain();
+                osc1.type = 'triangle';
+                osc1.frequency.setValueAtTime(987.77, ctx.currentTime); // B5
+                osc1.frequency.exponentialRampToValueAtTime(1318.51, ctx.currentTime + 0.08); // E6
+                
+                gain1.gain.setValueAtTime(0.12, ctx.currentTime);
+                gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+                
+                osc1.connect(gain1);
+                gain1.connect(ctx.destination);
+                osc1.start();
+                osc1.stop(ctx.currentTime + 0.15);
+
+                // Secondo tono di conferma (più corposo, tipo cassa)
+                const osc2 = ctx.createOscillator();
+                const gain2 = ctx.createGain();
+                osc2.type = 'sine';
+                osc2.frequency.setValueAtTime(523.25, ctx.currentTime + 0.1); // C5
+                osc2.frequency.setValueAtTime(659.25, ctx.currentTime + 0.18); // E5
+                
+                gain2.gain.setValueAtTime(0.15, ctx.currentTime + 0.1);
+                gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+                
+                osc2.connect(gain2);
+                gain2.connect(ctx.destination);
+                osc2.start(ctx.currentTime + 0.1);
+                osc2.stop(ctx.currentTime + 0.35);
+
+            } catch(e) {}
+        }
+
+        function aggiungiImporto(nomeVoce, valore) {
+            importoSelezionato += valore;
+            vociSelezionate.push({ nome: nomeVoce, prezzo: valore });
+            aggiornaBoxSelezione();
+        }
+
+        function aggiornaBoxSelezione() {
+            document.getElementById('infoSelezionato').textContent = `Totale da incassare: € ${importoSelezionato.toFixed(2)}`;
+            
+            const ul = document.getElementById('listaVoci');
+            if (vociSelezionate.length > 0) {
+                ul.style.display = 'block';
+                ul.innerHTML = vociSelezionate.map(v => `<li>${v.nome} - € ${v.prezzo.toFixed(2)}</li>`).join('');
+            } else {
+                ul.style.display = 'none';
+                ul.innerHTML = '';
+            }
+        }
+
+        function azzeraSelezione() {
+            importoSelezionato = 0;
+            vociSelezionate = [];
+            aggiornaBoxSelezione();
+        }
+
+        function registraPagamento(metodo) {
+            if (importoSelezionato <= 0) {
+                alert("Seleziona prima un importo cliccando sui pulsanti dei tagli!");
+                return;
+            }
+
+            // Emette il suono di avvenuto incasso
+            suonaConferma();
+
+            const oraCorrente = new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            
+            const transazione = {
+                orario: oraCorrente,
+                importo: importoSelezionato,
+                voci: [...vociSelezionate],
+                metodo: metodo
+            };
+
+            transazioni.unshift(transazione);
+            salvaEAggiorna();
+            azzeraSelezione();
+        }
+
+        function salvaEAggiorna() {
+            localStorage.setItem('cassa_transazioni', JSON.stringify(transazioni));
+            renderizzaTabella();
+        }
+
+        function renderizzaTabella() {
+            const tbody = document.getElementById('corpoTabella');
+            tbody.innerHTML = '';
+
+            if (transazioni.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; font-style:italic; color:#666;">Nessuna transazione registrata oggi.</td></tr>`;
+                return;
+            }
+
+            transazioni.forEach((t, indice) => {
+                const coloreMetodo = t.metodo === 'Contanti' ? '#28a745' : '#17a2b8';
+                
+                let dettaglioVoci = '-';
+                if (t.voci && t.voci.length > 0) {
+                    dettaglioVoci = t.voci.map(v => `${v.nome} (€ ${v.prezzo.toFixed(2)})`).join(',<br>');
+                }
+
+                tbody.innerHTML += `
+                    <tr ondblclick="eliminaTransazione(${indice})" title="Doppio click per eliminare questa transazione">
+                        <td>${t.orario}</td>
+                        <td>${dettaglioVoci}</td>
+                        <td><strong>€ ${t.importo.toFixed(2)}</strong></td>
+                        <td><span style="color: ${coloreMetodo}; font-weight: bold;">${t.metodo}</span></td>
+                    </tr>
+                `;
+            });
+        }
+
+        function eliminaTransazione(indice) {
+            const t = transazioni[indice];
+            const conferma = confirm(`Vuoi davvero eliminare la transazione delle ore ${t.orario} di € ${t.importo.toFixed(2)} (${t.metodo})?`);
+            
+            if (conferma) {
+                transazioni.splice(indice, 1);
+                salvaEAggiorna();
+            }
+        }
+
+        function eseguiChiusuraCassa() {
+            let totContanti = 0;
+            let totBancomat = 0;
+
+            transazioni.forEach(t => {
+                if (t.metodo === 'Contanti') {
+                    totContanti += t.importo;
+                } else if (t.metodo === 'Bancomat') {
+                    totBancomat += t.importo;
+                }
+            });
+
+            let totGenerale = totContanti + totBancomat;
+
+            document.getElementById('totaleContantiModal').textContent = `€ ${totContanti.toFixed(2)}`;
+            document.getElementById('totaleBancomatModal').textContent = `€ ${totBancomat.toFixed(2)}`;
+            document.getElementById('totaleGeneraleModal').textContent = `€ ${totGenerale.toFixed(2)}`;
+
+            document.getElementById('modalChiusura').style.display = 'flex';
+        }
+
+        function chiudiModale() {
+            document.getElementById('modalChiusura').style.display = 'none';
+        }
+
+        function azzeraCassa() {
+            if (confirm("Vuoi cancellare tutte le transazioni registrate e azzerare la cassa?")) {
+                transazioni = [];
+                localStorage.removeItem('cassa_transazioni');
+                renderizzaTabella();
+            }
+        }
+
+        renderizzaTabella();
+    </script>
+</body>
+</html>

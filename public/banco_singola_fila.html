@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pannello Banco - Coda Iscrizioni</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background: #f8fafc; 
+            padding: 12px; 
+            color: #1e293b; 
+            margin: 0; 
+        }
+        .container { 
+            max-width: 650px; 
+            margin: auto; 
+            background: #ffffff; 
+            padding: 16px 14px; 
+            border-radius: 20px; 
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); 
+            border: 2px solid #e2e8f0;
+        }
+        
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        h2 { 
+            margin: 0; 
+            color: #991b1b; 
+            font-size: 18px; 
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .mini-btn {
+            background: #ffffff;
+            border: 1.5px solid #cbd5e1;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #334155;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            transition: transform 0.1s, background 0.1s;
+            width: auto !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .mini-btn:active { transform: scale(0.95); background: #f1f5f9; }
+
+        .btn-reset { padding: 6px 9px; font-size: 13px; }
+        
+        .box-limite { 
+            font-size: 13px; 
+            background: #f8fafc; 
+            padding: 10px 14px; 
+            border-radius: 12px; 
+            color: #475569; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border: 1px solid #e2e8f0;
+            margin-bottom: 10px;
+        }
+        .box-limite strong { color: #15803d; font-size: 14px; }
+        .badge-pieno { background: #991b1b !important; border-color: #7f1d1d !important; color: #ffffff !important; }
+        .badge-pieno strong { color: #ffffff !important; }
+
+        .btn-riserva { 
+            background: linear-gradient(135deg, #15803d 0%, #166534 100%); 
+            color: white; 
+            border: none; 
+            padding: 10px 14px; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-weight: 700; 
+            font-size: 13px; 
+            width: 100%; 
+            box-shadow: 0 2px 6px rgba(21, 128, 61, 0.2);
+            transition: transform 0.1s;
+        }
+        .btn-riserva:active { transform: scale(0.98); }
+
+        .item-coda { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px;
+            padding: 14px; 
+            margin-top: 10px; 
+            background: #ffffff; 
+            border: 1px solid #e2e8f0; 
+            border-radius: 14px; 
+            transition: all 0.2s;
+        }
+        @media (min-width: 480px) {
+            .item-coda { flex-direction: row; justify-content: space-between; align-items: center; }
+        }
+
+        .item-in-attesa { background: #fafafa; border-color: #e2e8f0; border-left: 5px solid #15803d; }
+        .item-chiamato { background: #fef2f2; border-color: #fca5a5; border-left: 5px solid #dc2626; }
+        .item-iscritto { background: #f0fdf4; border-color: #bbf7d0; border-left: 5px solid #16a34a; }
+        
+        .badge-delega { background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; display: inline-block; border: 1px solid #fca5a5; }
+        .badge-pagamento { background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; display: inline-block; border: 1px solid #bae6fd; margin-left: 4px; }
+        .testo-delegante { font-size: 12px; color: #475569; margin-top: 2px; display: block; }
+        .testo-telefono { font-size: 12px; color: #475569; margin-top: 2px; display: block; }
+        .numero-biglietto { font-size: 14px; font-weight: 800; color: #15803d; margin-right: 8px; background: #f0fdf4; padding: 4px 8px; border-radius: 8px; display: inline-block; border: 1px solid #bbf7d0; }
+
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(3px); justify-content: center; align-items: center; z-index: 1000; padding: 15px; }
+        .modal-content { background: #ffffff; padding: 20px; border-radius: 20px; width: 100%; max-width: 520px; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15); border: 2px solid #e2e8f0; }
+        .item-riserva { padding: 12px; border-bottom: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 10px; font-size: 13px; }
+        @media (min-width: 480px) {
+            .item-riserva { flex-direction: row; justify-content: space-between; align-items: center; }
+        }
+
+        button { background: #15803d; color: white; border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 13px; width: 100%; box-shadow: 0 2px 6px rgba(21, 128, 61, 0.2); }
+        @media (min-width: 480px) { button { width: auto; } }
+        button:active { opacity: 0.9; transform: scale(0.98); }
+        
+        .btn-rimuovi { background: #64748b; box-shadow: none; }
+        .btn-chiama { background: #dc2626; color: #ffffff; box-shadow: 0 2px 6px rgba(220, 38, 38, 0.2); }
+        .btn-promuovi { background: #15803d; font-size: 12px; box-shadow: 0 2px 6px rgba(21, 128, 61, 0.2); }
+        
+        .azioni-gruppo { display: flex; gap: 8px; width: 100%; }
+        @media (min-width: 480px) { .azioni-gruppo { width: auto; } }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header-top">
+            <h2>Gestione Coda Unica</h2>
+            <div class="header-actions">
+                <button class="mini-btn" id="btnApriStats">📊 Stats</button>
+                <button class="mini-btn" id="btnModificaLimite">⚙️ Slot</button>
+                <button class="mini-btn btn-reset" id="btnSvuotaDb" title="Svuota Database">🗑️</button>
+            </div>
+        </div>
+
+        <div id="boxLimiteContainer" class="box-limite">
+            <span>In attesa: <strong id="valoreInAttesa">0</strong></span>
+            <span>•</span>
+            <span>Disp: <strong id="valoreDisponibili">0</strong>/<strong id="valoreLimite">10</strong></span>
+        </div>
+        
+        <button class="btn-riserva" id="btnApriRiserve">📋 Lista di Riserva (<span id="counterRiserve">0</span>)</button>
+
+        <p style="margin-top: 14px; font-size: 11px; color: #991b1b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Coda attiva:</p>
+        <div id="listaCoda">Caricamento coda...</div>
+    </div>
+
+    <div id="modalRiserva" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-top: 0; color: #991b1b; font-size: 16px; display: flex; justify-content: space-between; align-items: center;">
+                Lista di Riserva 
+                <button onclick="chiudiModal('modalRiserva')" style="background: #dc2626; width: auto; padding: 4px 10px; font-size: 12px; border-radius: 6px; box-shadow: none;">✕</button>
+            </h3>
+            <p style="font-size: 12px; color: #64748b; margin-top: 0;">Ordinato per orario di inserimento. Puoi promuovere un utente in coda attiva.</p>
+            <div id="listaRiservaContent">Nessun utente in riserva.</div>
+        </div>
+    </div>
+
+    <div id="modalStats" class="modal">
+        <div class="modal-content" style="max-width: 550px;">
+            <h3 style="margin-top: 0; color: #991b1b; font-size: 16px; display: flex; justify-content: space-between; align-items: center;">
+                Statistiche Iscrizioni (Flusso 30 min)
+                <button onclick="chiudiModal('modalStats')" style="background: #dc2626; width: auto; padding: 4px 10px; font-size: 12px; border-radius: 6px; box-shadow: none;">✕</button>
+            </h3>
+            <p style="font-size: 12px; color: #64748b; margin-top: 0;">Confronto flussi suddivisi per fasce orarie.</p>
+            <div style="position: relative; height: 280px; width: 100%;">
+                <canvas id="graficoIscrizioni"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+        import { getDatabase, ref, onValue, update, remove, set } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+
+        const firebaseConfig = {
+              apiKey: "AIzaSyCKfb2IDqE-y4Ln_1tUIYm09VVMqRRruvQ",
+              authDomain: "ticketdispensertuchini.firebaseapp.com",
+              databaseURL: "https://ticketdispensertuchini-default-rtdb.europe-west1.firebasedatabase.app",
+              projectId: "ticketdispensertuchini",
+              storageBucket: "ticketdispensertuchini.firebasestorage.app",
+              messagingSenderId: "582164145424",
+              appId: "1:582164145424:web:41a6df5056265e19ddf195"
+            };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const codaRef = ref(db, 'coda');
+        const limiteRef = ref(db, 'config/limiteMassimo');
+
+        let limiteMaxCorrente = 10;
+        const PASSWORD_ADMIN = "tuchini2027";
+        const PASSWORD_RESET = "1978";
+        let cacheDatiCoda = {};
+        let chartInstance = null;
+
+        document.getElementById('btnApriRiserve').addEventListener('click', () => {
+            document.getElementById('modalRiserva').style.display = 'flex';
+            renderizzaListaRiserve(cacheDatiCoda);
+        });
+
+        document.getElementById('btnApriStats').addEventListener('click', () => {
+            document.getElementById('modalStats').style.display = 'flex';
+            generaGraficoStatistiche(cacheDatiCoda);
+        });
+
+        document.getElementById('btnSvuotaDb').addEventListener('click', () => {
+            const pwd = prompt("Inserisci la password di sicurezza per svuotare il database:");
+            if (pwd === null) return;
+
+            if (pwd !== PASSWORD_RESET) {
+                alert("Password errata!");
+                return;
+            }
+
+            if (confirm("ATTENZIONE: Stai per cancellare interamente il database (coda attiva, riserve e statistiche). Vuoi procedere?")) {
+                set(codaRef, null).then(() => {
+                    alert("Database svuotato con successo!");
+                }).catch(err => {
+                    alert("Errore durante lo svuotamento: " + err.message);
+                });
+            }
+        });
+
+        document.getElementById('btnModificaLimite').addEventListener('click', () => {
+            const pwdInserita = prompt("Inserisci la password amministratore per modificare gli slot massimi:");
+            if (pwdInserita === null) return;
+
+            if (pwdInserita !== PASSWORD_ADMIN) {
+                alert("Password errata!");
+                return;
+            }
+
+            const nuovoLimite = prompt("Inserisci il numero massimo di slot in coda:", limiteMaxCorrente);
+            if (nuovoLimite !== null && !isNaN(nuovoLimite) && nuovoLimite > 0) {
+                set(limiteRef, parseInt(nuovoLimite));
+            }
+        });
+
+        window.chiudiModal = function(idModal) {
+            document.getElementById(idModal).style.display = 'none';
+        };
+
+        document.addEventListener('click', function(e) {
+            if (e.target && e.target.classList.contains('azione-chiama')) {
+                const idPersona = e.target.getAttribute('data-id');
+                update(ref(db, 'coda/' + idPersona), { stato: 'chiamato' });
+            }
+
+            if (e.target && e.target.classList.contains('azione-conferma')) {
+                const idPersona = e.target.getAttribute('data-id');
+                update(ref(db, 'coda/' + idPersona), { 
+                    stato: 'iscritto',
+                    timestampIscritto: Date.now() 
+                });
+            }
+
+            if (e.target && e.target.classList.contains('azione-rimuovi')) {
+                const idPersona = e.target.getAttribute('data-id');
+                if(confirm("Vuoi rimuovere definitivamente questa persona?")) {
+                    remove(ref(db, 'coda/' + idPersona));
+                }
+            }
+
+            if (e.target && e.target.classList.contains('azione-promuovi')) {
+                const idPersona = e.target.getAttribute('data-id');
+                update(ref(db, 'coda/' + idPersona), { stato: 'attesa' }).then(() => {
+                    renderizzaListaRiserve(cacheDatiCoda);
+                });
+            }
+        });
+
+        onValue(limiteRef, (snapshot) => {
+            const val = snapshot.val();
+            if (val !== null) {
+                limiteMaxCorrente = parseInt(val);
+                const elLimite = document.getElementById('valoreLimite');
+                if (elLimite) elLimite.innerText = limiteMaxCorrente;
+            } else {
+                set(limiteRef, 10);
+            }
+        });
+
+        onValue(codaRef, (snapshot) => {
+            try {
+                const data = snapshot.val();
+                cacheDatiCoda = data || {};
+                renderizzaCodaBanco(cacheDatiCoda);
+
+                if (document.getElementById('modalRiserva').style.display === 'flex') {
+                    renderizzaListaRiserve(cacheDatiCoda);
+                }
+
+                if (document.getElementById('modalStats').style.display === 'flex') {
+                    generaGraficoStatistiche(cacheDatiCoda);
+                }
+            } catch (err) {
+                console.error("Errore di rendering:", err);
+                document.getElementById('listaCoda').innerHTML = `<p style="color: #dc2626; font-weight: bold;">Errore nello script: ${err.message}</p>`;
+            }
+        });
+
+        function renderizzaCodaBanco(data) {
+            const container = document.getElementById('listaCoda');
+            container.innerHTML = '';
+
+            if (!data) {
+                container.innerHTML = '<p style="color: #64748b; text-align: center; padding: 20px 0;">Nessuno in coda al momento.</p>';
+                document.getElementById('valoreDisponibili').innerText = limiteMaxCorrente;
+                document.getElementById('valoreInAttesa').innerText = 0;
+                document.getElementById('counterRiserve').innerText = 0;
+                return;
+            }
+
+            const arrayCompleto = Object.keys(data)
+                .filter(id => data[id] !== null && typeof data[id] === 'object')
+                .map(id => ({ id, ...data[id] }));
+
+            const arrayCodaAttiva = arrayCompleto.filter(p => (p.stato || 'attesa') !== 'riserva');
+            const arrayRiserve = arrayCompleto.filter(p => p.stato === 'riserva');
+
+            document.getElementById('counterRiserve').innerText = arrayRiserve.length;
+
+            let postiTotaliPesati = 0;
+            arrayCodaAttiva.forEach(persona => {
+                postiTotaliPesati += persona.delega ? 2 : 1;
+            });
+
+            let postiDisponibili = limiteMaxCorrente - postiTotaliPesati;
+            if (postiDisponibili < 0) postiDisponibili = 0;
+            document.getElementById('valoreDisponibili').innerText = postiDisponibili;
+
+            const boxContainer = document.getElementById('boxLimiteContainer');
+            if (boxContainer) {
+                if (postiTotaliPesati >= limiteMaxCorrente) {
+                    boxContainer.classList.add('badge-pieno');
+                } else {
+                    boxContainer.classList.remove('badge-pieno');
+                }
+            }
+
+            const personeInAttesaCount = arrayCodaAttiva.reduce((acc, persona) => {
+                const stato = persona.stato || 'attesa';
+                if (stato === 'attesa' || stato === 'chiamato') {
+                    return acc + (persona.delega ? 2 : 1);
+                }
+                return acc;
+            }, 0);
+            document.getElementById('valoreInAttesa').innerText = personeInAttesaCount;
+
+            if (arrayCodaAttiva.length === 0) {
+                container.innerHTML = '<p style="color: #64748b; text-align: center; padding: 20px 0;">Nessun utente in coda.</p>';
+                return;
+            }
+
+            arrayCodaAttiva.sort((a, b) => {
+                const pesoStato = (stato) => {
+                    if (stato === 'chiamato') return 1;
+                    if (stato === 'attesa') return 2;
+                    if (stato === 'iscritto') return 3;
+                    return 2;
+                };
+                
+                const pesoA = pesoStato(a.stato);
+                const pesoB = pesoStato(b.stato);
+
+                if (pesoA !== pesoB) return pesoA - pesoB;
+
+                if (a.stato === 'iscritto' && b.stato === 'iscritto') {
+                    const tA = a.timestampIscritto || a.timestamp;
+                    const tB = b.timestampIscritto || b.timestamp;
+                    return tA - tB;
+                }
+
+                return a.timestamp - b.timestamp;
+            });
+
+            arrayCodaAttiva.forEach((persona, index) => {
+                const numeroBiglietto = index + 1;
+                const div = document.createElement('div');
+                const stato = persona.stato || 'attesa';
+                
+                let classeStato = 'item-in-attesa';
+                let testoStato = '💤 In attesa';
+                let pulsantiHTML = '';
+
+                if (stato === 'chiamato') {
+                    classeStato = 'item-chiamato';
+                    testoStato = '📢 Chiamato';
+                    pulsantiHTML = `<button class="azione-conferma" data-id="${persona.id}">✅ Conferma</button>`;
+                } else if (stato === 'iscritto') {
+                    classeStato = 'item-iscritto';
+                    testoStato = '🟢 Iscritto';
+                    pulsantiHTML = `<button class="btn-rimuovi azione-rimuovi" data-id="${persona.id}">🗑️</button>`;
+                } else {
+                    pulsantiHTML = `<button class="btn-chiama azione-chiama" data-id="${persona.id}">📢 Chiama</button>`;
+                }
+
+                div.className = `item-coda ${classeStato}`;
+                
+                const etichettaDelega = persona.delega ? '<span class="badge-delega">⚠️ DELEGA (2)</span>' : '';
+                const rigaDelegante = (persona.delega && persona.delegato) ? `<small class="testo-delegante">Delegante: <strong>${persona.delegato}</strong></small>` : '';
+                const rigaTelefono = persona.telefono ? `<small class="testo-telefono">📞 Tel: <strong>${persona.telefono}</strong></small>` : '';
+
+                div.innerHTML = `
+                    <div style="text-align: left;">
+                        <span class="numero-biglietto">N° ${numeroBiglietto}</span>
+                        <strong style="font-size: 15px; color: #0f172a;">${persona.nome}</strong> ${etichettaDelega}
+                        ${rigaTelefono}
+                        ${rigaDelegante}
+                        <small style="color: #64748b; display: block; margin-top: 4px;">Stato: ${testoStato}</small>
+                    </div>
+                    <div class="azioni-gruppo">
+                        ${pulsantiHTML}
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function renderizzaListaRiserve(data) {
+            const containerRiserva = document.getElementById('listaRiservaContent');
+            containerRiserva.innerHTML = '';
+
+            if (!data) {
+                containerRiserva.innerHTML = '<p style="color: #64748b;">Nessun utente in riserva.</p>';
+                return;
+            }
+
+            const arrayRiserve = Object.keys(data)
+                .filter(id => data[id] !== null && typeof data[id] === 'object' && data[id].stato === 'riserva')
+                .map(id => ({ id, ...data[id] }));
+
+            arrayRiserve.sort((a, b) => a.timestamp - b.timestamp);
+
+            if (arrayRiserve.length === 0) {
+                containerRiserva.innerHTML = '<p style="color: #64748b;">Nessun utente in riserva al momento.</p>';
+                return;
+            }
+
+            arrayRiserve.forEach((persona, index) => {
+                const orario = new Date(persona.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                const div = document.createElement('div');
+                div.className = 'item-riserva';
+
+                const etichettaDelega = persona.delega ? ' <span class="badge-delega">⚠️ DELEGA</span>' : '';
+                const infoDelegante = (persona.delega && persona.delegato) ? `<br><small style="color:#475569;">Delegante: <strong>${persona.delegato}</strong></small>` : '';
+                const rigaTelefonoRiserva = persona.telefono ? `<br><small style="color:#475569;">📞 Tel: <strong>${persona.telefono}</strong></small>` : '';
+
+                div.innerHTML = `
+                    <div style="text-align: left;">
+                        <strong style="color: #0f172a;">#${index + 1} - ${persona.nome}</strong>${etichettaDelega}
+                        ${rigaTelefonoRiserva}
+                        ${infoDelegante}
+                        <br><small style="color: #94a3b8;">Inserito alle: ${orario}</small>
+                    </div>
+                    <div style="display: flex; gap: 6px; width: 100%;">
+                        <button class="azione-promuovi btn-promuovi" data-id="${persona.id}">⬆️ Sposta</button>
+                        <button class="azione-rimuovi btn-rimuovi" data-id="${persona.id}">🗑️</button>
+                    </div>
+                `;
+                containerRiserva.appendChild(div);
+            });
+        }
+
+        function generaGraficoStatistiche(data) {
+            if (!data) return;
+
+            const iscrittiCompletati = Object.keys(data)
+                .filter(id => data[id] !== null && typeof data[id] === 'object' && data[id].stato === 'iscritto' && data[id].timestampIscritto)
+                .map(id => data[id]);
+
+            const conteggioTotale = {};
+            const setFasce = new Set();
+
+            iscrittiCompletati.forEach(item => {
+                const d = new Date(item.timestampIscritto);
+                const ore = d.getHours();
+                const minuti = d.getMinutes();
+                
+                const fasciaMinuti = minuti < 30 ? 0 : 30;
+                const prossimaOra = fasciaMinuti === 30 ? (ore + 1) % 24 : ore;
+                const prossimoMinutoStr = fasciaMinuti === 30 ? "00" : "30";
+                const oraInizioStr = String(ore).padStart(2, '0') + ":" + (fasciaMinuti === 0 ? "00" : "30");
+                const oraFineStr = String(prossimaOra).padStart(2, '0') + ":" + prossimoMinutoStr;
+
+                const etichettaFascia = `${oraInizioStr} - ${oraFineStr}`;
+                setFasce.add(etichettaFascia);
+
+                conteggioTotale[etichettaFascia] = (conteggioTotale[etichettaFascia] || 0) + 1;
+            });
+
+            const etichetteOrdinate = Array.from(setFasce).sort();
+            const datiIscrizioni = etichetteOrdinate.map(fascia => conteggioTotale[fascia] || 0);
+
+            const ctx = document.getElementById('graficoIscrizioni').getContext('2d');
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: etichetteOrdinate.length > 0 ? etichetteOrdinate : ['Nessun dato'],
+                    datasets: [
+                        {
+                            label: 'Iscritti',
+                            data: etichetteOrdinate.length > 0 ? datiIscrizioni : [0],
+                            backgroundColor: '#15803d',
+                            borderColor: '#166534',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
