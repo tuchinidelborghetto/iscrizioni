@@ -68,5 +68,5 @@ node_modules/
 # dataconnect generated files
 .dataconnect
 
-git rm --cached "public/Script/Anni VR/serviceAccountKey.json"
-git rm --cached "public/Script/Adulti/serviceAccountKey.json"
+public/Script/Anni VR/serviceAccountKey.json
+public/Script/Adulti/serviceAccountKey.json

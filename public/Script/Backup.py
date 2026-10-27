@@ -13,19 +13,27 @@ if not firebase_admin._apps:
 
 db = firestore.client()
 
+
+def json_serial(obj):
+    """Funzione di supporto per convertire oggetti non standard (come i timestamp di Firestore) in stringhe ISO."""
+    if hasattr(obj, 'isoformat'):
+        return obj.isoformat()
+    raise TypeError(f"Il tipo {type(obj)} non è serializzabile in JSON")
+
+
 def esporta_database():
     print("🔄 Connessione a Firebase e lettura di tutte le collezioni...")
-    
+
     backup_data = {}
-    
+
     # Recupera dinamicamente tutte le collezioni presenti nel database
     collezioni = db.collections()
-    
+
     for coll in collezioni:
         nome_collezione = coll.id
         print(f"📥 Esportazione collezione: '{nome_collezione}'...")
         backup_data[nome_collezione] = {}
-        
+
         docs = coll.stream()
         for doc in docs:
             backup_data[nome_collezione][doc.id] = doc.to_dict()
@@ -33,14 +41,15 @@ def esporta_database():
     # Genera un nome file con la data e l'ora corrente
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     file_output = f"backup_dbiscrizioni_{timestamp}.json"
-    
+
     with open(file_output, "w", encoding="utf-8") as f:
-        json.dump(backup_data, f, ensure_ascii=False, indent=4)
-        
+        json.dump(backup_data, f, ensure_ascii=False, indent=4, default=json_serial)
+
     print("\n--------------------------------------------------")
     print(f"✨ Backup completato con successo!")
     print(f"📁 File salvato come: {file_output}")
     print("--------------------------------------------------")
+
 
 if __name__ == "__main__":
     esporta_database()
