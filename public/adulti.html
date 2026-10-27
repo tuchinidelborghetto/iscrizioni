@@ -584,7 +584,7 @@
     <!-- AREA PRINCIPALE -->
     <main class="main-content">
         <div class="container">
-			<div class="versione-app">Ver. 02.00</div>
+			<div class="versione-app">Ver. 02.10</div>
             <div class="top-bar-header">
 				<!-- NUOVO PULSANTE GESTIONE CODA -->
 				<button type="button" id="btnGestioneCoda" class="btn-logout" style="background-color: #dc2626;" onclick="apriGestioneCodaBanco()">📢 Gestione Coda</button>
@@ -1062,7 +1062,7 @@
                         </div>
 
                         <div id="gruppoGen1Doc" style="display: none; margin-bottom: 10px;">
-							<div class="collapsible-header" style="background: #fff3cd; color: #b7791f;" onclick="toggleCollapsible('corpoDocGen1', this); apriQRCapture('gen1');">
+							<div<div class="collapsible-header" style="background: #fff3cd; color: #b7791f;" onclick="toggleCollapsibleDoc('corpoDocGen1', this, 'gen1');">
 								<span>🪪 Documento d'Identità (Genitore 1)</span>
 								<span>▼</span>
 							</div>
@@ -1129,7 +1129,7 @@
                         </div>
 
                         <div id="gruppoGen2Doc" style="display: none; margin-top: 5px; margin-bottom: 0;">
-							<div class="collapsible-header" style="background: #fff3cd; color: #b7791f;" onclick="toggleCollapsible('corpoDocGen2', this); apriQRCapture('gen2');">
+							<div class="collapsible-header" style="background: #fff3cd; color: #b7791f;" onclick="toggleCollapsibleDoc('corpoDocGen2', this, 'gen2');">
 								<span>🪪 Documento d'Identità (Genitore 2)</span>
 								<span>▼</span>
 							</div>
@@ -3227,9 +3227,35 @@
 		
         const modal = document.getElementById('editModal');
 
-        async function apriModaleEsistente(p) {
+async function apriModaleEsistened(p) { // o apriModaleEsistente(p)
 			await registraLog("Apertura Anagrafica", `${p.cognome} ${p.nome}`);
 
+			// 1. Ferma eventuali sessioni e polling QR attivi della scheda precedente
+			chiudiQRCapture('iscritto');
+			chiudiQRCapture('gen1');
+			chiudiQRCapture('gen2');
+
+			// 2. Resetta preventivamente tutti i campi documento, input e anteprime
+			document.getElementById('editTipoDocumento').value = "";
+			document.getElementById('editNumeroDocumento').value = "";
+			document.getElementById('editScadenzaDocumento').value = "";
+			document.getElementById('editUrl_iscritto_1').value = "";
+			document.getElementById('editUrl_iscritto_2').value = "";
+			aggiornaStatoUIImmagini('iscritto');
+
+			document.getElementById('editGenitore1TipoDoc').value = "";
+			document.getElementById('editGenitore1NumDoc').value = "";
+			document.getElementById('editGenitore1ScadenzaDoc').value = "";
+			document.getElementById('editUrl_gen1_1').value = "";
+			document.getElementById('editUrl_gen1_2').value = "";
+			aggiornaStatoUIImmagini('gen1');
+
+			document.getElementById('editGenitore2TipoDoc').value = "";
+			document.getElementById('editGenitore2NumDoc').value = "";
+			document.getElementById('editGenitore2ScadenzaDoc').value = "";
+			document.getElementById('editUrl_gen2_1').value = "";
+			document.getElementById('editUrl_gen2_2').value = "";
+			aggiornaStatoUIImmagini('gen2');
 			document.getElementById('editIdPersona').value = p.id;
 			document.getElementById('editCognome').value = pulisciTesto(p.cognome);
 			document.getElementById('editNome').value = pulisciTesto(p.nome);
