@@ -71,7 +71,8 @@
         }
         .delega-container input { width: 20px; height: 20px; margin: 0; cursor: pointer; accent-color: #2563eb; }
 
-        #containerDelegato, #containerDelegatoRiserva { display: none; margin-top: 10px; }
+        #containerDelegato { display: none; margin-top: 14px; background: #fffbeb; border: 1.5px dashed #f59e0b; padding: 16px; border-radius: 16px; }
+        .titolo-delegato { font-size: 14px; font-weight: 800; color: #b45309; margin-top: 0; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
 
         .sezione-pagamento, .sezione-sesso {
             margin-top: 18px;
@@ -219,9 +220,59 @@
                 <span>Iscrizione con delega</span>
             </label>
 
+            <!-- SEZIONE DELEGATO (Replicata) -->
             <div id="containerDelegato">
-                <label class="campo-label">Nome del Delegante</label>
-                <input type="text" id="nomeDelegato" placeholder="Cognome e Nome del delegante" autocomplete="off" oninput="validaForm()">
+                <div class="titolo-delegato">📋 Dati di chi delega (Delegante)</div>
+                
+                <div class="riga-doppia">
+                    <div>
+                        <label class="campo-label">Nome Delegante *</label>
+                        <input type="text" id="nomeDelegato" placeholder="Es. Giuseppe" autocomplete="given-name" oninput="validaForm()">
+                    </div>
+                    <div>
+                        <label class="campo-label">Cognome Delegante *</label>
+                        <input type="text" id="cognomeDelegato" placeholder="Es. Verdi" autocomplete="family-name" oninput="validaForm()">
+                    </div>
+                </div>
+                
+                <label class="campo-label">Numero di Telefono Delegante *</label>
+                <input type="tel" id="telefonoDelegato" placeholder="Es. 3339876543" autocomplete="tel" oninput="validaForm()">
+
+                <div class="riga-doppia">
+                    <div>
+                        <label class="campo-label">Data di Nascita Delegante *</label>
+                        <input type="date" id="dataNascitaDelegato" onchange="validaForm()" oninput="validaForm()">
+                    </div>
+                    <div>
+                        <label class="campo-label">Luogo di Nascita Delegante</label>
+                        <input type="text" id="luogoNascitaDelegato" placeholder="Es. Ivrea">
+                    </div>
+                </div>
+
+                <div class="sezione-sesso" style="background: #fff; margin-top: 12px;">
+                    <label class="campo-label">Sesso Delegante *</label>
+                    <div class="opzioni-sesso">
+                        <label class="opzione-radio"><input type="radio" name="sessoDelegato" value="M" checked> Maschio (M)</label>
+                        <label class="opzione-radio"><input type="radio" name="sessoDelegato" value="F"> Femmina (F)</label>
+                    </div>
+                </div>
+
+                <label class="campo-label">Codice Fiscale Delegante</label>
+                <input type="text" id="codiceFiscaleDelegato" placeholder="Es. VRDGPP80A01E379Y" style="text-transform: uppercase;">
+
+                <label class="campo-label">Indirizzo di Residenza Delegante</label>
+                <input type="text" id="indirizzoDelegato" placeholder="Via / Piazza e numero civico">
+
+                <div class="riga-doppia">
+                    <div>
+                        <label class="campo-label">Città Delegante *</label>
+                        <input type="text" id="cittaDelegato" placeholder="Città" oninput="validaForm()">
+                    </div>
+                    <div>
+                        <label class="campo-label">CAP Delegante *</label>
+                        <input type="text" id="capDelegato" placeholder="10015" oninput="validaForm()">
+                    </div>
+                </div>
             </div>
 
             <div class="sezione-pagamento">
@@ -286,7 +337,17 @@
         window.toggleDelega = function() {
             const check = document.getElementById('checkDelega').checked;
             document.getElementById('containerDelegato').style.display = check ? 'block' : 'none';
-            if (!check) document.getElementById('nomeDelegato').value = ''; 
+            if (!check) {
+                document.getElementById('nomeDelegato').value = '';
+                document.getElementById('cognomeDelegato').value = '';
+                document.getElementById('telefonoDelegato').value = '';
+                document.getElementById('dataNascitaDelegato').value = '';
+                document.getElementById('luogoNascitaDelegato').value = '';
+                document.getElementById('codiceFiscaleDelegato').value = '';
+                document.getElementById('indirizzoDelegato').value = '';
+                document.getElementById('cittaDelegato').value = '';
+                document.getElementById('capDelegato').value = '';
+            }
             validaForm();
         };
 
@@ -297,11 +358,21 @@
             const dataNascita = document.getElementById('dataNascita').value;
             const citta = document.getElementById('cittaResidenza').value.trim();
             const cap = document.getElementById('capResidenza').value.trim();
+            
             const conDelega = document.getElementById('checkDelega').checked;
-            const nomeDelegato = document.getElementById('nomeDelegato').value.trim();
-            const btn = document.getElementById('btnInvia');
+            let delegaValida = true;
+            if (conDelega) {
+                const nomeDel = document.getElementById('nomeDelegato').value.trim();
+                const cognomeDel = document.getElementById('cognomeDelegato').value.trim();
+                const telDel = document.getElementById('telefonoDelegato').value.trim();
+                const dataDel = document.getElementById('dataNascitaDelegato').value;
+                const cittaDel = document.getElementById('cittaDelegato').value.trim();
+                const capDel = document.getElementById('capDelegato').value.trim();
+                delegaValida = (nomeDel && cognomeDel && telDel && dataDel && cittaDel && capDel);
+            }
 
-            btn.disabled = (!nome || !cognome || !telefono || !dataNascita || !citta || !cap || (conDelega && !nomeDelegato));
+            const btn = document.getElementById('btnInvia');
+            btn.disabled = (!nome || !cognome || !telefono || !dataNascita || !citta || !cap || !delegaValida);
         };
 
         window.validaRiserva = function() {
@@ -368,29 +439,28 @@
             }, { onlyOnce: true });
         }
 
+        function formattaData(raw) {
+            if (!raw) return "";
+            const parti = raw.split('-');
+            if (parti.length === 3) {
+                return `${parti[2]}.${parti[1]}.${parti[0]}`;
+            }
+            return raw;
+        }
+
         window.registraInCoda = function() {
             const nome = document.getElementById('nomeUtente').value.trim();
             const cognome = document.getElementById('cognomeUtente').value.trim();
             const telefono = document.getElementById('telefonoUtente').value.trim();
-            
-            const rawDataNascita = document.getElementById('dataNascita').value;
-            let dataNascita = rawDataNascita;
-            if (rawDataNascita) {
-                const parti = rawDataNascita.split('-');
-                if (parti.length === 3) {
-                    dataNascita = `${parti[2]}.${parti[1]}.${parti[0]}`;
-                }
-            }
-
+            const dataNascita = formattaData(document.getElementById('dataNascita').value);
             const luogoNascita = document.getElementById('luogoNascita').value.trim();
             const codiceFiscale = document.getElementById('codiceFiscale').value.trim().toUpperCase();
             const indirizzo = document.getElementById('indirizzo').value.trim();
             const citta = document.getElementById('cittaResidenza').value.trim();
             const cap = document.getElementById('capResidenza').value.trim();
-            const conDelega = document.getElementById('checkDelega').checked;
-            const nomeDelegato = document.getElementById('nomeDelegato').value.trim();
             const sesso = document.querySelector('input[name="sessoUtente"]:checked').value;
-            const pagamento = document.querySelector('input[name="pagamentoUtente"]:checked').value;
+            // pagamento rimosso
+            const conDelega = document.getElementById('checkDelega').checked;
 
             if(!nome || !cognome || !telefono || !dataNascita || !citta || !cap || !sesso) return;
 
@@ -417,18 +487,54 @@
                     prossimoNumero = maxNum > 0 ? maxNum + 1 : Object.keys(data).length + 1;
                 }
 
-                // Salvataggio con nome, cognome e sesso separati
-                const nuovoTicket = push(codaRef, {
+                // Oggetto dati utente principale
+                const datiTicket = {
                     numero: prossimoNumero,
                     nome: nome,
                     cognome: cognome,
                     sesso,
                     telefono, dataNascita, luogoNascita, codiceFiscale, indirizzo, citta, cap,
-                    delega: conDelega, delegato: conDelega ? nomeDelegato : "", pagamento,
-                    timestamp: timestampCalcolato, stato: 'attesa'
-                });
+                    delega: conDelega,
+                                        timestamp: timestampCalcolato,
+                    stato: 'attesa'
+                };
 
-                // Salviamo anche il nome completo in locale per la UI di attesa
+                // Se c'è la delega, creiamo il sotto-oggetto ID delega annidato dentro il ticket principale
+                if (conDelega) {
+                    const nomeDel = document.getElementById('nomeDelegato').value.trim();
+                    const cognomeDel = document.getElementById('cognomeDelegato').value.trim();
+                    const telDel = document.getElementById('telefonoDelegato').value.trim();
+                    const dataDel = formattaData(document.getElementById('dataNascitaDelegato').value);
+                    const luogoDel = document.getElementById('luogoNascitaDelegato').value.trim();
+                    const cfDel = document.getElementById('codiceFiscaleDelegato').value.trim().toUpperCase();
+                    const indirizzoDel = document.getElementById('indirizzoDelegato').value.trim();
+                    const cittaDel = document.getElementById('cittaDelegato').value.trim();
+                    const capDel = document.getElementById('capDelegato').value.trim();
+                    const sessoDel = document.querySelector('input[name="sessoDelegato"]:checked').value;
+
+                    // Salviamo il nominativo del delegante anche nel campo stringa per retrocompatibilità con i pannelli operatore esistenti
+                    datiTicket.delegato = `${cognomeDel} ${nomeDel}`;
+
+                    // ID delega univoco generato via push o chiave fissa
+                    // Annidiamo i dati sotto l'ID del ticket principale con una chiave dedicata (es. "datiDelega")
+                    datiTicket.z_datiDelega = {
+                        nome: nomeDel,
+                        cognome: cognomeDel,
+                        sesso: sessoDel,
+                        telefono: telDel,
+                        dataNascita: dataDel,
+                        luogoNascita: luogoDel,
+                        codiceFiscale: cfDel,
+                        indirizzo: indirizzoDel,
+                        citta: cittaDel,
+                        cap: capDel
+                    };
+                } else {
+                    datiTicket.delegato = "";
+                }
+
+                const nuovoTicket = push(codaRef, datiTicket);
+
                 const nomeCompletoUI = `${cognome} ${nome}`;
                 localStorage.setItem('coda_id_utente', nuovoTicket.key);
                 localStorage.setItem('coda_nome_utente', nomeCompletoUI);
@@ -457,7 +563,7 @@
                     numero: prossimoNumero,
                     nome: nome,
                     cognome: cognome,
-                    telefono, delega: false, delegato: "", pagamento: "bancomat",
+                    telefono, delega: false, delegato: "", 
                     timestamp: Date.now(), stato: 'riserva'
                 });
 
