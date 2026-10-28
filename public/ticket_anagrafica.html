@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tuchini del Borghetto - Iscrizioni 2027</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            text-align: center; 
+            padding: 20px 16px; 
+            background: #f4f7fc; 
+            color: #1f2937; 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            min-height: 100vh; 
+        }
+        .card { 
+            background: white; 
+            padding: 30px 22px; 
+            border-radius: 24px; 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06); 
+            max-width: 480px; 
+            width: 100%; 
+            margin: auto; 
+            border: 1px solid rgba(0,0,0,0.02);
+            text-align: left;
+        }
+        
+        .logo-aziendale { max-width: 140px; height: auto; margin-bottom: 12px; display: block; margin-left: auto; margin-right: auto; }
+        h2 { font-size: 22px; color: #111827; font-weight: 700; margin-top: 0; margin-bottom: 6px; text-align: center; }
+        .sottotitolo { font-size: 14px; color: #6b7280; margin-bottom: 24px; line-height: 1.4; text-align: center; }
+
+        label.campo-label { font-size: 12px; font-weight: 700; color: #4b5563; margin-top: 12px; display: block; }
+        input[type="text"], input[type="tel"], input[type="date"] { 
+            width: 100%; 
+            padding: 14px; 
+            margin-top: 4px; 
+            font-size: 15px; 
+            border-radius: 12px; 
+            border: 1.5px solid #e5e7eb; 
+            outline: none; 
+            background: #f9fafb;
+            transition: all 0.2s ease;
+        }
+        input:focus { 
+            border-color: #2563eb; 
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); 
+        }
+
+        .riga-doppia { display: flex; gap: 10px; }
+        .riga-doppia > div { flex: 1; }
+        
+        .delega-container { 
+            margin-top: 18px; 
+            font-size: 14px; 
+            font-weight: 500;
+            color: #4b5563;
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            cursor: pointer; 
+            background: #f9fafb;
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1.5px solid #e5e7eb;
+        }
+        .delega-container input { width: 20px; height: 20px; margin: 0; cursor: pointer; accent-color: #2563eb; }
+
+        #containerDelegato, #containerDelegatoRiserva { display: none; margin-top: 10px; }
+
+        .sezione-pagamento, .sezione-sesso {
+            margin-top: 18px;
+            background: #f9fafb;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1.5px solid #e5e7eb;
+        }
+        .sezione-pagamento label.campo-label, .sezione-sesso label.campo-label {
+            margin-top: 0;
+            margin-bottom: 8px;
+        }
+        .opzioni-pagamento, .opzioni-sesso {
+            display: flex;
+            gap: 10px;
+        }
+        .opzione-radio {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #fff;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1.5px solid #d1d5db;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .opzione-radio input { accent-color: #2563eb; cursor: pointer; }
+        .avviso-satispay {
+            font-size: 11px;
+            color: #dc2626;
+            margin-top: 8px;
+            font-weight: 600;
+        }
+
+        button { 
+            width: 100%;
+            background: #2563eb; 
+            color: white; 
+            border: none; 
+            font-weight: 600; 
+            font-size: 16px;
+            cursor: pointer; 
+            min-height: 52px; 
+            border-radius: 14px;
+            margin-top: 20px;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3); 
+            transition: background 0.2s, transform 0.1s; 
+        }
+        button:active { background: #1d4ed8; transform: scale(0.98); }
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+        
+        #schermataForm { display: none; }
+        #schermataAttesa { display: none; background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%); border: 1px solid #fde68a; padding: 24px 16px; border-radius: 20px; margin-top: 10px; text-align: center; }
+        #schermataChiamata { display: none; background: linear-gradient(135deg, #dcfce7 0%, #f0fdf4 100%); border: 2px solid #86efac; padding: 28px 16px; border-radius: 20px; margin-top: 10px; color: #166534; text-align: center; }
+        #schermataIscritto { display: none; background: linear-gradient(135deg, #dcfce7 0%, #f0fdf4 100%); border: 1px solid #bbf7d0; padding: 28px 16px; border-radius: 20px; margin-top: 10px; color: #166534; text-align: center; }
+        #schermataPiena { display: none; background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%); border: 1px solid #fde68a; padding: 22px 16px; border-radius: 20px; margin-top: 10px; }
+        
+        .badge-numero {
+            background: white;
+            color: #2563eb;
+            display: inline-block;
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-size: 15px;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin: 8px 0;
+        }
+        .numero-evidenza { font-size: 36px; font-weight: 800; color: #1e3a8a; margin: 10px 0; letter-spacing: -1px; }
+        .turno-chiamata { font-size: 20px; font-weight: 700; color: #166534; margin-top: 10px; line-height: 1.4; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <img src="logotuchini.png" alt="Logo" class="logo-aziendale">
+        
+        <h2>Iscrizioni 2027</h2>
+        <p class="sottotitolo">Compila l'anagrafica per prendere il numero</p>
+
+        <!-- FASE 1: Inserimento Dati Anagrafici -->
+        <div id="schermataForm">
+            <div class="riga-doppia">
+                <div>
+                    <label class="campo-label">Nome *</label>
+                    <input type="text" id="nomeUtente" placeholder="Es. Mario" autocomplete="given-name" oninput="validaForm()">
+                </div>
+                <div>
+                    <label class="campo-label">Cognome *</label>
+                    <input type="text" id="cognomeUtente" placeholder="Es. Rossi" autocomplete="family-name" oninput="validaForm()">
+                </div>
+            </div>
+            
+            <label class="campo-label">Numero di Telefono *</label>
+            <input type="tel" id="telefonoUtente" placeholder="Es. 3331234567" autocomplete="tel" oninput="validaForm()">
+
+            <div class="riga-doppia">
+                <div>
+                    <label class="campo-label">Data di Nascita *</label>
+                    <input type="date" id="dataNascita" onchange="validaForm()" oninput="validaForm()">
+                </div>
+                <div>
+                    <label class="campo-label">Luogo di Nascita</label>
+                    <input type="text" id="luogoNascita" placeholder="Es. Ivrea">
+                </div>
+            </div>
+
+            <!-- SEZIONE SESSO (M / F) -->
+            <div class="sezione-sesso">
+                <label class="campo-label">Sesso *</label>
+                <div class="opzioni-sesso">
+                    <label class="opzione-radio"><input type="radio" name="sessoUtente" value="M" checked> Maschio (M)</label>
+                    <label class="opzione-radio"><input type="radio" name="sessoUtente" value="F"> Femmina (F)</label>
+                </div>
+            </div>
+
+            <label class="campo-label">Codice Fiscale</label>
+            <input type="text" id="codiceFiscale" placeholder="Es. RSSMRA90A01E379X" style="text-transform: uppercase;">
+
+            <label class="campo-label">Indirizzo di Residenza</label>
+            <input type="text" id="indirizzo" placeholder="Via / Piazza e numero civico">
+
+            <div class="riga-doppia">
+                <div>
+                    <label class="campo-label">Città *</label>
+                    <input type="text" id="cittaResidenza" placeholder="Città" oninput="validaForm()">
+                </div>
+                <div>
+                    <label class="campo-label">CAP *</label>
+                    <input type="text" id="capResidenza" placeholder="10015" oninput="validaForm()">
+                </div>
+            </div>
+            
+            <label class="delega-container">
+                <input type="checkbox" id="checkDelega" onchange="toggleDelega()">
+                <span>Iscrizione con delega</span>
+            </label>
+
+            <div id="containerDelegato">
+                <label class="campo-label">Nome del Delegante</label>
+                <input type="text" id="nomeDelegato" placeholder="Cognome e Nome del delegante" autocomplete="off" oninput="validaForm()">
+            </div>
+
+            <div class="sezione-pagamento">
+                <label class="campo-label">Metodo di pagamento:</label>
+                <div class="opzioni-pagamento">
+                    <label class="opzione-radio"><input type="radio" name="pagamentoUtente" value="bancomat" checked> Bancomat</label>
+                    <label class="opzione-radio"><input type="radio" name="pagamentoUtente" value="contanti"> Contanti</label>
+                </div>
+                <div class="avviso-satispay">⚠️ Satispay non è accettato</div>
+            </div>
+
+            <button id="btnInvia" onclick="registraInCoda()" disabled>Prendi il Numero</button>
+        </div>
+
+        <!-- LISTA DI RISERVA -->
+        <div id="schermataPiena">
+            <h3 style="margin-top:0; color: #b45309; text-align: center; font-size: 18px;">⚠️ Coda Al Completo</h3>
+            <p style="font-size: 13px; line-height: 1.4; margin-bottom: 16px;">Siamo al completo. Puoi iscriverti alla <strong>lista di riserva</strong>:</p>
+            
+            <div class="riga-doppia">
+                <div>
+                    <label class="campo-label">Nome *</label>
+                    <input type="text" id="nomeUtenteRiserva" placeholder="Nome" autocomplete="given-name" oninput="validaRiserva()">
+                </div>
+                <div>
+                    <label class="campo-label">Cognome *</label>
+                    <input type="text" id="cognomeUtenteRiserva" placeholder="Cognome" autocomplete="family-name" oninput="validaRiserva()">
+                </div>
+            </div>
+            
+            <label class="campo-label">Numero di Telefono *</label>
+            <input type="tel" id="telefonoUtenteRiserva" placeholder="Numero di telefono" autocomplete="tel" oninput="validaRiserva()">
+
+            <button id="btnInviaRiserva" onclick="registraInRiserva()" style="background: #d97706; margin-top: 18px;" disabled>Iscriviti alla Riserva</button>
+        </div>
+
+        <!-- FASE 2: In Attesa -->
+        <div id="schermataAttesa">
+            <p style="margin:0; font-size: 15px; color: #78350f;">Ciao <span id="marioNome" style="font-weight:700;"></span>,</p>
+            <div id="mioNumeroBiglietto" class="badge-numero">Il tuo biglietto è il N° -</div>
+            <div class="numero-evidenza" id="personeDavanti">...</div>
+            <p style="font-size: 13px; color: #92400e; margin-bottom:0; line-height: 1.4;">Tieni questa pagina aperta.</p>
+        </div>
+
+        <!-- FASE 3: Turno Arrivato -->
+        <div id="schermataChiamata">
+            <h3 style="margin-top:0; color: #166534; font-size: 24px;">📢 È IL TUO TURNO!</h3>
+            <div class="turno-chiamata"><span id="nomeChiamato" style="font-weight: 800;"></span> è il tuo turno!<br><span style="font-size: 16px; font-weight: 500; color: #15803d;">Presentati al banco con il numero <span id="numeroChiamato" style="font-weight: 700;"></span></span></div>
+        </div>
+
+        <!-- FASE 4: Iscrizione Effettuata -->
+        <div id="schermataIscritto">
+            <h3 style="margin-top:0; color: #166534; font-size: 20px;">🟢 ISCRIZIONE COMPLETATA</h3>
+            <p style="font-size: 14px; line-height: 1.5; color: #166534;">Complimenti <span id="nomeUtenteIscritto" style="font-weight: 700;"></span>!<br>I tuoi dati sono stati acquisiti con successo.</p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+        import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+
+        window.toggleDelega = function() {
+            const check = document.getElementById('checkDelega').checked;
+            document.getElementById('containerDelegato').style.display = check ? 'block' : 'none';
+            if (!check) document.getElementById('nomeDelegato').value = ''; 
+            validaForm();
+        };
+
+        window.validaForm = function() {
+            const nome = document.getElementById('nomeUtente').value.trim();
+            const cognome = document.getElementById('cognomeUtente').value.trim();
+            const telefono = document.getElementById('telefonoUtente').value.trim();
+            const dataNascita = document.getElementById('dataNascita').value;
+            const citta = document.getElementById('cittaResidenza').value.trim();
+            const cap = document.getElementById('capResidenza').value.trim();
+            const conDelega = document.getElementById('checkDelega').checked;
+            const nomeDelegato = document.getElementById('nomeDelegato').value.trim();
+            const btn = document.getElementById('btnInvia');
+
+            btn.disabled = (!nome || !cognome || !telefono || !dataNascita || !citta || !cap || (conDelega && !nomeDelegato));
+        };
+
+        window.validaRiserva = function() {
+            const nome = document.getElementById('nomeUtenteRiserva').value.trim();
+            const cognome = document.getElementById('cognomeUtenteRiserva').value.trim();
+            const telefono = document.getElementById('telefonoUtenteRiserva').value.trim();
+            const btn = document.getElementById('btnInviaRiserva');
+            btn.disabled = (!nome || !cognome || !telefono);
+        };
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const tokenUrl = urlParams.get('t');
+        const timestampUrl = parseInt(urlParams.get('ts') || '0');
+        const debugUrl = urlParams.get('debug');
+        const minutiRitardo = parseInt(urlParams.get('ritardo') || '0', 10);
+        
+        const giaRegistrato = localStorage.getItem('coda_id_utente');
+        const tokenSessioneLocale = sessionStorage.getItem('qr_verificato');        
+
+        let accessoConsentito = (debugUrl === '1' || giaRegistrato || tokenSessioneLocale === 'true' || (tokenUrl === 'tuchini2027' && Date.now() - timestampUrl < 30000));
+        if (tokenUrl === 'tuchini2027') sessionStorage.setItem('qr_verificato', 'true');
+
+        if (!accessoConsentito) {
+            document.body.innerHTML = `<div class="card"><h2 style="color: #dc2626;">⚠️ Accesso non consentito</h2><p>Inquadra il QR code ufficiale.</p></div>`;
+            throw new Error("Accesso bloccato.");
+        }
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCKfb2IDqE-y4Ln_1tUIYm09VVMqRRruvQ",
+            authDomain: "ticketdispensertuchini.firebaseapp.com",
+            databaseURL: "https://ticketdispensertuchini-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "ticketdispensertuchini",
+            storageBucket: "ticketdispensertuchini.firebasestorage.app",
+            messagingSenderId: "582164145424",
+            appId: "1:582164145424:web:41a6df5056265e19ddf195"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const codaRef = ref(db, 'coda');
+        const limiteRef = ref(db, 'config/limiteMassimo');
+
+        if (giaRegistrato) {
+            attivaModalitaAttesa(giaRegistrato, localStorage.getItem('coda_nome_utente'));
+        } else {
+            onValue(limiteRef, (limiteSnapshot) => {
+                const limiteMax = limiteSnapshot.val() || 10;
+                onValue(codaRef, (codaSnapshot) => {
+                    if (localStorage.getItem('coda_id_utente')) return;
+                    const data = codaSnapshot.val();
+                    let postiOccupati = 0;
+                    if (data) {
+                        Object.keys(data).forEach(id => {
+                            if ((data[id].stato || 'attesa') !== 'riserva') postiOccupati += data[id].delega ? 2 : 1;
+                        });
+                    }
+                    if (postiOccupati >= limiteMax) {
+                        document.getElementById('schermataForm').style.display = 'none';
+                        document.getElementById('schermataPiena').style.display = 'block';
+                    } else {
+                        document.getElementById('schermataPiena').style.display = 'none';
+                        document.getElementById('schermataForm').style.display = 'block';
+                    }
+                }, { onlyOnce: true });
+            }, { onlyOnce: true });
+        }
+
+        window.registraInCoda = function() {
+            const nome = document.getElementById('nomeUtente').value.trim();
+            const cognome = document.getElementById('cognomeUtente').value.trim();
+            const telefono = document.getElementById('telefonoUtente').value.trim();
+            
+            const rawDataNascita = document.getElementById('dataNascita').value;
+            let dataNascita = rawDataNascita;
+            if (rawDataNascita) {
+                const parti = rawDataNascita.split('-');
+                if (parti.length === 3) {
+                    dataNascita = `${parti[2]}.${parti[1]}.${parti[0]}`;
+                }
+            }
+
+            const luogoNascita = document.getElementById('luogoNascita').value.trim();
+            const codiceFiscale = document.getElementById('codiceFiscale').value.trim().toUpperCase();
+            const indirizzo = document.getElementById('indirizzo').value.trim();
+            const citta = document.getElementById('cittaResidenza').value.trim();
+            const cap = document.getElementById('capResidenza').value.trim();
+            const conDelega = document.getElementById('checkDelega').checked;
+            const nomeDelegato = document.getElementById('nomeDelegato').value.trim();
+            const sesso = document.querySelector('input[name="sessoUtente"]:checked').value;
+            const pagamento = document.querySelector('input[name="pagamentoUtente"]:checked').value;
+
+            if(!nome || !cognome || !telefono || !dataNascita || !citta || !cap || !sesso) return;
+
+            onValue(codaRef, (snapshot) => {
+                const data = snapshot.val();
+                let timestampCalcolato = Date.now();
+                let prossimoNumero = 1;
+
+                if (data) {
+                    let arrayAttiva = Object.keys(data)
+                        .filter(id => data[id] !== null && (data[id].stato || 'attesa') !== 'riserva')
+                        .map(id => ({ id, ...data[id] }))
+                        .sort((a, b) => a.timestamp - b.timestamp);
+
+                    if (minutiRitardo > 0 && arrayAttiva.length > 0) {
+                        timestampCalcolato = arrayAttiva[0].timestamp + (minutiRitardo * 60 * 1000);
+                    }
+
+                    let maxNum = 0;
+                    Object.keys(data).forEach(id => {
+                        const item = data[id];
+                        if (item && item.numero && item.numero > maxNum) maxNum = item.numero;
+                    });
+                    prossimoNumero = maxNum > 0 ? maxNum + 1 : Object.keys(data).length + 1;
+                }
+
+                // Salvataggio con nome, cognome e sesso separati
+                const nuovoTicket = push(codaRef, {
+                    numero: prossimoNumero,
+                    nome: nome,
+                    cognome: cognome,
+                    sesso,
+                    telefono, dataNascita, luogoNascita, codiceFiscale, indirizzo, citta, cap,
+                    delega: conDelega, delegato: conDelega ? nomeDelegato : "", pagamento,
+                    timestamp: timestampCalcolato, stato: 'attesa'
+                });
+
+                // Salviamo anche il nome completo in locale per la UI di attesa
+                const nomeCompletoUI = `${cognome} ${nome}`;
+                localStorage.setItem('coda_id_utente', nuovoTicket.key);
+                localStorage.setItem('coda_nome_utente', nomeCompletoUI);
+                attivaModalitaAttesa(nuovoTicket.key, nomeCompletoUI);
+            }, { onlyOnce: true });
+        }
+
+        window.registraInRiserva = function() {
+            const nome = document.getElementById('nomeUtenteRiserva').value.trim();
+            const cognome = document.getElementById('cognomeUtenteRiserva').value.trim();
+            const telefono = document.getElementById('telefonoUtenteRiserva').value.trim();
+            if(!nome || !cognome || !telefono) return;
+
+            onValue(codaRef, (snapshot) => {
+                const data = snapshot.val();
+                let prossimoNumero = 1;
+                if (data) {
+                    let maxNum = 0;
+                    Object.keys(data).forEach(id => {
+                        if (data[id] && data[id].numero && data[id].numero > maxNum) maxNum = data[id].numero;
+                    });
+                    prossimoNumero = maxNum > 0 ? maxNum + 1 : Object.keys(data).length + 1;
+                }
+
+                const nuovoTicket = push(codaRef, {
+                    numero: prossimoNumero,
+                    nome: nome,
+                    cognome: cognome,
+                    telefono, delega: false, delegato: "", pagamento: "bancomat",
+                    timestamp: Date.now(), stato: 'riserva'
+                });
+
+                const nomeCompletoUI = `${cognome} ${nome}`;
+                localStorage.setItem('coda_id_utente', nuovoTicket.key);
+                localStorage.setItem('coda_nome_utente', nomeCompletoUI);
+                attivaModalitaAttesa(nuovoTicket.key, nomeCompletoUI);
+            }, { onlyOnce: true });
+        }
+
+        function attivaModalitaAttesa(idMioTicket, nome) {
+            document.getElementById('schermataForm').style.display = 'none';
+            document.getElementById('schermataPiena').style.display = 'none';
+            document.getElementById('marioNome').innerText = nome;
+            document.getElementById('nomeUtenteIscritto').innerText = nome;
+            document.getElementById('schermataAttesa').style.display = 'block';
+
+            onValue(codaRef, (snapshot) => {
+                const data = snapshot.val();
+                if (!data || !data[idMioTicket]) {
+                    document.body.innerHTML = `<div class="card"><h2>Operazione Conclusa</h2><p>Pratica completata al banco. Grazie!</p></div>`;
+                    localStorage.clear(); sessionStorage.clear(); return;
+                }
+                const mioOggetto = data[idMioTicket];
+                const mioStato = mioOggetto.stato || 'attesa';
+
+                if (mioStato === 'riserva') {
+                    document.getElementById('mioNumeroBiglietto').innerText = `In Lista di Riserva`;
+                    document.getElementById('personeDavanti').innerHTML = `<span style="font-size: 15px; color: #b45309;">Verrai spostato appena si libera un posto.</span>`;
+                    return;
+                }
+
+                const arrayAttiva = Object.keys(data)
+                    .filter(id => data[id] && (data[id].stato || 'attesa') !== 'riserva')
+                    .map(id => ({ id, ...data[id] }))
+                    .sort((a, b) => a.timestamp - b.timestamp);
+
+                const numeroMioBiglietto = arrayAttiva.findIndex(p => p.id === idMioTicket) + 1;
+
+                if (mioStato === 'iscritto') {
+                    document.getElementById('schermataAttesa').style.display = 'none';
+                    document.getElementById('schermataChiamata').style.display = 'none';
+                    document.getElementById('schermataIscritto').style.display = 'block';
+                    return;
+                }
+                if (mioStato === 'chiamato') {
+                    document.getElementById('schermataAttesa').style.display = 'none';
+                    document.getElementById('schermataChiamata').style.display = 'block';
+                    document.getElementById('nomeChiamato').innerText = nome;
+                    document.getElementById('numeroChiamato').innerText = mioOggetto.numero || numeroMioBiglietto;
+                    return;
+                }
+
+                let personeDavanti = 0;
+                arrayAttiva.forEach(item => {
+                    if (item.timestamp < mioOggetto.timestamp && (item.stato === 'attesa' || item.stato === 'chiamato')) {
+                        personeDavanti += item.delega ? 2 : 1;
+                    }
+                });
+
+                const numeroDb = mioOggetto.numero !== undefined ? mioOggetto.numero : numeroMioBiglietto;
+                document.getElementById('mioNumeroBiglietto').innerText = `Il tuo biglietto è il N° ${numeroDb}`;
+                document.getElementById('personeDavanti').innerHTML = personeDavanti === 0 ? `<span style="color: #16a34a; font-size: 24px;">Sei il prossimo! 🎯</span>` : `${personeDavanti} persone davanti`;
+            });
+        }
+    </script>
+</body>
+</html>
