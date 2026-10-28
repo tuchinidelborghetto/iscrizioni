@@ -70,3 +70,5 @@ node_modules/
 
 public/Script/Anni VR/serviceAccountKey.json
 public/Script/Adulti/serviceAccountKey.json
+
+/public/tmp/

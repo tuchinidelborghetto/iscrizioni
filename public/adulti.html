@@ -584,7 +584,7 @@
     <!-- AREA PRINCIPALE -->
     <main class="main-content">
         <div class="container">
-			<div class="versione-app">Ver. 02.10</div>
+			<div class="versione-app">Ver. 02.50</div>
             <div class="top-bar-header">
 				<!-- NUOVO PULSANTE GESTIONE CODA -->
 				<button type="button" id="btnGestioneCoda" class="btn-logout" style="background-color: #dc2626;" onclick="apriGestioneCodaBanco()">📢 Gestione Coda</button>
@@ -813,6 +813,8 @@
 				<h4 style="color: #007BFF; border-bottom: 2px solid #007BFF; padding-bottom: 5px; margin-top: 35px;">Manutenzione Dati</h4>
 				<div style="margin-top: 15px; margin-bottom: 20px;">
 					<button type="button" class="btn-nuovo-utente" style="background-color: #6c757d; height: 38px; font-size: 14px; opacity: 0.6; cursor: not-allowed;" disabled onclick="eseguiAggiornamentoMassivoOnorificenze()">⚡ Ricalcola e Aggiorna Stato Onorificenze (Massivo)</button>
+					<!-- PULSANTE VERIFICA NUMERI MANCANTI -->
+					<button type="button" class="btn-nuovo-utente" style="background-color: #17a2b8; height: 38px; font-size: 14px;" onclick="verificaNumeriMancantiAnnoCorrente()">🔍 Verifica Numeri Mancanti Anno Corso</button>
 				</div>
 
                 <h4 style="color: #007BFF; border-bottom: 2px solid #007BFF; padding-bottom: 5px; margin-top: 25px;">Campi Obbligatori / Visibili Scheda Anagrafica</h4>
@@ -4806,6 +4808,82 @@ async function apriModaleEsistente(p) {
         // Esegue il controllo al caricamento e al ridimensionamento/rotazione dello schermo
         window.addEventListener('load', rilevaDispositivoMobile);
         window.addEventListener('resize', rilevaDispositivoMobile);
+		
+		async function verificaNumeriMancantiAnnoCorrente() {
+			try {
+				// Recupera l'anno del carnevale in corso dalle impostazioni / variabili globali
+				const inputAnnoEl = document.getElementById('inputAnnoCarnevale');
+                const annoCorrente = inputAnnoEl ? inputAnnoEl.value.trim() : (localStorage.getItem('anno_carnevale_corrente') || "2027");
+                
+				if (typeof mostraCaricamento === 'function') {
+					mostraCaricamento(`Verifica numeri mancanti per l'anno ${annoCorrente}...`);
+				}
+
+				// Interroga la collezione dello storico filtrando per l'anno corrente
+				const q = query(COLLECTION_STORICO, where("anno", "==", String(annoCorrente)));
+				const snapshot = await getDocs(q);
+
+				if (snapshot.empty) {
+					if (typeof nascondiCaricamento === 'function') nascondiCaricamento();
+					alert(`Nessuna iscrizione trovata per l'anno ${annoCorrente}.`);
+					return [];
+				}
+
+				let numeriPresenti = new Set();
+
+				snapshot.forEach(docSnap => {
+					let data = docSnap.data();
+					let numId = String(data.numero_identificativo || "").trim();
+					
+					// Filtra e converte in intero escludendo stringhe non numeriche o "N/D"
+					if (numId !== "" && numId.toUpperCase() !== "N/D" && !isNaN(numId)) {
+						numeriPresenti.add(parseInt(numId, 10));
+					}
+				});
+
+				if (numeriPresenti.size === 0) {
+					if (typeof nascondiCaricamento === 'function') nascondiCaricamento();
+					alert(`Nessun numero identificativo numerico trovato per l'anno ${annoCorrente}.`);
+					return [];
+				}
+
+				// Ordina i numeri identificativi trovati
+				const numeriOrdinati = Array.from(numeriPresenti).sort((a, b) => a - b);
+				const minNum = numeriOrdinati[0];
+				const maxNum = numeriOrdinati[numeriOrdinati.length - 1];
+
+				let numeriMancanti = [];
+
+				// Scansiona l'intervallo tra il min e il max per trovare i buchi (numeri non consecutivi mancanti)
+				for (let i = minNum; i <= maxNum; i++) {
+					if (!numeriPresenti.has(i)) {
+						numeriMancanti.push(i);
+					}
+				}
+
+				if (typeof nascondiCaricamento === 'function') nascondiCaricamento();
+
+				// Mostra il risultato all'utente in modo chiaro
+				if (numeriMancanti.length > 0) {
+					console.warn(`Numeri mancanti per il ${annoCorrente} (da ${minNum} a ${maxNum}):`, numeriMancanti);
+					alert(`⚠️ Trovati ${numeriMancanti.length} numeri mancanti nell'anno ${annoCorrente}:\n${numeriMancanti.join(', ')}`);
+				} else {
+					alert(`✅ Nessun buco trovato! Tutti i numeri da ${minNum} a ${maxNum} sono consecutivi e registrati per l'anno ${annoCorrente}.`);
+				}
+
+				return numeriMancanti;
+
+			} catch (error) {
+				if (typeof nascondiCaricamento === 'function') nascondiCaricamento();
+				console.error("Errore durante la verifica dei numeri mancanti:", error);
+				alert("Errore durante la verifica: " + error.message);
+				return [];
+			}
+		}
+
+// Rendiamo la funzione accessibile globalmente se richiamata da pulsanti HTML
+window.verificaNumeriMancantiAnnoCorrente = verificaNumeriMancantiAnnoCorrente;
+		
 						
     </script>
 	
