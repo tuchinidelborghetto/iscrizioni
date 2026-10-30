@@ -4100,7 +4100,7 @@ async function apriModaleEsistente(p) {
 			let el = document.getElementById(id);
 			return el ? el.value : "";
 		}
-
+		
 		window.gestisciSalvataggioEsistente = async function() {
 			let idPersona = document.getElementById('editIdPersona').value;
 			if (!idPersona || idPersona.startsWith('temp_')) return;
@@ -4108,44 +4108,58 @@ async function apriModaleEsistente(p) {
 			try {
 				mostraCaricamento("Salvataggio modifiche anagrafica...");
 
-				// 1. Raccoglie tutti i dati aggiornati dal form
-				let datiAggiornati = raccogliDatiAnagrafica();
-				datiAggiornati.dataAggiornamento = new Date();
+				// 1. Raccoglie tutti i dati correnti dal form
+				let datiCorrenti = raccogliDatiAnagrafica();
+				
+				// 2. Calcola il DELTA: invia a Firestore SOLO i campi effettivamente modificati
+				// rispetto all'apertura della scheda, evitando di sovrascrivere o svuotare
+				// i campi non specificati o non toccati nel form.
+				let datiDaSalvare = {};
+				if (datiAnagraficaOriginali) {
+					for (let key in datiCorrenti) {
+						if (String(datiCorrenti[key] ?? "") !== String(datiAnagraficaOriginali[key] ?? "")) {
+							datiDaSalvare[key] = datiCorrenti[key];
+						}
+					}
+				} else {
+					datiDaSalvare = datiCorrenti;
+				}
 
-				// 2. Salva sul database Firestore
+				datiDaSalvare.dataAggiornamento = new Date();
+
+				// Se non ci sono modifiche effettive, evita chiamate inutili al DB
+				if (Object.keys(datiDaSalvare).length <= 1) {
+					nascondiCaricamento();
+					alert("Nessuna modifica rilevata da salvare.");
+					return;
+				}
+
+				// 3. Salva sul database Firestore solo le variazioni
 				const docRef = doc(db, NOME_COLL_ANAGRAFICA, idPersona);
-				await setDoc(docRef, datiAggiornati, { merge: true });
+				await setDoc(docRef, datiDaSalvare, { merge: true });
 
-				// 3. AGGIORNAMENTO CRUCIALE DELLA CACHE IN MEMORIA
+				// 4. Aggiornamento della cache in memoria
 				const indexCache = cacheTuttiIscritti.findIndex(p => p.id === idPersona);
 				if (indexCache !== -1) {
-					// Mantiene lo storico esistente associato a questa persona nella cache
 					let storicoEsistente = cacheTuttiIscritti[indexCache].iscrizioni || [];
 					cacheTuttiIscritti[indexCache] = {
 						id: idPersona,
 						...cacheTuttiIscritti[indexCache],
-						...datiAggiornati,
+						...datiDaSalvare,
 						iscrizioni: storicoEsistente
 					};
-				} else {
-					// Se per qualsiasi motivo non era in cache, lo aggiunge al volo
-					cacheTuttiIscritti.push({
-						id: idPersona,
-						...datiAggiornati,
-						iscrizioni: []
-					});
 				}
 
-				// 4. Aggiorna i dati originali di controllo per resettare lo stato del pulsante Salva
+				// 5. Aggiorna i dati originali di controllo
 				datiAnagraficaOriginali = raccogliDatiAnagrafica();
 				aggiornaStatoPulsanteSalva();
 
-				await registraLog("Modifica Anagrafica", `${datiAggiornati.cognome} ${datiAggiornati.nome}`);
+				await registraLog("Modifica Anagrafica", `${datiCorrenti.cognome} ${datiCorrenti.nome}`);
 
 				nascondiCaricamento();
-				alert("✅ Anagrafica salvata e aggiornata in memoria con successo!");
+				alert("✅ Anagrafica salvata con successo senza alterare i campi non specificati!");
 
-				// 5. Se l'utente stava usando la ricerca testuale, aggiorna i risultati a schermo in tempo reale
+				// Aggiorna la ricerca testuale in tempo reale se attiva
 				const campoFiltro = document.getElementById('filtroCognome');
 				if (campoFiltro && campoFiltro.value.trim().length >= 2) {
 					cercaIscritti(campoFiltro.value);
@@ -5093,12 +5107,12 @@ async function apriModaleEsistente(p) {
 			window.aggiornaAnteprimaTicketSelezionato();
 		};
 
-		window.impostaTipoSoggettoTicket = function(tipo) {
+		window.impostaTipoSoggettoTicket = async function(tipo) {
 			tipoSoggettoSelezionatoCache = tipo;
-			window.aggiornaAnteprimaTicketSelezionato();
+			await window.aggiornaAnteprimaTicketSelezionato();
 		};
-
-		window.aggiornaAnteprimaTicketSelezionato = function() {
+		
+		window.aggiornaAnteprimaTicketSelezionato = async function() {
 			if (!datiTicketSelezionatoCache) return;
 
 			const containerDettaglio = document.getElementById('dettaglioCampiTicketEstratto');
@@ -5108,24 +5122,49 @@ async function apriModaleEsistente(p) {
 				? datiTicketSelezionatoCache.z_datiDelega 
 				: datiTicketSelezionatoCache;
 
-			const cognome = fonte.cognome || (fonte.nome ? fonte.nome.trim().split(' ')[0] : "");
-			const nome = fonte.cognome ? fonte.nome : (fonte.nome ? fonte.nome.trim().split(' ').slice(1).join(' ') : "");
+			const cognomeTicket = fonte.cognome || (fonte.nome ? fonte.nome.trim().split(' ')[0] : "");
+			const nomeTicket = fonte.cognome ? fonte.nome : (fonte.nome ? fonte.nome.trim().split(' ').slice(1).join(' ') : "");
+			const dataNascitaGrezza = fonte.dataNascita || fonte.data_nascita || "";
+			const dataNascitaFormattata = formattaDataPerInputDate(dataNascitaGrezza);
+
+			// Verifica se esiste già in anagrafica
+			if (cacheTuttiIscritti.length === 0 && typeof inizializzaCacheGlobale === 'function') {
+				await inizializzaCacheGlobale();
+			}
+
+			let personaTrovata = null;
+			cacheTuttiIscritti.forEach(dt => {
+				let dbCognome = String(dt.cognome || "").trim().toUpperCase();
+				let dbNome = String(dt.nome || "").trim().toUpperCase();
+				let dbData = String(dt.data_nascita || "").trim();
+
+				if (dbCognome === cognomeTicket.toUpperCase() && 
+					dbNome === nomeTicket.toUpperCase() && 
+					dbData === dataNascitaFormattata) {
+					personaTrovata = dt;
+				}
+			});
+
+			let badgeStatoAnagrafica = personaTrovata 
+				? `<div style="background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 6px 10px; border-radius: 4px; margin-bottom: 10px; font-weight: bold; text-align: center; font-size: 13px;">✅ Già presente in anagrafica</div>`
+				: `<div style="background-color: #cce5ff; color: #004085; border: 1px solid #b8daff; padding: 6px 10px; border-radius: 4px; margin-bottom: 10px; font-weight: bold; text-align: center; font-size: 13px;">🆕 Nuovo Iscritto</div>`;
+
 			const dataNascita = formattaDataPerInputDate(fonte.dataNascita || fonte.data_nascita || "");
 
 			containerDettaglio.innerHTML = `
-				<p><strong>Nominativo Selezionato:</strong> <span style="color: #007BFF; text-transform: uppercase;">${tipoSoggettoSelezionatoCache === 'delega' ? 'Delegante' : 'Iscritto'}</span></p>
+				${badgeStatoAnagrafica}
 				<p><strong>N. Ticket:</strong> ${datiTicketSelezionatoCache.numero || ''}</p>
-				<p><strong>Cognome:</strong> ${cognome || 'N/D'}</p>
-				<p><strong>Nome:</strong> ${nome || 'N/D'}</p>
+				<p><strong>Cognome:</strong> ${cognomeTicket || 'N/D'}</p>
+				<p><strong>Nome:</strong> ${nomeTicket || 'N/D'}</p>
 				<p><strong>Telefono:</strong> ${fonte.telefono || 'Non specificato'}</p>
 				<p><strong>Codice Fiscale:</strong> ${fonte.codiceFiscale || fonte.codice_fiscale || 'Non specificato'}</p>
-				<p><strong>Data di Nascita:</strong> ${dataNascita || 'Non specificata'}</p>
+				<p><strong>Data di Nascita:</strong> ${dataNascita || 'Non specificato'}</p>
 				<p><strong>Luogo di Nascita:</strong> ${fonte.luogoNascita || fonte.luogo_nascita || 'Non specificato'}</p>
 				<p><strong>Indirizzo:</strong> ${fonte.indirizzo || 'Non specificato'}</p>
-				<p><strong>Città:</strong> ${(fonte.citta || fonte.cittaResidenza) || 'Non specificata'}</p>
+				<p><strong>Città:</strong> ${(fonte.citta || fonte.cittaResidenza) || 'Non specificato'}</p>
 			`;
 		};
-
+		
 		window.apriSchedaDaTicketTrovato = async function() {
 			if (!datiTicketSelezionatoCache) return;
 
@@ -5184,10 +5223,53 @@ async function apriModaleEsistente(p) {
 		window.apriSchedaDaTicketTrovatoEseguineIstanziamento = function(datiTicketGrezzi) {
 			if (!personaTrovataDaTicketCache) return;
 
-			const dataNascitaGrezza = personaTrovataDaTicketCache.data_nascita || personaTrovataDaTicketCache.dataNascita || "";
-			const dataNascitaFormattata = formattaDataPerInputDate(dataNascitaGrezza);
+			// SE L'ANAGRAFICA ESISTE GIÀ NEL DATABASE:
+			if (personaTrovataDaTicketCache.id !== 'temp_nuovo') {
+				// 1. Apriamo la scheda esistente caricando ESATTAMENTE i dati del DB (senza spianare nulla!)
+				apriModaleEsistente(personaTrovataDaTicketCache);
 
-			if (personaTrovataDaTicketCache.id === 'temp_nuovo') {
+				// 2. Dopo l'apertura, evidenziamo con un bordo arancione (.campo-diverso-ticket) 
+				// i campi in cui il ticket ha un valore DIVERSO da quello salvato nel DB.
+				setTimeout(() => {
+					document.querySelectorAll('.campo-diverso-ticket').forEach(el => el.classList.remove('campo-diverso-ticket'));
+
+					const dataNascitaTicketFormattata = formattaDataPerInputDate(datiTicketGrezzi.dataNascita || datiTicketGrezzi.data_nascita || "");
+
+					const campiDaConfrontare = {
+						'editTelefono': datiTicketGrezzi.telefono,
+						'editCodiceFiscale': datiTicketGrezzi.codiceFiscale || datiTicketGrezzi.codice_fiscale,
+						'editLuogoNascita': datiTicketGrezzi.luogoNascita || datiTicketGrezzi.luogo_nascita,
+						'editDataNascita': dataNascitaTicketFormattata,
+						'editIndirizzo': datiTicketGrezzi.indirizzo,
+						'editCitta': datiTicketGrezzi.citta || datiTicketGrezzi.cittaResidenza,
+						'editCap': datiTicketGrezzi.cap || datiTicketGrezzi.capResidenza
+					};
+					
+					const sessoDb = document.querySelector('input[name="editSesso"]:checked')?.value || "";
+					const sessoTk = String(datiTicketGrezzi.sesso || "").toUpperCase();
+					if (sessoTk && sessoDb !== sessoTk) {
+						const bloccoSesso = document.querySelector('input[name="editSesso"]')?.closest('div');
+						if (bloccoSesso) bloccoSesso.classList.add('campo-diverso-ticket');
+					}
+
+					for (let [idCampo, valoreTicket] of Object.entries(campiDaConfrontare)) {
+						if (valoreTicket !== undefined && valoreTicket !== null && String(valoreTicket).trim() !== "") {
+							const elementoInput = document.getElementById(idCampo);
+							if (elementoInput) {
+								let valoreDb = String(elementoInput.value || "").trim().toLowerCase();
+								let valoreTk = String(valoreTicket).trim().toLowerCase();
+								
+								if (valoreDb !== valoreTk) {
+									elementoInput.classList.add('campo-diverso-ticket');
+								}
+							}
+						}
+					}
+				}, 150);
+
+			} else {
+				// SE È UN NUOVO SOGGETTO (NON PRESENTE NEL DB):
+				// Allora compiliamo i campi con i dati del ticket perché partiamo da zero.
 				document.getElementById('editIdPersona').value = "";
 				document.querySelectorAll('.campo-controllo, .campo-controllo-genitore').forEach(c => {
 					c.value = "";
@@ -5218,6 +5300,7 @@ async function apriModaleEsistente(p) {
 				document.getElementById('editTigre').checked = false;
 				document.getElementById('editCapitanoPiazza').checked = false;
 				
+				const dataNascitaFormattata = formattaDataPerInputDate(personaTrovataDaTicketCache.data_nascita || personaTrovataDaTicketCache.dataNascita || "");
 				const sessoTicket = String(personaTrovataDaTicketCache.sesso || "").toUpperCase();
 				const radioSessoTicket = document.querySelector(`input[name="editSesso"][value="${sessoTicket}"]`);
 				if (radioSessoTicket) {
@@ -5257,16 +5340,16 @@ async function apriModaleEsistente(p) {
 				btnSalva.textContent = "Crea Anagrafica";
 				btnSalva.onclick = gestisciCreazioneNuovaAnagrafica;
 
-				document.getElementById('editCognome').value = personaTrovataDaTicketCache.cognome || "";
-				document.getElementById('editNome').value = personaTrovataDaTicketCache.nome || "";
-				document.getElementById('editTelefono').value = personaTrovataDaTicketCache.telefono || "";
-				document.getElementById('editCodiceFiscale').value = personaTrovataDaTicketCache.codice_fiscale || personaTrovataDaTicketCache.codiceFiscale || "";
-				document.getElementById('editLuogoNascita').value = personaTrovataDaTicketCache.luogo_nascita || personaTrovataDaTicketCache.luogoNascita || "";
-				document.getElementById('editDataNascita').value = dataNascitaFormattata;
-				document.getElementById('editIndirizzo').value = personaTrovataDaTicketCache.indirizzo || "";
-				document.getElementById('editCitta').value = personaTrovataDaTicketCache.citta || personaTrovataDaTicketCache.cittaResidenza || "";
-				document.getElementById('editCap').value = personaTrovataDaTicketCache.cap || personaTrovataDaTicketCache.capResidenza || "";
-
+				assegnaSeValido('editCognome', personaTrovataDaTicketCache.cognome);
+				assegnaSeValido('editNome', personaTrovataDaTicketCache.nome);
+				assegnaSeValido('editTelefono', personaTrovataDaTicketCache.telefono);
+				assegnaSeValido('editCodiceFiscale', personaTrovataDaTicketCache.codice_fiscale || personaTrovataDaTicketCache.codiceFiscale);
+				assegnaSeValido('editLuogoNascita', personaTrovataDaTicketCache.luogo_nascita || personaTrovataDaTicketCache.luogoNascita);
+				assegnaSeValido('editDataNascita', dataNascitaFormattata);
+				assegnaSeValido('editIndirizzo', personaTrovataDaTicketCache.indirizzo);
+				assegnaSeValido('editCitta', personaTrovataDaTicketCache.citta || personaTrovataDaTicketCache.cittaResidenza);
+				assegnaSeValido('editCap', personaTrovataDaTicketCache.cap || personaTrovataDaTicketCache.capResidenza);
+				
 				if (dataNascitaFormattata) {
 					calcolaEImpostaEta(dataNascitaFormattata);
 				}
@@ -5274,58 +5357,23 @@ async function apriModaleEsistente(p) {
 				modal.style.display = 'flex';
 				controllaCampiVuoti();
 				aggiornaStatoPulsanteSalva();
-
-			} else {
-				const datiAggiornatiDalTicket = {
-					...personaTrovataDaTicketCache,
-					data_nascita: personaTrovataDaTicketCache.data_nascita || dataNascitaFormattata,
-					luogo_nascita: personaTrovataDaTicketCache.luogo_nascita || personaTrovataDaTicketCache.luogoNascita || "",
-					indirizzo: personaTrovataDaTicketCache.indirizzo || "",
-					citta: personaTrovataDaTicketCache.citta || personaTrovataDaTicketCache.cittaResidenza || "",
-					cap: personaTrovataDaTicketCache.cap || personaTrovataDaTicketCache.capResidenza || "",
-					telefono: personaTrovataDaTicketCache.telefono || ""
-				};
-
-				apriModaleEsistente(datiAggiornatiDalTicket);
-
-				setTimeout(() => {
-					document.querySelectorAll('.campo-diverso-ticket').forEach(el => el.classList.remove('campo-diverso-ticket'));
-
-					const campiDaConfrontare = {
-						'editTelefono': datiTicketGrezzi.telefono,
-						'editCodiceFiscale': datiTicketGrezzi.codiceFiscale || datiTicketGrezzi.codice_fiscale,
-						'editLuogoNascita': datiTicketGrezzi.luogoNascita || datiTicketGrezzi.luogo_nascita,
-						'editDataNascita': formattaDataPerInputDate(datiTicketGrezzi.dataNascita || datiTicketGrezzi.data_nascita),
-						'editIndirizzo': datiTicketGrezzi.indirizzo,
-						'editCitta': datiTicketGrezzi.citta || datiTicketGrezzi.cittaResidenza,
-						'editCap': datiTicketGrezzi.cap || datiTicketGrezzi.capResidenza
-					};
-					
-					const sessoDb = document.querySelector('input[name="editSesso"]:checked')?.value || "";
-					const sessoTk = String(datiTicketGrezzi.sesso || "").toUpperCase();
-					if (sessoTk && sessoDb !== sessoTk) {
-						const bloccoSesso = document.querySelector('input[name="editSesso"]')?.closest('div');
-						if (bloccoSesso) bloccoSesso.classList.add('campo-diverso-ticket');
-					}
-
-					for (let [idCampo, valoreTicket] of Object.entries(campiDaConfrontare)) {
-						if (valoreTicket !== undefined && valoreTicket !== null && String(valoreTicket).trim() !== "") {
-							const elementoInput = document.getElementById(idCampo);
-							if (elementoInput) {
-								let valoreDb = String(elementoInput.value || "").trim().toLowerCase();
-								let valoreTk = String(valoreTicket).trim().toLowerCase();
-								
-								if (valoreDb !== valoreTk) {
-									elementoInput.classList.add('campo-diverso-ticket');
-								}
-							}
-						}
-					}
-				}, 150);
 			}
 		};
 		
-		// Rendiamo la funzione accessibile globalmente se richiamata da pulsanti HTML
+		// Funzione di utilità locale per verificare se un valore è valido e non vuoto o "Non specificato"
+		function assegnaSeValido(idElemento, valoreTicket) {
+			const elem = document.getElementById(idElemento);
+			if (!elem) return;
+			
+			const valStr = String(valoreTicket || "").trim();
+			if (valStr !== "" && valStr.toLowerCase() !== "non specificato" && valStr.toLowerCase() !== "undefined" && valStr.toLowerCase() !== "null") {
+				elem.value = valStr;
+			} else {
+				// Se non è specificato sul ticket, NON facciamo nulla (mantiene il campo vuoto o intatto)
+				elem.value = "";
+			}
+		}
+
 		window.verificaNumeriMancantiAnnoCorrente = verificaNumeriMancantiAnnoCorrente;
 		
 						
@@ -5380,7 +5428,7 @@ async function apriModaleEsistente(p) {
 			<div class="box-ricerca-ticket">
 				<label for="inputNumeroTicketCerca"><strong>Inserisci N. Ticket:</strong></label>
 				<div style="display: flex; gap: 8px; margin-top: 6px;">
-					<input type="text" id="inputNumeroTicketCerca" placeholder="es. 12" style="margin:0;">
+					<input type="text" id="inputNumeroTicketCerca" placeholder="es. 12" style="margin:0;" onkeydown="if(event.key === 'Enter') cercaDatiPerTicketOttimizzata();">
 					<button type="button" class="btn-azione" style="background-color: #007BFF; padding: 0 15px; font-weight: bold;" onclick="cercaDatiPerTicketOttimizzata()">Cerca</button>
 				</div>
 			</div>
@@ -5389,7 +5437,7 @@ async function apriModaleEsistente(p) {
 				<div class="dati-ticket-trovati" id="contenutoDatiTicket">
 					<!-- I dati compaiono qui -->
 				</div>
-				<button type="button" class="btn-salva" style="margin-top: 15px; width: 100%; background-color: #28a745;" onclick="apriSchedaDaTicketTrovato()">📂 Apri Anagrafica Completa</button>
+				<button type="button" class="btn-salva" style="margin-top: 15px; width: 100%; background-color: #28a745;" onclick="apriSchedaDaTicketTrovato()">📂 Apri / trasferisci Anagrafica</button>
 			</div>
 			<div id="messaggioStatoTicket" style="font-size: 13px; color: #666; font-style: italic; text-align: center; margin-top: 20px;">
 				Digita il numero di ticket per recuperare i dati in tempo reale.

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+=<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -71,21 +71,21 @@
         }
         .delega-container input { width: 20px; height: 20px; margin: 0; cursor: pointer; accent-color: #2563eb; }
 
-        #containerDelegato { display: none; margin-top: 14px; background: #fffbeb; border: 1.5px dashed #f59e0b; padding: 16px; border-radius: 16px; }
-        .titolo-delegato { font-size: 14px; font-weight: 800; color: #b45309; margin-top: 0; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+        #containerDelegatoRiserva { display: none; margin-top: 10px; }
+        #containerDelegato { display: none; margin-top: 14px; background: #fefce8; padding: 16px; border-radius: 16px; border: 2px solid #fde047; }
 
-        .sezione-pagamento, .sezione-sesso {
-            margin-top: 18px;
+        .sezione-scelta, .sezione-sesso {
+            margin-top: 12px;
             background: #f9fafb;
-            padding: 14px;
+            padding: 12px 14px;
             border-radius: 12px;
             border: 1.5px solid #e5e7eb;
         }
-        .sezione-pagamento label.campo-label, .sezione-sesso label.campo-label {
+        .sezione-scelta label.campo-label, .sezione-sesso label.campo-label {
             margin-top: 0;
             margin-bottom: 8px;
         }
-        .opzioni-pagamento, .opzioni-sesso {
+        .opzioni-scelta, .opzioni-sesso {
             display: flex;
             gap: 10px;
         }
@@ -104,12 +104,6 @@
             transition: all 0.2s;
         }
         .opzione-radio input { accent-color: #2563eb; cursor: pointer; }
-        .avviso-satispay {
-            font-size: 11px;
-            color: #dc2626;
-            margin-top: 8px;
-            font-weight: 600;
-        }
 
         button { 
             width: 100%;
@@ -160,58 +154,79 @@
         <img src="logotuchini.png" alt="Logo" class="logo-aziendale">
         
         <h2>Iscrizioni 2027</h2>
-        <p class="sottotitolo">Compila l'anagrafica per prendere il numero</p>
+        <p class="sottotitolo">Nell'attesa, compila la tua anagrafica per aiutarci a velocizzare le operazioni di isrcrizione. <br><br><strong style="color: #e63922;"> I dati verranno trasferiti automaticamente nel databse, ti chiediamo la cortesia di compilarli con la massima attenzione!</strong></p>
 
         <!-- FASE 1: Inserimento Dati Anagrafici -->
         <div id="schermataForm">
             <div class="riga-doppia">
                 <div>
                     <label class="campo-label">Nome *</label>
-                    <input type="text" id="nomeUtente" placeholder="Es. Mario" autocomplete="given-name" oninput="validaForm()">
+                    <input type="text" id="nomeUtente" placeholder="NOME" autocomplete="given-name" oninput="validaForm()">
                 </div>
                 <div>
                     <label class="campo-label">Cognome *</label>
-                    <input type="text" id="cognomeUtente" placeholder="Es. Rossi" autocomplete="family-name" oninput="validaForm()">
-                </div>
-            </div>
-            
-            <label class="campo-label">Numero di Telefono *</label>
-            <input type="tel" id="telefonoUtente" placeholder="Es. 3331234567" autocomplete="tel" oninput="validaForm()">
-
-            <div class="riga-doppia">
-                <div>
-                    <label class="campo-label">Data di Nascita *</label>
-                    <input type="date" id="dataNascita" onchange="validaForm()" oninput="validaForm()">
-                </div>
-                <div>
-                    <label class="campo-label">Luogo di Nascita</label>
-                    <input type="text" id="luogoNascita" placeholder="Es. Ivrea">
+                    <input type="text" id="cognomeUtente" placeholder="COGNOME" autocomplete="family-name" oninput="validaForm()">
                 </div>
             </div>
 
-            <!-- SEZIONE SESSO (M / F) -->
-            <div class="sezione-sesso">
-                <label class="campo-label">Sesso *</label>
-                <div class="opzioni-sesso">
-                    <label class="opzione-radio"><input type="radio" name="sessoUtente" value="M" checked> Maschio (M)</label>
-                    <label class="opzione-radio"><input type="radio" name="sessoUtente" value="F"> Femmina (F)</label>
+            <!-- DOMINIO GIÀ ISCRITTO -->
+            <div class="sezione-scelta">
+                <label class="campo-label">Già iscritto? *</label>
+                <div class="opzioni-scelta">
+                    <label class="opzione-radio"><input type="radio" name="giaIscrittoUtente" value="si" onclick="toggleCampiIscritto(true)"> Sì</label>
+                    <label class="opzione-radio"><input type="radio" name="giaIscrittoUtente" value="no" onclick="toggleCampiIscritto(false)" checked> No</label>
                 </div>
             </div>
 
-            <label class="campo-label">Codice Fiscale</label>
-            <input type="text" id="codiceFiscale" placeholder="Es. RSSMRA90A01E379X" style="text-transform: uppercase;">
+            <!-- CONTENITORE SE GIÀ ISCRITTO -->
+            <div id="containerSoloCF" style="display: none;">
+                <label class="campo-label">Codice Fiscale *</label>
+                <input type="text" id="codiceFiscaleSolo" placeholder="Es. RSSMRA90A01E379X" style="text-transform: uppercase;" oninput="validaForm()">
 
-            <label class="campo-label">Indirizzo di Residenza</label>
-            <input type="text" id="indirizzo" placeholder="Via / Piazza e numero civico">
+                <label class="campo-label">Data di Nascita *</label>
+                <input type="date" id="dataNascitaSolo" onchange="validaForm()" oninput="validaForm()">
+            </div>
 
-            <div class="riga-doppia">
-                <div>
-                    <label class="campo-label">Città *</label>
-                    <input type="text" id="cittaResidenza" placeholder="Città" oninput="validaForm()">
+            <!-- CONTENITORE SE NON ISCRITTO (TUTTI I DATI) -->
+            <div id="containerDatiCompleti">
+                <label class="campo-label">Numero di Telefono *</label>
+                <input type="tel" id="telefonoUtente" placeholder="Es. 3331234567" autocomplete="tel" oninput="validaForm()">
+
+                <div class="riga-doppia">
+                    <div>
+                        <label class="campo-label">Data di Nascita *</label>
+                        <input type="date" id="dataNascita" onchange="validaForm()" oninput="validaForm()">
+                    </div>
+                    <div>
+                        <label class="campo-label">Luogo di Nascita</label>
+                        <input type="text" id="luogoNascita" placeholder="Es. Ivrea">
+                    </div>
                 </div>
-                <div>
-                    <label class="campo-label">CAP *</label>
-                    <input type="text" id="capResidenza" placeholder="10015" oninput="validaForm()">
+
+                <!-- SEZIONE SESSO (M / F) -->
+                <div class="sezione-sesso">
+                    <label class="campo-label">Sesso *</label>
+                    <div class="opzioni-sesso">
+                        <label class="opzione-radio"><input type="radio" name="sessoUtente" value="M" checked> Maschio (M)</label>
+                        <label class="opzione-radio"><input type="radio" name="sessoUtente" value="F"> Femmina (F)</label>
+                    </div>
+                </div>
+
+                <label class="campo-label">Codice Fiscale</label>
+                <input type="text" id="codiceFiscale" placeholder="Es. RSSMRA90A01E379X" style="text-transform: uppercase;">
+
+                <label class="campo-label">Indirizzo di Residenza</label>
+                <input type="text" id="indirizzo" placeholder="Via / Piazza e numero civico">
+
+                <div class="riga-doppia">
+                    <div>
+                        <label class="campo-label">Città *</label>
+                        <input type="text" id="cittaResidenza" placeholder="Città" oninput="validaForm()">
+                    </div>
+                    <div>
+                        <label class="campo-label">CAP *</label>
+                        <input type="text" id="capResidenza" placeholder="10015" oninput="validaForm()">
+                    </div>
                 </div>
             </div>
             
@@ -220,68 +235,77 @@
                 <span>Iscrizione con delega</span>
             </label>
 
-            <!-- SEZIONE DELEGATO (Replicata) -->
             <div id="containerDelegato">
-                <div class="titolo-delegato">📋 Dati di chi delega (Delegante)</div>
-                
                 <div class="riga-doppia">
                     <div>
                         <label class="campo-label">Nome Delegante *</label>
-                        <input type="text" id="nomeDelegato" placeholder="Es. Giuseppe" autocomplete="given-name" oninput="validaForm()">
+                        <input type="text" id="nomeDelegato" placeholder="NOME" autocomplete="off" oninput="validaForm()">
                     </div>
                     <div>
                         <label class="campo-label">Cognome Delegante *</label>
-                        <input type="text" id="cognomeDelegato" placeholder="Es. Verdi" autocomplete="family-name" oninput="validaForm()">
-                    </div>
-                </div>
-                
-                <label class="campo-label">Numero di Telefono Delegante *</label>
-                <input type="tel" id="telefonoDelegato" placeholder="Es. 3339876543" autocomplete="tel" oninput="validaForm()">
-
-                <div class="riga-doppia">
-                    <div>
-                        <label class="campo-label">Data di Nascita Delegante *</label>
-                        <input type="date" id="dataNascitaDelegato" onchange="validaForm()" oninput="validaForm()">
-                    </div>
-                    <div>
-                        <label class="campo-label">Luogo di Nascita Delegante</label>
-                        <input type="text" id="luogoNascitaDelegato" placeholder="Es. Ivrea">
+                        <input type="text" id="cognomeDelegato" placeholder="COGNOME" autocomplete="off" oninput="validaForm()">
                     </div>
                 </div>
 
-                <div class="sezione-sesso" style="background: #fff; margin-top: 12px;">
-                    <label class="campo-label">Sesso Delegante *</label>
-                    <div class="opzioni-sesso">
-                        <label class="opzione-radio"><input type="radio" name="sessoDelegato" value="M" checked> Maschio (M)</label>
-                        <label class="opzione-radio"><input type="radio" name="sessoDelegato" value="F"> Femmina (F)</label>
+                <!-- DOMINIO GIÀ ISCRITTO DELEGANTE -->
+                <div class="sezione-scelta">
+                    <label class="campo-label">Delegante già iscritto? *</label>
+                    <div class="opzioni-scelta">
+                        <label class="opzione-radio"><input type="radio" name="giaIscrittoDelegato" value="si" onclick="toggleCampiDelegato(true)"> Sì</label>
+                        <label class="opzione-radio"><input type="radio" name="giaIscrittoDelegato" value="no" onclick="toggleCampiDelegato(false)" checked> No</label>
                     </div>
                 </div>
 
-                <label class="campo-label">Codice Fiscale Delegante</label>
-                <input type="text" id="codiceFiscaleDelegato" placeholder="Es. VRDGPP80A01E379Y" style="text-transform: uppercase;">
+                <!-- CONTENITORE DELEGANTE SOLO CF -->
+                <div id="containerDelegatoSoloCF" style="display: none;">
+                    <label class="campo-label">Codice Fiscale Delegante *</label>
+                    <input type="text" id="codiceFiscaleDelegatoSolo" placeholder="Es. RSSMRA90A01E379X" style="text-transform: uppercase;" oninput="validaForm()">
 
-                <label class="campo-label">Indirizzo di Residenza Delegante</label>
-                <input type="text" id="indirizzoDelegato" placeholder="Via / Piazza e numero civico">
+                    <label class="campo-label">Data di Nascita Delegante *</label>
+                    <input type="date" id="dataNascitaDelegatoSolo" onchange="validaForm()" oninput="validaForm()">
+                </div>
 
-                <div class="riga-doppia">
-                    <div>
-                        <label class="campo-label">Città Delegante *</label>
-                        <input type="text" id="cittaDelegato" placeholder="Città" oninput="validaForm()">
+                <!-- CONTENITORE DELEGANTE DATI COMPLETI -->
+                <div id="containerDelegatoDatiCompleti">
+                    <label class="campo-label">Numero di Telefono Delegante</label>
+                    <input type="tel" id="telefonoDelegato" placeholder="Es. 3331234567" autocomplete="tel">
+
+                    <div class="riga-doppia">
+                        <div>
+                            <label class="campo-label">Data di Nascita Delegante</label>
+                            <input type="date" id="dataNascitaDelegato">
+                        </div>
+                        <div>
+                            <label class="campo-label">Luogo di Nascita Delegante</label>
+                            <input type="text" id="luogoNascitaDelegato" placeholder="Es. Ivrea">
+                        </div>
                     </div>
-                    <div>
-                        <label class="campo-label">CAP Delegante *</label>
-                        <input type="text" id="capDelegato" placeholder="10015" oninput="validaForm()">
+
+                    <div class="sezione-sesso">
+                        <label class="campo-label">Sesso Delegante</label>
+                        <div class="opzioni-sesso">
+                            <label class="opzione-radio"><input type="radio" name="sessoDelegato" value="M" checked> M</label>
+                            <label class="opzione-radio"><input type="radio" name="sessoDelegato" value="F"> F</label>
+                        </div>
+                    </div>
+
+                    <label class="campo-label">Codice Fiscale Delegante</label>
+                    <input type="text" id="codiceFiscaleDelegato" placeholder="Es. RSSMRA90A01E379X" style="text-transform: uppercase;">
+
+                    <label class="campo-label">Indirizzo di Residenza Delegante</label>
+                    <input type="text" id="indirizzoDelegato" placeholder="Via / Piazza e numero civico">
+
+                    <div class="riga-doppia">
+                        <div>
+                            <label class="campo-label">Città Delegante</label>
+                            <input type="text" id="cittaResidenzaDelegato" placeholder="Città">
+                        </div>
+                        <div>
+                            <label class="campo-label">CAP Delegante</label>
+                            <input type="text" id="capResidenzaDelegato" placeholder="10015">
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <div class="sezione-pagamento">
-                <label class="campo-label">Metodo di pagamento:</label>
-                <div class="opzioni-pagamento">
-                    <label class="opzione-radio"><input type="radio" name="pagamentoUtente" value="bancomat" checked> Bancomat</label>
-                    <label class="opzione-radio"><input type="radio" name="pagamentoUtente" value="contanti"> Contanti</label>
-                </div>
-                <div class="avviso-satispay">⚠️ Satispay non è accettato</div>
             </div>
 
             <button id="btnInvia" onclick="registraInCoda()" disabled>Prendi il Numero</button>
@@ -334,45 +358,79 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
         import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
 
+        window.toggleCampiIscritto = function(giaIscritto) {
+            document.getElementById('containerSoloCF').style.display = giaIscritto ? 'block' : 'none';
+            document.getElementById('containerDatiCompleti').style.display = giaIscritto ? 'none' : 'block';
+            validaForm();
+        };
+
+        window.toggleCampiDelegato = function(giaIscritto) {
+            document.getElementById('containerDelegatoSoloCF').style.display = giaIscritto ? 'block' : 'none';
+            document.getElementById('containerDelegatoDatiCompleti').style.display = giaIscritto ? 'none' : 'block';
+            validaForm();
+        };
+
         window.toggleDelega = function() {
             const check = document.getElementById('checkDelega').checked;
             document.getElementById('containerDelegato').style.display = check ? 'block' : 'none';
             if (!check) {
                 document.getElementById('nomeDelegato').value = '';
                 document.getElementById('cognomeDelegato').value = '';
-                document.getElementById('telefonoDelegato').value = '';
-                document.getElementById('dataNascitaDelegato').value = '';
-                document.getElementById('luogoNascitaDelegato').value = '';
-                document.getElementById('codiceFiscaleDelegato').value = '';
-                document.getElementById('indirizzoDelegato').value = '';
-                document.getElementById('cittaDelegato').value = '';
-                document.getElementById('capDelegato').value = '';
-            }
+                document.getElementById('codiceFiscaleDelegatoSolo').value = '';
+            } 
             validaForm();
         };
 
         window.validaForm = function() {
             const nome = document.getElementById('nomeUtente').value.trim();
             const cognome = document.getElementById('cognomeUtente').value.trim();
-            const telefono = document.getElementById('telefonoUtente').value.trim();
-            const dataNascita = document.getElementById('dataNascita').value;
-            const citta = document.getElementById('cittaResidenza').value.trim();
-            const cap = document.getElementById('capResidenza').value.trim();
-            
-            const conDelega = document.getElementById('checkDelega').checked;
-            let delegaValida = true;
-            if (conDelega) {
-                const nomeDel = document.getElementById('nomeDelegato').value.trim();
-                const cognomeDel = document.getElementById('cognomeDelegato').value.trim();
-                const telDel = document.getElementById('telefonoDelegato').value.trim();
-                const dataDel = document.getElementById('dataNascitaDelegato').value;
-                const cittaDel = document.getElementById('cittaDelegato').value.trim();
-                const capDel = document.getElementById('capDelegato').value.trim();
-                delegaValida = (nomeDel && cognomeDel && telDel && dataDel && cittaDel && capDel);
+            const giaIscrittoRadio = document.querySelector('input[name="giaIscrittoUtente"]:checked');
+            const giaIscritto = giaIscrittoRadio ? giaIscrittoRadio.value === 'si' : false;
+
+            if (!nome || !cognome) {
+                document.getElementById('btnInvia').disabled = true;
+                return;
             }
 
-            const btn = document.getElementById('btnInvia');
-            btn.disabled = (!nome || !cognome || !telefono || !dataNascita || !citta || !cap || !delegaValida);
+            if (giaIscritto) {
+                const cfSolo = document.getElementById('codiceFiscaleSolo').value.trim();
+                const dataSolo = document.getElementById('dataNascitaSolo').value;
+                document.getElementById('btnInvia').disabled = (cfSolo.length < 16 || !dataSolo);
+            } else {
+                const telefono = document.getElementById('telefonoUtente').value.trim();
+                const dataNascita = document.getElementById('dataNascita').value;
+                const citta = document.getElementById('cittaResidenza').value.trim();
+                const cap = document.getElementById('capResidenza').value.trim();
+                
+                if (!telefono || !dataNascita || !citta || !cap) {
+                    document.getElementById('btnInvia').disabled = true;
+                    return;
+                }
+
+                const conDelega = document.getElementById('checkDelega').checked;
+                if (conDelega) {
+                    const nomeDel = document.getElementById('nomeDelegato').value.trim();
+                    const cognomeDel = document.getElementById('cognomeDelegato').value.trim();
+                    const giaIscrittoDelRadio = document.querySelector('input[name="giaIscrittoDelegato"]:checked');
+                    const giaIscrittoDel = giaIscrittoDelRadio ? giaIscrittoDelRadio.value === 'si' : false;
+
+                    if (!nomeDel || !cognomeDel) {
+                        document.getElementById('btnInvia').disabled = true;
+                        return;
+                    }
+
+                    if (giaIscrittoDel) {
+                        const cfDelSolo = document.getElementById('codiceFiscaleDelegatoSolo').value.trim();
+                        const dataDelSolo = document.getElementById('dataNascitaDelegatoSolo').value;
+                        if (cfDelSolo.length < 16 || !dataDelSolo) {
+                            document.getElementById('btnInvia').disabled = true;
+                            return;
+                        }
+                    }
+                }
+
+                document.getElementById('btnInvia').disabled = false;
+            }
         };
 
         window.validaRiserva = function() {
@@ -439,30 +497,96 @@
             }, { onlyOnce: true });
         }
 
-        function formattaData(raw) {
-            if (!raw) return "";
-            const parti = raw.split('-');
-            if (parti.length === 3) {
-                return `${parti[2]}.${parti[1]}.${parti[0]}`;
-            }
-            return raw;
-        }
-
         window.registraInCoda = function() {
             const nome = document.getElementById('nomeUtente').value.trim();
             const cognome = document.getElementById('cognomeUtente').value.trim();
-            const telefono = document.getElementById('telefonoUtente').value.trim();
-            const dataNascita = formattaData(document.getElementById('dataNascita').value);
-            const luogoNascita = document.getElementById('luogoNascita').value.trim();
-            const codiceFiscale = document.getElementById('codiceFiscale').value.trim().toUpperCase();
-            const indirizzo = document.getElementById('indirizzo').value.trim();
-            const citta = document.getElementById('cittaResidenza').value.trim();
-            const cap = document.getElementById('capResidenza').value.trim();
-            const sesso = document.querySelector('input[name="sessoUtente"]:checked').value;
-            // pagamento rimosso
-            const conDelega = document.getElementById('checkDelega').checked;
+            const giaIscritto = document.querySelector('input[name="giaIscrittoUtente"]:checked').value === 'si';
 
-            if(!nome || !cognome || !telefono || !dataNascita || !citta || !cap || !sesso) return;
+            let datiUtente = {
+                nome: nome,
+                cognome: cognome,
+                giaIscritto: giaIscritto
+            };
+
+            if (giaIscritto) {
+                datiUtente.codiceFiscale = document.getElementById('codiceFiscaleSolo').value.trim().toUpperCase();
+                const rawDataNascitaSolo = document.getElementById('dataNascitaSolo').value;
+                let dataNascitaSolo = rawDataNascitaSolo;
+                if (rawDataNascitaSolo) {
+                    const parti = rawDataNascitaSolo.split('-');
+                    if (parti.length === 3) {
+                        dataNascitaSolo = `${parti[2]}.${parti[1]}.${parti[0]}`;
+                    }
+                }
+                datiUtente.dataNascita = dataNascitaSolo;
+            } else {
+                datiUtente.telefono = document.getElementById('telefonoUtente').value.trim();
+                const rawDataNascita = document.getElementById('dataNascita').value;
+                let dataNascita = rawDataNascita;
+                if (rawDataNascita) {
+                    const parti = rawDataNascita.split('-');
+                    if (parti.length === 3) {
+                        dataNascita = `${parti[2]}.${parti[1]}.${parti[0]}`;
+                    }
+                }
+                datiUtente.dataNascita = dataNascita;
+                datiUtente.luogoNascita = document.getElementById('luogoNascita').value.trim();
+                datiUtente.sesso = document.querySelector('input[name="sessoUtente"]:checked').value;
+                datiUtente.codiceFiscale = document.getElementById('codiceFiscale').value.trim().toUpperCase();
+                datiUtente.indirizzo = document.getElementById('indirizzo').value.trim();
+                datiUtente.citta = document.getElementById('cittaResidenza').value.trim();
+                datiUtente.cap = document.getElementById('capResidenza').value.trim();
+            }
+
+            const conDelega = document.getElementById('checkDelega').checked;
+            datiUtente.delega = conDelega;
+
+            if (conDelega) {
+                const nomeDel = document.getElementById('nomeDelegato').value.trim();
+                const cognomeDel = document.getElementById('cognomeDelegato').value.trim();
+                const giaIscrittoDel = document.querySelector('input[name="giaIscrittoDelegato"]:checked').value === 'si';
+
+                let datiDelegato = {
+                    nome: nomeDel,
+                    cognome: cognomeDel,
+                    giaIscritto: giaIscrittoDel
+                };
+
+                if (giaIscrittoDel) {
+                    datiDelegato.codiceFiscale = document.getElementById('codiceFiscaleDelegatoSolo').value.trim().toUpperCase();
+                    const rawDataNascitaDelSolo = document.getElementById('dataNascitaDelegatoSolo').value;
+                    let dataNascitaDelSolo = rawDataNascitaDelSolo;
+                    if (rawDataNascitaDelSolo) {
+                        const parti = rawDataNascitaDelSolo.split('-');
+                        if (parti.length === 3) {
+                            dataNascitaDelSolo = `${parti[2]}.${parti[1]}.${parti[0]}`;
+                        }
+                    }
+                    datiDelegato.dataNascita = dataNascitaDelSolo;
+                } else {
+                    datiDelegato.telefono = document.getElementById('telefonoDelegato').value.trim();
+                    const rawDataNascitaDel = document.getElementById('dataNascitaDelegato').value;
+                    let dataNascitaDel = rawDataNascitaDel;
+                    if (rawDataNascitaDel) {
+                        const parti = rawDataNascitaDel.split('-');
+                        if (parti.length === 3) {
+                            dataNascitaDel = `${parti[2]}.${parti[1]}.${parti[0]}`;
+                        }
+                    }
+                    datiDelegato.dataNascita = dataNascitaDel;
+                    datiDelegato.luogoNascita = document.getElementById('luogoNascitaDelegato').value.trim();
+                    datiDelegato.sesso = document.querySelector('input[name="sessoDelegato"]:checked').value;
+                    datiDelegato.codiceFiscale = document.getElementById('codiceFiscaleDelegato').value.trim().toUpperCase();
+                    datiDelegato.indirizzo = document.getElementById('indirizzoDelegato').value.trim();
+                    datiDelegato.citta = document.getElementById('cittaResidenzaDelegato').value.trim();
+                    datiDelegato.cap = document.getElementById('capResidenzaDelegato').value.trim();
+                }
+
+                datiUtente.delegato = `${cognomeDel} ${nomeDel}`;
+                datiUtente.z_datiDelega = datiDelegato;
+            } else {
+                datiUtente.delegato = "";
+            }
 
             onValue(codaRef, (snapshot) => {
                 const data = snapshot.val();
@@ -487,53 +611,12 @@
                     prossimoNumero = maxNum > 0 ? maxNum + 1 : Object.keys(data).length + 1;
                 }
 
-                // Oggetto dati utente principale
-                const datiTicket = {
+                const nuovoTicket = push(codaRef, {
                     numero: prossimoNumero,
-                    nome: nome,
-                    cognome: cognome,
-                    sesso,
-                    telefono, dataNascita, luogoNascita, codiceFiscale, indirizzo, citta, cap,
-                    delega: conDelega,
-                                        timestamp: timestampCalcolato,
+                    ...datiUtente,
+                    timestamp: timestampCalcolato,
                     stato: 'attesa'
-                };
-
-                // Se c'è la delega, creiamo il sotto-oggetto ID delega annidato dentro il ticket principale
-                if (conDelega) {
-                    const nomeDel = document.getElementById('nomeDelegato').value.trim();
-                    const cognomeDel = document.getElementById('cognomeDelegato').value.trim();
-                    const telDel = document.getElementById('telefonoDelegato').value.trim();
-                    const dataDel = formattaData(document.getElementById('dataNascitaDelegato').value);
-                    const luogoDel = document.getElementById('luogoNascitaDelegato').value.trim();
-                    const cfDel = document.getElementById('codiceFiscaleDelegato').value.trim().toUpperCase();
-                    const indirizzoDel = document.getElementById('indirizzoDelegato').value.trim();
-                    const cittaDel = document.getElementById('cittaDelegato').value.trim();
-                    const capDel = document.getElementById('capDelegato').value.trim();
-                    const sessoDel = document.querySelector('input[name="sessoDelegato"]:checked').value;
-
-                    // Salviamo il nominativo del delegante anche nel campo stringa per retrocompatibilità con i pannelli operatore esistenti
-                    datiTicket.delegato = `${cognomeDel} ${nomeDel}`;
-
-                    // ID delega univoco generato via push o chiave fissa
-                    // Annidiamo i dati sotto l'ID del ticket principale con una chiave dedicata (es. "datiDelega")
-                    datiTicket.z_datiDelega = {
-                        nome: nomeDel,
-                        cognome: cognomeDel,
-                        sesso: sessoDel,
-                        telefono: telDel,
-                        dataNascita: dataDel,
-                        luogoNascita: luogoDel,
-                        codiceFiscale: cfDel,
-                        indirizzo: indirizzoDel,
-                        citta: cittaDel,
-                        cap: capDel
-                    };
-                } else {
-                    datiTicket.delegato = "";
-                }
-
-                const nuovoTicket = push(codaRef, datiTicket);
+                });
 
                 const nomeCompletoUI = `${cognome} ${nome}`;
                 localStorage.setItem('coda_id_utente', nuovoTicket.key);
@@ -563,7 +646,7 @@
                     numero: prossimoNumero,
                     nome: nome,
                     cognome: cognome,
-                    telefono, delega: false, delegato: "", 
+                    telefono, delega: false, delegato: "",
                     timestamp: Date.now(), stato: 'riserva'
                 });
 

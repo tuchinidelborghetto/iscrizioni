@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sala d'Attesa e QR Code - Iscrizioni 2027</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        body { 
+            font-family: sans-serif; 
+            background: linear-gradient(135deg, #09140f 0%, #1a1a1a 50%, #1f0a0d 100%);
+            color: #ffffff; 
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10, 15, 12, 0.88);
+            z-index: -2;
+        }
+
+        .filigrana-logo {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 45vw;
+            max-width: 450px;
+            opacity: 0.10;
+            z-index: -1;
+            pointer-events: none;
+            filter: invert(1) brightness(2);
+        }
+
+        h1 { 
+            color: #e53935; 
+            margin-top: 10px; 
+            font-size: 36px; 
+            text-transform: uppercase; 
+            letter-spacing: 2px;
+            text-align: center;
+            text-shadow: 0 2px 10px rgba(229, 57, 53, 0.4);
+        }
+
+        .main-layout {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            max-width: 1200px;
+            width: 100%;
+            justify-content: center;
+            align-items: flex-start;
+            margin-top: 20px;
+        }
+
+        .container-coda { 
+            flex: 2;
+            min-width: 320px;
+            background: rgba(22, 36, 28, 0.9);
+            border: 3px solid rgba(46, 125, 50, 0.4);
+            padding: 30px; 
+            border-radius: 20px; 
+            box-shadow: 0 8px 30px rgba(0,0,0,0.6); 
+            text-align: center;
+        }
+
+        .container-qr {
+            flex: 1;
+            min-width: 280px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+            text-align: center;
+        }
+
+        .container-qr h3 {
+            margin-top: 0;
+            color: #0f2017;
+            font-size: 22px;
+        }
+
+        .container-qr p {
+            color: #555;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        #countdown {
+            font-weight: bold;
+            color: #2e7d32;
+        }
+
+        .istruzioni { 
+            font-size: 18px; 
+            color: #c8e6c9; 
+            margin-bottom: 20px; 
+        }
+
+        .box-sezione-chiamate {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .colonna-cassa {
+            flex: 1;
+            min-width: 240px;
+            background: rgba(15, 30, 20, 0.7);
+            border: 2px solid rgba(46, 125, 50, 0.3);
+            border-radius: 14px;
+            padding: 15px;
+        }
+
+        .colonna-cassa h3 {
+            margin-top: 0;
+            font-size: 18px;
+            color: #81c784;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 8px;
+        }
+        
+        .lista-box-chiamati {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+        }
+        
+        .biglietto-chiamato {
+            background: #ffc107; 
+            color: #000000;     
+            font-size: 40px;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(255, 193, 7, 0.5);
+            animation: lampcheggio 1.2s infinite alternate;
+            width: 100%;
+            max-width: 220px;
+        }
+
+        .nessun-turno {
+            font-size: 15px;
+            color: #a5d6a7;
+            font-style: italic;
+            background: rgba(15, 45, 25, 0.5);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px dashed rgba(46, 125, 50, 0.3);
+        }
+
+        #btnAttivaAudio {
+            background-color: #e53935; 
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(229, 57, 53, 0.4);
+            transition: background 0.2s;
+        }
+        #btnAttivaAudio:hover {
+            background-color: #c62828;
+        }
+
+        @keyframes lampcheggio {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.05); opacity: 0.85; }
+        }
+    </style>
+</head>
+<body>
+
+    <img src="logotuchini.png" alt="Logo Tuchini" class="filigrana-logo">
+
+    <h1>Iscrizioni 2027</h1>
+
+    <div class="main-layout">
+        <div class="container-coda">
+            <button id="btnAttivaAudio">🔊 Clicca qui per attivare l'audio</button>
+            <div class="istruzioni">Prossimi numeri chiamati al banco iscrizioni:</div>
+
+			<div style="display: flex; justify-content: center; margin-top: 15px;">
+				<div class="colonna-cassa" style="max-width: 350px; width: 100%;">
+					<h3>📢 Turni Chiamati</h3>
+					<div id="listaChiamatiUnica" class="lista-box-chiamati">
+						<div class="nessun-turno">Nessun turno</div>
+					</div>
+				</div>
+			</div>
+        </div>
+        <div class="container-qr">
+            <h3>Prendi il tuo numero</h3>
+            <p>Inquadra il QR code con lo smartphone per metterti in coda.</p>
+            
+            <div id="qrImgContainer" style="display: flex; justify-content: center; margin: 15px 0;"></div>
+
+            <!-- NUOVO BLOCCO ISTRUZIONI -->
+            <div style="background: rgba(0, 0, 0, 0.04); padding: 12px; border-radius: 10px; text-align: left; font-size: 12px; color: #444; margin: 15px 0; border: 1px solid rgba(0,0,0,0.08);">
+                <strong style="display: block; margin-bottom: 6px; color: #0f2017; font-size: 13px;">📱 Come funziona:</strong>
+                1. Inquadra il QR Code con lo smartphone.<br>
+                2. Inserisci i tuoi dati e prendi il numero.<br>
+                3. Tieni la pagina aperta sul telefono: la schermata si aggiornerà in tempo reale per mostrarti lo stato della coda e quando sarà il tuo momento.<br>
+                <strong>Non riceverai notifiche o SMS sul telefono</strong><br>
+                4. Segui il tuo turno comodamente dallo smartphone o dal monitor.<br><br>
+                🔄 <em>Ti si è chiusa la pagina? Nessun problema: inquadra nuovamente il QR code per recuperare il tuo ticket!</em>
+            </div>
+            <!-- FINE BLOCCO ISTRUZIONI -->
+
+            <p>Aggiornamento sicurezza:<br>Prossimo cambio tra: <span id="countdown">15</span> secondi</p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+
+        const URL_BASE = "https://iscrizionituchini.web.app//ticket_anagrafica.html";
+        const INTERVALLO_SECONDI = 15;
+        let secondiRimasti = INTERVALLO_SECONDI;
+        let qrCodeInstance = null;
+
+        function aggiornaQRCode() {
+            const timestampCorrente = Date.now();
+            const urlSicuro = `${URL_BASE}?t=tuchini2027&ts=${timestampCorrente}`;
+            const qrContainer = document.getElementById('qrImgContainer');
+            
+            if (!qrCodeInstance) {
+                qrCodeInstance = new QRCode(qrContainer, {
+                    text: urlSicuro,
+                    width: 200,
+                    height: 200,
+                    colorDark : "#0f2017",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.M
+                });
+            } else {
+                qrCodeInstance.clear();
+                qrCodeInstance.makeCode(urlSicuro);
+            }
+            
+            secondiRimasti = INTERVALLO_SECONDI;
+        }
+
+        setTimeout(aggiornaQRCode, 100);
+
+        setInterval(() => {
+            secondiRimasti--;
+            const elemCountdown = document.getElementById('countdown');
+            if (elemCountdown) elemCountdown.innerText = secondiRimasti;
+            
+            if (secondiRimasti <= 0) {
+                aggiornaQRCode();
+            }
+        }, 1000);
+
+        const firebaseConfig = {
+			  apiKey: "AIzaSyCKfb2IDqE-y4Ln_1tUIYm09VVMqRRruvQ",
+			  authDomain: "ticketdispensertuchini.firebaseapp.com",
+			  databaseURL: "https://ticketdispensertuchini-default-rtdb.europe-west1.firebasedatabase.app",
+			  projectId: "ticketdispensertuchini",
+			  storageBucket: "ticketdispensertuchini.firebasestorage.app",
+			  messagingSenderId: "582164145424",
+			  appId: "1:582164145424:web:41a6df5056265e19ddf195"
+			};
+			
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const codaRef = ref(db, 'coda');
+
+        let ultimiChiamatiNotificati = new Set();
+        let audioAbilitato = false;
+
+        document.getElementById('btnAttivaAudio').addEventListener('click', () => {
+            audioAbilitato = true;
+            document.getElementById('btnAttivaAudio').style.display = 'none';
+            
+            if ('speechSynthesis' in window) {
+                const testUtterance = new SpeechSynthesisUtterance("Audio attivo");
+                testUtterance.lang = 'it-IT';
+                testUtterance.volume = 0.1;
+                window.speechSynthesis.speak(testUtterance);
+            }
+        });
+
+        function pronunciaNumero(numero) {
+			if (!audioAbilitato || !('speechSynthesis' in window)) return;
+
+			window.speechSynthesis.cancel();
+
+			const testoDaDire = `Attenzione. Numero... ${numero}`;
+			const utterance = new SpeechSynthesisUtterance(testoDaDire);
+			utterance.lang = 'it-IT';
+			utterance.rate = 0.85; 
+			utterance.pitch = 1.0;
+			utterance.volume = 1.0;
+
+			const voci = window.speechSynthesis.getVoices();
+			const voceItalianaMigliore = voci.find(v => v.lang.includes('it') && (v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Online'))) || voci.find(v => v.lang.includes('it'));
+
+			if (voceItalianaMigliore) {
+				utterance.voice = voceItalianaMigliore;
+			}
+
+			window.speechSynthesis.speak(utterance);
+		}
+		
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = () => {
+                window.speechSynthesis.getVoices();
+            };
+        }
+
+        onValue(codaRef, (snapshot) => {
+			const data = snapshot.val();
+			const containerUnico = document.getElementById('listaChiamatiUnica');
+
+			containerUnico.innerHTML = '';
+
+			if (!data) {
+				containerUnico.innerHTML = '<div class="nessun-turno">Nessun turno</div>';
+				ultimiChiamatiNotificati.clear();
+				return;
+			}
+
+			const arrayCoda = Object.keys(data).map(id => ({ id, ...data[id] }))
+				.sort((a, b) => a.timestamp - b.timestamp);
+
+			const chiamati = arrayCoda.filter(item => item.stato === 'chiamato');
+
+			if (chiamati.length === 0) {
+				containerUnico.innerHTML = '<div class="nessun-turno">Nessun turno</div>';
+				ultimiChiamatiNotificati.clear();
+				return;
+			}
+
+			const nuoviChiamatiCorrenti = new Set();
+
+			chiamati.forEach(persona => {
+				const numeroBiglietto = persona.numero !== undefined && persona.numero !== null ? persona.numero : (arrayCoda.findIndex(p => p.id === persona.id) + 1);
+				
+				nuoviChiamatiCorrenti.add(numeroBiglietto);
+
+				if (!ultimiChiamatiNotificati.has(numeroBiglietto)) {
+					pronunciaNumero(numeroBiglietto);
+				}
+
+				const div = document.createElement('div');
+				div.className = 'biglietto-chiamato';
+				div.innerText = `N° ${numeroBiglietto}`;
+				containerUnico.appendChild(div);
+			});
+
+			ultimiChiamatiNotificati = nuoviChiamatiCorrenti;
+		});
+				
+    </script>
+</body>
+</html>
