@@ -657,7 +657,7 @@
     <!-- AREA PRINCIPALE -->
     <main class="main-content">
         <div class="container">
-			<div class="versione-app">Ver. 03.00</div>
+			<div class="versione-app">Ver. 03.10</div>
             <div class="top-bar-header">
 				<!-- NUOVO PULSANTE GESTIONE CODA -->
 				<button type="button" id="btnGestioneCoda" class="btn-logout" style="background-color: #dc2626;" onclick="apriGestioneCodaBanco()">📢 Gestione Coda</button>
@@ -1127,15 +1127,19 @@
                             <div class="form-group col-medium"><label style="font-size: 11px;">Luogo Nascita:</label><input type="text" id="editGenitore1LuogoNascita" class="campo-controllo-genitore" style="padding: 5px; font-size: 12px;"></div>
                             <div class="form-group col-medium"><label style="font-size: 11px;">Data Nascita:</label><input type="date" id="editGenitore1DataNascita" class="campo-controllo-genitore" style="padding: 5px; font-size: 12px;"></div>
                         </div>
-                        <div class="form-row" id="gruppoGen1CF" style="margin-bottom: 5px;">
-                            <div class="form-group col-large">
-                                <label style="font-size: 11px;">Codice Fiscale:</label>
-                                <div style="display: flex; gap: 6px;">
-                                    <input type="text" id="editGenitore1CodiceFiscale" class="campo-controllo-genitore" maxlength="16" style="padding: 5px; font-size: 12px; text-transform: uppercase; margin: 0;">
-                                    <button type="button" class="btn-azione" style="background-color: #007BFF; padding: 0 10px; font-size: 11px; font-weight: bold; height: 30px;" onclick="calcolaCFGenitore(1)">Calcola</button>
-                                </div>
-                            </div>
-                        </div>
+                       <div class="form-row" id="gruppoGen1CF" style="margin-bottom: 5px;">
+							<div class="form-group col-large">
+								<label style="font-size: 11px;">Sesso e Codice Fiscale:</label>
+								<div style="display: flex; gap: 6px; align-items: center;">
+									<div style="display: flex; gap: 6px; align-items: center; background: #fff; padding: 2px 6px; border: 1px solid #ced4da; border-radius: 3px; height: 30px; box-sizing: border-box;">
+										<label style="font-size: 11px; font-weight: bold; cursor: pointer; margin: 0;"><input type="radio" name="editGenitore1Sesso" value="M" style="cursor: pointer;"> M</label>
+										<label style="font-size: 11px; font-weight: bold; cursor: pointer; margin: 0;"><input type="radio" name="editGenitore1Sesso" value="F" style="cursor: pointer;"> F</label>
+									</div>
+									<input type="text" id="editGenitore1CodiceFiscale" class="campo-controllo-genitore" maxlength="16" style="padding: 5px; font-size: 12px; text-transform: uppercase; margin: 0; flex: 1;">
+									<button type="button" class="btn-azione" style="background-color: #007BFF; padding: 0 10px; font-size: 11px; font-weight: bold; height: 30px;" onclick="calcolaCFGenitore(1)">Calcola</button>
+								</div>
+							</div>
+						</div>
 
                         <div id="gruppoGen1Doc" style="display: none; margin-bottom: 10px;">
 							<div class="collapsible-header" style="background: #fff3cd; color: #b7791f;" onclick="toggleCollapsibleDoc('corpoDocGen1', this, 'gen1');">
@@ -1194,15 +1198,19 @@
                             <div class="form-group col-medium"><label style="font-size: 11px;">Luogo Nascita:</label><input type="text" id="editGenitore2LuogoNascita" class="campo-controllo-genitore" style="padding: 5px; font-size: 12px;"></div>
                             <div class="form-group col-medium"><label style="font-size: 11px;">Data Nascita:</label><input type="date" id="editGenitore2DataNascita" class="campo-controllo-genitore" style="padding: 5px; font-size: 12px;"></div>
                         </div>
-                        <div class="form-row" id="gruppoGen2CF" style="margin-bottom: 0;">
-                            <div class="form-group col-large">
-                                <label style="font-size: 11px;">Codice Fiscale:</label>
-                                <div style="display: flex; gap: 6px;">
-                                    <input type="text" id="editGenitore2CodiceFiscale" class="campo-controllo-genitore" maxlength="16" style="padding: 5px; font-size: 12px; text-transform: uppercase; margin: 0;">
-                                    <button type="button" class="btn-azione" style="background-color: #007BFF; padding: 0 10px; font-size: 11px; font-weight: bold; height: 30px;" onclick="calcolaCFGenitore(2)">Calcola</button>
-                                </div>
-                            </div>
-                        </div>
+                       <div class="form-row" id="gruppoGen2CF" style="margin-bottom: 0;">
+							<div class="form-group col-large">
+								<label style="font-size: 11px;">Sesso e Codice Fiscale:</label>
+								<div style="display: flex; gap: 6px; align-items: center;">
+									<div style="display: flex; gap: 6px; align-items: center; background: #fff; padding: 2px 6px; border: 1px solid #ced4da; border-radius: 3px; height: 30px; box-sizing: border-box;">
+										<label style="font-size: 11px; font-weight: bold; cursor: pointer; margin: 0;"><input type="radio" name="editGenitore2Sesso" value="M" style="cursor: pointer;"> M</label>
+										<label style="font-size: 11px; font-weight: bold; cursor: pointer; margin: 0;"><input type="radio" name="editGenitore2Sesso" value="F" style="cursor: pointer;"> F</label>
+									</div>
+									<input type="text" id="editGenitore2CodiceFiscale" class="campo-controllo-genitore" maxlength="16" style="padding: 5px; font-size: 12px; text-transform: uppercase; margin: 0; flex: 1;">
+									<button type="button" class="btn-azione" style="background-color: #007BFF; padding: 0 10px; font-size: 11px; font-weight: bold; height: 30px;" onclick="calcolaCFGenitore(2)">Calcola</button>
+								</div>
+							</div>
+						</div>
 
                         <div id="gruppoGen2Doc" style="display: none; margin-top: 5px; margin-bottom: 0;">
 							<div class="collapsible-header" style="background: #fff3cd; color: #b7791f;" onclick="toggleCollapsibleDoc('corpoDocGen2', this, 'gen2');">
@@ -2263,21 +2271,22 @@
         };
 
         window.calcolaCFGenitore = function(numGen) {
-            const cognome = document.getElementById(`editGenitore${numGen}Cognome`).value.trim().toUpperCase();
-            const nome = document.getElementById(`editGenitore${numGen}Nome`).value.trim().toUpperCase();
-            const luogo = document.getElementById(`editGenitore${numGen}LuogoNascita`).value.trim().toUpperCase();
-            const dataNascita = document.getElementById(`editGenitore${numGen}DataNascita`).value.trim();
+			const cognome = document.getElementById(`editGenitore${numGen}Cognome`).value.trim().toUpperCase();
+			const nome = document.getElementById(`editGenitore${numGen}Nome`).value.trim().toUpperCase();
+			const luogo = document.getElementById(`editGenitore${numGen}LuogoNascita`).value.trim().toUpperCase();
+			const dataNascita = document.getElementById(`editGenitore${numGen}DataNascita`).value.trim();
+			const sessoEl = document.querySelector(`input[name="editGenitore${numGen}Sesso"]:checked`);
+			const sesso = sessoEl ? sessoEl.value : 'M';
 
-            if (!cognome || !nome || !luogo || !dataNascita) {
-                alert(`Compila Cognome, Nome, Luogo e Data di Nascita del Genitore ${numGen} per calcolare il Codice Fiscale.`);
-                return;
-            }
-            let cf = calcolaCodiceFiscaleGenerico(cognome, nome, luogo, dataNascita, 'M');
-            if (cf) {
-                document.getElementById(`editGenitore${numGen}CodiceFiscale`).value = cf;
-            }
-        };
-
+			if (!cognome || !nome || !luogo || !dataNascita) {
+				alert(`Compila Cognome, Nome, Luogo e Data di Nascita del Genitore ${numGen} per calcolare il Codice Fiscale.`);
+				return;
+			}
+			let cf = calcolaCodiceFiscaleGenerico(cognome, nome, luogo, dataNascita, sesso);
+			if (cf) {
+				document.getElementById(`editGenitore${numGen}CodiceFiscale`).value = cf;
+			}
+		};
         async function decodificaCfInCampi(cf) {
 			cf = cf.trim().toUpperCase();
 			if (cf.length !== 16) return;
@@ -2331,45 +2340,53 @@
 			eseguiVerificaRuntime();
 		}
 		
-        async function decodificaCfGenitoreInCampi(cf, numGen) {
-            cf = cf.trim().toUpperCase();
-            if (cf.length !== 16) return;
+		async function decodificaCfGenitoreInCampi(cf, numGen) {
+			cf = cf.trim().toUpperCase();
+			if (cf.length !== 16) return;
 
-            const annoCar = cf.substring(6, 8);
-            const meseCar = cf.substring(8, 9);
-            let giornoCar = parseInt(cf.substring(9, 11), 10);
-            if (giornoCar > 40) giornoCar -= 40;
-            
-            let annoNum = parseInt(annoCar, 10);
-            const annoCorrente2CIF = new Date().getFullYear() % 100;
-            let secolo = annoNum <= annoCorrente2CIF ? 2000 : 1900;
-            let annoNascita = secolo + annoNum;
+			const annoCar = cf.substring(6, 8);
+			const meseCar = cf.substring(8, 9);
+			let giornoCar = parseInt(cf.substring(9, 11), 10);
+			
+			// Gestione automatica Genere da Codice Fiscale
+			if (giornoCar > 40) {
+				const radioF = document.querySelector(`input[name="editGenitore${numGen}Sesso"][value="F"]`);
+				if (radioF) radioF.checked = true;
+				giornoCar -= 40;
+			} else {
+				const radioM = document.querySelector(`input[name="editGenitore${numGen}Sesso"][value="M"]`);
+				if (radioM) radioM.checked = true;
+			}
+			
+			let annoNum = parseInt(annoCar, 10);
+			const annoCorrente2CIF = new Date().getFullYear() % 100;
+			let secolo = annoNum <= annoCorrente2CIF ? 2000 : 1900;
+			let annoNascita = secolo + annoNum;
 
-            const mesiCodice = { 'A': '01', 'B': '02', 'C': '03', 'D': '04', 'E': '05', 'H': '06', 'L': '07', 'M': '08', 'P': '09', 'R': '10', 'S': '11', 'T': '12' };
-            let meseNum = mesiCodice[meseCar] || '01';
+			const mesiCodice = { 'A': '01', 'B': '02', 'C': '03', 'D': '04', 'E': '05', 'H': '06', 'L': '07', 'M': '08', 'P': '09', 'R': '10', 'S': '11', 'T': '12' };
+			let meseNum = mesiCodice[meseCar] || '01';
 
-            let giornoStr = String(giornoCar).padStart(2, '0');
+			let giornoStr = String(giornoCar).padStart(2, '0');
 
-            const dataNascitaIso = `${annoNascita}-${meseNum}-${giornoStr}`;
-            document.getElementById(`editGenitore${numGen}DataNascita`).value = dataNascitaIso;
+			const dataNascitaIso = `${annoNascita}-${meseNum}-${giornoStr}`;
+			document.getElementById(`editGenitore${numGen}DataNascita`).value = dataNascitaIso;
 
-            const codCatastale = cf.substring(11, 15);
+			const codCatastale = cf.substring(11, 15);
 
-            if (!dizionarioCaricato) {
-                let tentativi = 0;
-                while (!dizionarioCaricato && tentativi < 15) {
-                    await new Promise(r => setTimeout(r, 200));
-                    tentativi++;
-                }
-            }
-            
-            if (dizionarioComuniCatastali && dizionarioComuniCatastali[codCatastale]) {
-                document.getElementById(`editGenitore${numGen}LuogoNascita`).value = dizionarioComuniCatastali[codCatastale];
-            } else {
-                document.getElementById(`editGenitore${numGen}LuogoNascita`).value = ""; 
-            }
-        }
-
+			if (!dizionarioCaricato) {
+				let tentativi = 0;
+				while (!dizionarioCaricato && tentativi < 15) {
+					await new Promise(r => setTimeout(r, 200));
+					tentativi++;
+				}
+			}
+			
+			if (dizionarioComuniCatastali && dizionarioComuniCatastali[codCatastale]) {
+				document.getElementById(`editGenitore${numGen}LuogoNascita`).value = dizionarioComuniCatastali[codCatastale];
+			} else {
+				document.getElementById(`editGenitore${numGen}LuogoNascita`).value = ""; 
+			}
+		}
         document.getElementById('editGenitore1CodiceFiscale').addEventListener('input', function(e) {
             let val = e.target.value.trim().toUpperCase();
             if (val.length === 16) decodificaCfGenitoreInCampi(val, 1);
@@ -3373,21 +3390,15 @@ async function apriModaleEsistente(p) {
 			document.getElementById('editNonIscrivibile').checked = Boolean(p.non_iscrivibile);
 
 			// Caricamento Sesso (Maschio / Femmina)
-			const sessoVal = String(p.sesso || '').toUpperCase();
-			const radioSesso = document.querySelector(`input[name="editSesso"][value="${sessoVal}"]`);
-			if (radioSesso) {
-				radioSesso.checked = true;
-				window.gestisciSelezioneSesso();
-			} else {
-				// Se non presente sul database, deseleziona entrambi e disabilita il calcola
-				document.querySelectorAll('input[name="editSesso"]').forEach(r => r.checked = false);
-				const btnCalcola = document.getElementById('btnCalcolaCF');
-				if (btnCalcola) {
-					btnCalcola.disabled = true;
-					btnCalcola.style.opacity = "0.6";
-					btnCalcola.style.cursor = "not-allowed";
-				}
-			}
+			const gen1SessoVal = String(p.genitore1_sesso || '').toUpperCase();
+			const radioGen1Sesso = document.querySelector(`input[name="editGenitore1Sesso"][value="${gen1SessoVal}"]`);
+			if (radioGen1Sesso) radioGen1Sesso.checked = true;
+			else document.querySelectorAll('input[name="editGenitore1Sesso"]').forEach(r => r.checked = false);
+
+			const gen2SessoVal = String(p.genitore2_sesso || '').toUpperCase();
+			const radioGen2Sesso = document.querySelector(`input[name="editGenitore2Sesso"][value="${gen2SessoVal}"]`);
+			if (radioGen2Sesso) radioGen2Sesso.checked = true;
+			else document.querySelectorAll('input[name="editGenitore2Sesso"]').forEach(r => r.checked = false);
 
 			const isAdmin = (modalitaCorrente === 'admin');
 			document.getElementById('gruppoFlagNonIscrivibile').style.display = isAdmin ? 'flex' : 'none';
@@ -3498,6 +3509,8 @@ async function apriModaleEsistente(p) {
             
             // Deseleziona entrambi i radio button del sesso
             document.querySelectorAll('input[name="editSesso"]').forEach(r => r.checked = false);
+
+			document.querySelectorAll('input[name="editGenitore1Sesso"], input[name="editGenitore2Sesso"]').forEach(r => r.checked = false);
 
             // Disabilita il pulsante Calcola all'apertura del nuovo utente
             const btnCalcola = document.getElementById('btnCalcolaCF');
@@ -4007,6 +4020,7 @@ async function apriModaleEsistente(p) {
                 genitore1_scadenza_doc: document.getElementById('editGenitore1ScadenzaDoc').value.trim(),
                 immagine_documento_gen1_1: document.getElementById('editUrl_gen1_1').value.trim(),
                 immagine_documento_gen1_2: document.getElementById('editUrl_gen1_2').value.trim(),
+				genitore1_sesso: document.querySelector('input[name="editGenitore1Sesso"]:checked')?.value || '',
 
                 genitore2_cognome: document.getElementById('editGenitore2Cognome').value.trim().toUpperCase(),
                 genitore2_nome: document.getElementById('editGenitore2Nome').value.trim(),
@@ -4018,6 +4032,7 @@ async function apriModaleEsistente(p) {
                 genitore2_scadenza_doc: document.getElementById('editGenitore2ScadenzaDoc').value.trim(),
                 immagine_documento_gen2_1: document.getElementById('editUrl_gen2_1').value.trim(),
                 immagine_documento_gen2_2: document.getElementById('editUrl_gen2_2').value.trim(),
+				genitore2_sesso: document.querySelector('input[name="editGenitore2Sesso"]:checked')?.value || '',
 
                 stato_onorificenza: document.getElementById('badgeStatoOnorificenza').textContent.trim(),
                 tigre: document.getElementById('editTigre').checked,
