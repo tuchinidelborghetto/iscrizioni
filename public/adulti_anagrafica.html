@@ -3544,6 +3544,12 @@ async function apriModaleEsistente(p) {
             document.getElementById('editUrl_iscritto_2').value = "";
             aggiornaStatoUIImmagini('iscritto');
             
+            ['gen1', 'gen2'].forEach(sogg => {
+                document.getElementById(`editUrl_${sogg}_1`).value = "";
+                document.getElementById(`editUrl_${sogg}_2`).value = "";
+                aggiornaStatoUIImmagini(sogg);
+            });
+            
             // --- GESTIONE ELEGANTE DELLA COLONNA DESTRA (INSERIMENTO PLACEHOLDER) ---
             const storicoContainer = document.getElementById('sezioneStoricoContainer');
             storicoContainer.style.display = 'block';
@@ -5327,9 +5333,11 @@ async function apriModaleEsistente(p) {
 				document.getElementById('editTigre').disabled = isUserMode;
 				document.getElementById('editCapitanoPiazza').disabled = isUserMode;
 				
-				document.getElementById('editUrl_iscritto_1').value = "";
-				document.getElementById('editUrl_iscritto_2').value = "";
-				aggiornaStatoUIImmagini('iscritto');
+				['iscritto', 'gen1', 'gen2'].forEach(sogg => {
+					document.getElementById(`editUrl_${sogg}_1`).value = "";
+					document.getElementById(`editUrl_${sogg}_2`).value = "";
+					aggiornaStatoUIImmagini(sogg);
+				});
 				
 				const storicoContainer = document.getElementById('sezioneStoricoContainer');
 				storicoContainer.style.display = 'block';
