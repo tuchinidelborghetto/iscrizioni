@@ -3381,6 +3381,7 @@
 			document.getElementById('editUrl_gen2_1').value = "";
 			document.getElementById('editUrl_gen2_2').value = "";
 			aggiornaStatoUIImmagini('gen2');
+			
 			document.getElementById('editIdPersona').value = p.id;
 			document.getElementById('editCognome').value = pulisciTesto(p.cognome);
 			document.getElementById('editNome').value = pulisciTesto(p.nome);
@@ -4110,7 +4111,6 @@
                 const nuovoStato = document.getElementById('badgeStatoOnorificenza').textContent.trim();
                 await setDoc(doc(db, NOME_COLL_ANAGRAFICA, idPersona), {
 					stato_onorificenza: nuovoStato
-				}, { merge: true });
                 }, { merge: true });
             } catch (e) {
                 console.error("Errore aggiornamento automatico stato onorificenza sul DB:", e);

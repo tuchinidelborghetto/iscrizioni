@@ -4111,7 +4111,6 @@
                 const nuovoStato = document.getElementById('badgeStatoOnorificenza').textContent.trim();
                 await setDoc(doc(db, NOME_COLL_ANAGRAFICA, idPersona), {
 					stato_onorificenza: nuovoStato
-				}, { merge: true });
                 }, { merge: true });
             } catch (e) {
                 console.error("Errore aggiornamento automatico stato onorificenza sul DB:", e);
