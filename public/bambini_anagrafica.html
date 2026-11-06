@@ -3636,7 +3636,7 @@
             if (confirm("Eliminare definitivamente l'anagrafica, lo storico e i documenti associati?")) {
                 try {
                     mostraCaricamento("Eliminazione anagrafica e documenti in corso...");
-                    const docRefPersona = doc(db, "anagrafica", id);
+                    const docRefPersona = doc(db, NOME_COLL_ANAGRAFICA, id);
                     const docSnapPersona = await getDoc(docRefPersona);
                     let nomeCompletoLog = `ID: ${id}`;
                     
@@ -3663,7 +3663,7 @@
                     
                     // Elimina lo storico iscrizioni
                     const snap = await getDocs(query(COLLECTION_STORICO, where("id_persona", "==", id)));
-                    await Promise.all(snap.docs.map(d => deleteDoc(doc(db, "storico", d.id))));
+                    await Promise.all(snap.docs.map(d => deleteDoc(doc(db, NOME_COLL_STORICO, d.id))));
                     
                     // Elimina l'anagrafica principale
                     await deleteDoc(docRefPersona);
@@ -3852,12 +3852,12 @@
                     }
                 }
 
-                await setDoc(doc(db, "storico", storicoId), { 
-                    anno: String(nuovoAnno),
-                    tipo_iscrizione: nuovoTipo, 
-                    tipologia: nuovoTipo,
-                    numero_identificativo: nuovoTipo === "Socio Sostenitore" ? "N/D" : nuovoNum 
-                }, { merge: true });
+                await setDoc(doc(db, NOME_COLL_STORICO, storicoId), { 
+					anno: String(nuovoAnno),
+					tipo_iscrizione: nuovoTipo, 
+					tipologia: nuovoTipo,
+					numero_identificativo: nuovoTipo === "Socio Sostenitore" ? "N/D" : nuovoNum 
+				}, { merge: true });
                 
                 await registraLog("Modifica iscrizione", `Anno ${nuovoAnno} - ${nuovoTipo}`);
 
@@ -4109,8 +4109,9 @@
             if (!idPersona || idPersona.startsWith('temp_')) return;
             try {
                 const nuovoStato = document.getElementById('badgeStatoOnorificenza').textContent.trim();
-                await setDoc(doc(db, "anagrafica", idPersona), {
-                    stato_onorificenza: nuovoStato
+                await setDoc(doc(db, NOME_COLL_ANAGRAFICA, idPersona), {
+					stato_onorificenza: nuovoStato
+				}, { merge: true });
                 }, { merge: true });
             } catch (e) {
                 console.error("Errore aggiornamento automatico stato onorificenza sul DB:", e);
@@ -4230,7 +4231,7 @@
 					let nuovoStato = calcolaStatoOnorificenzaDaAnni(anniArr);
 
 					// Prepara l'aggiornamento del documento su Firestore
-					batchPromises.push(setDoc(doc(db, "anagrafica", idPers), {
+					batchPromises.push(setDoc(doc(db, NOME_COLL_ANAGRAFICA, idPers), {
 						stato_onorificenza: nuovoStato
 					}, { merge: true }));
 
