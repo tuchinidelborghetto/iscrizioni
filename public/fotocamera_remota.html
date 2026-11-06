@@ -61,6 +61,37 @@
             display: block;
         }
 
+        /* Rettangolo guida per il documento (Proporzione ID-1: ~1.58 / 85.6mm x 54mm) */
+        .doc-guide {
+            position: absolute;
+            top: 8%;    /* Posizionato più in alto rispetto al centro */
+            width: 60%; 
+            height: 70%; 
+            border: 2px dashed rgba(255, 255, 255, 0.9);
+            border-radius: 6px;
+            box-shadow: 0 0 0 2000px rgba(0, 0, 0, 0.4); 
+            pointer-events: none; 
+            box-sizing: border-box;
+
+            /* Proprietà per centrare la scritta al suo interno */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            text-align: center;
+        }
+
+        /* Stile del testo semitrasparente dentro al riquadro */
+        .doc-guide span {
+            color: rgba(255, 255, 255, 0.6); 
+            font-size: 14px;
+            font-weight: bold;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+            user-select: none;
+            transform: rotate(90deg); /* Ruota la scritta di 90° in senso orario */
+            white-space: nowrap;      /* Impedisce al testo di andare a capo spezzandosi */
+        }
+
         /* Testo in sovrimpressione */
         .overlay-testo {
             position: absolute;
@@ -76,6 +107,7 @@
             justify-content: center;
             border-top: 1px solid rgba(255,255,255,0.2);
             transition: background 0.2s;
+            z-index: 2;
         }
         .video-container:active .overlay-testo {
             background: rgba(40, 167, 69, 0.85); 
@@ -122,7 +154,7 @@
 </head>
 <body>
 
-    <div class="versione-app">Ver. 01.30</div>
+    <div class="versione-app">Ver. 01.32</div>
 
     <div>
         <h3 id="titoloSoggetto">Acquisizione Documento</h3>
@@ -130,10 +162,18 @@
 
     <div class="video-container" id="videoContainer" onclick="scattaEInviaRemota()">
         <video id="webcamVideo" autoplay playsinline muted></video>
+
+        <!-- Rettangolo guida con testo semitrasparente -->
+        <div class="doc-guide">
+            <span>Posiziona qui il documento</span>
+        </div>
         
+        <!-- Rettangolo guida visivo per l'utente -->
+        <div class="doc-guide"></div>
+
         <div class="overlay-testo">
             <div id="istruzioniStep">Tap per scattare la foto del <span class="evidenziatore-fronte" id="testoLato">FRONTE</span></div>
-            <div class="suggerimento-tap">📸 Tocca l'immagine per catturare</div>
+            <div class="suggerimento-tap">📸 Inquadra nel rettangolo e tocca per catturare</div>
         </div>
     </div>
 
@@ -159,6 +199,7 @@
             appId: "1:803347064813:web:430a3fc4d0d1a3aa72e9e4"
         };
 
+        // Corretto l'errore di assegnazione non dichiarata
         const app = initializeApp(firebaseConfig);
         const storage = getStorage(app);
 
@@ -243,8 +284,6 @@
                 await uploadString(sRef, base64Compresso, 'data_url');
 
                 loader.style.display = 'none';
-
-                // L'attesa di 1 secondo è stata rimossa completamente (tempo di attesa azzerato)
 
                 if (slotCorrente === 1) {
                     slotCorrente = 2;
