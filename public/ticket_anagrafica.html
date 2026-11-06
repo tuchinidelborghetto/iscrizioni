@@ -198,7 +198,7 @@
                         <input type="date" id="dataNascita" onchange="validaForm()" oninput="validaForm()">
                     </div>
                     <div>
-                        <label class="campo-label">Luogo di Nascita</label>
+                        <label class="campo-label">Luogo di Nascita *</label>
                         <input type="text" id="luogoNascita" placeholder="Es. Ivrea">
                     </div>
                 </div>
@@ -212,10 +212,10 @@
                     </div>
                 </div>
 
-                <label class="campo-label">Codice Fiscale</label>
+                <label class="campo-label">Codice Fiscale *</label>
                 <input type="text" id="codiceFiscale" placeholder="Es. RSSMRA90A01E379X" style="text-transform: uppercase;">
 
-                <label class="campo-label">Indirizzo di Residenza</label>
+                <label class="campo-label">Indirizzo di Residenza *</label>
                 <input type="text" id="indirizzo" placeholder="Via / Piazza e numero civico">
 
                 <div class="riga-doppia">
@@ -258,50 +258,50 @@
 
                 <!-- CONTENITORE DELEGANTE SOLO CF -->
                 <div id="containerDelegatoSoloCF" style="display: none;">
-                    <label class="campo-label">Codice Fiscale Delegante *</label>
+                    <label class="campo-label">Codice Fiscale *</label>
                     <input type="text" id="codiceFiscaleDelegatoSolo" placeholder="Es. RSSMRA90A01E379X" style="text-transform: uppercase;" oninput="validaForm()">
 
-                    <label class="campo-label">Data di Nascita Delegante *</label>
+                    <label class="campo-label">Data di Nascita *</label>
                     <input type="date" id="dataNascitaDelegatoSolo" onchange="validaForm()" oninput="validaForm()">
                 </div>
 
                 <!-- CONTENITORE DELEGANTE DATI COMPLETI -->
                 <div id="containerDelegatoDatiCompleti">
-                    <label class="campo-label">Numero di Telefono Delegante</label>
+                    <label class="campo-label">Numero di Telefono *</label>
                     <input type="tel" id="telefonoDelegato" placeholder="Es. 3331234567" autocomplete="tel">
 
                     <div class="riga-doppia">
                         <div>
-                            <label class="campo-label">Data di Nascita Delegante</label>
+                            <label class="campo-label">Data di Nascita *</label>
                             <input type="date" id="dataNascitaDelegato">
                         </div>
                         <div>
-                            <label class="campo-label">Luogo di Nascita Delegante</label>
+                            <label class="campo-label">Luogo di Nascita *</label>
                             <input type="text" id="luogoNascitaDelegato" placeholder="Es. Ivrea">
                         </div>
                     </div>
 
                     <div class="sezione-sesso">
-                        <label class="campo-label">Sesso Delegante</label>
+                        <label class="campo-label">Sesso *</label>
                         <div class="opzioni-sesso">
                             <label class="opzione-radio"><input type="radio" name="sessoDelegato" value="M" checked> M</label>
                             <label class="opzione-radio"><input type="radio" name="sessoDelegato" value="F"> F</label>
                         </div>
                     </div>
 
-                    <label class="campo-label">Codice Fiscale Delegante</label>
+                    <label class="campo-label">Codice Fiscale *</label>
                     <input type="text" id="codiceFiscaleDelegato" placeholder="Es. RSSMRA90A01E379X" style="text-transform: uppercase;">
 
-                    <label class="campo-label">Indirizzo di Residenza Delegante</label>
+                    <label class="campo-label">Indirizzo di Residenza *</label>
                     <input type="text" id="indirizzoDelegato" placeholder="Via / Piazza e numero civico">
 
                     <div class="riga-doppia">
                         <div>
-                            <label class="campo-label">Città Delegante</label>
+                            <label class="campo-label">Città *</label>
                             <input type="text" id="cittaResidenzaDelegato" placeholder="Città">
                         </div>
                         <div>
-                            <label class="campo-label">CAP Delegante</label>
+                            <label class="campo-label">CAP *</label>
                             <input type="text" id="capResidenzaDelegato" placeholder="10015">
                         </div>
                     </div>

@@ -3352,7 +3352,7 @@
 		
         const modal = document.getElementById('editModal');
 
-async function apriModaleEsistente(p) {
+		async function apriModaleEsistente(p) {
 			await registraLog("Apertura Anagrafica", `${p.cognome} ${p.nome}`);
 
 			// 1. Ferma eventuali sessioni e polling QR attivi della scheda precedente
@@ -4178,8 +4178,7 @@ async function apriModaleEsistente(p) {
 				await registraLog("Modifica Anagrafica", `${datiCorrenti.cognome} ${datiCorrenti.nome}`);
 
 				nascondiCaricamento();
-				alert("✅ Anagrafica salvata con successo senza alterare i campi non specificati!");
-
+				
 				// Aggiorna la ricerca testuale in tempo reale se attiva
 				const campoFiltro = document.getElementById('filtroCognome');
 				if (campoFiltro && campoFiltro.value.trim().length >= 2) {
