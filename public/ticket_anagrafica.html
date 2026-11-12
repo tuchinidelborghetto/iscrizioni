@@ -1,4 +1,4 @@
-=<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -35,7 +35,7 @@
         .sottotitolo { font-size: 14px; color: #6b7280; margin-bottom: 24px; line-height: 1.4; text-align: center; }
 
         label.campo-label { font-size: 12px; font-weight: 700; color: #4b5563; margin-top: 12px; display: block; }
-        input[type="text"], input[type="tel"], input[type="date"] { 
+        input[type="text"], input[type="tel"], input[type="date"], input[type="email"], select { 
             width: 100%; 
             padding: 14px; 
             margin-top: 4px; 
@@ -45,8 +45,9 @@
             outline: none; 
             background: #f9fafb;
             transition: all 0.2s ease;
+            color: #1f2937;
         }
-        input:focus { 
+        input:focus, select:focus { 
             border-color: #2563eb; 
             background: #fff;
             box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); 
@@ -154,7 +155,9 @@
         <img src="logotuchini.png" alt="Logo" class="logo-aziendale">
         
         <h2>Iscrizioni 2027</h2>
-        <p class="sottotitolo">Nell'attesa, compila la tua anagrafica per aiutarci a velocizzare le operazioni di isrcrizione. <br><br><strong style="color: #e63922;"> I dati verranno trasferiti automaticamente nel databse, ti chiediamo la cortesia di compilarli con la massima attenzione!</strong></p>
+        <p id="testoAvvisoCompilazione" class="sottotitolo">Approfitta dell'attesa per portarti avanti: inserisci i tuoi dati e velocizza l'iscrizione!
+			<br><br><strong style="color: #e63922;"> I dati verranno trasferiti automaticamente nel database, ti chiediamo la cortesia di compilarli con la massima attenzione!</strong>
+		</p>
 
         <!-- FASE 1: Inserimento Dati Anagrafici -->
         <div id="schermataForm">
@@ -183,14 +186,49 @@
                 <label class="campo-label">Codice Fiscale *</label>
                 <input type="text" id="codiceFiscaleSolo" placeholder="Es. RSSMRA90A01E379X" style="text-transform: uppercase;" oninput="validaForm()">
 
-                <label class="campo-label">Data di Nascita *</label>
-                <input type="date" id="dataNascitaSolo" onchange="validaForm()" oninput="validaForm()">
+                <div class="riga-doppia">
+                    <div>
+                        <label class="campo-label">Data di Nascita *</label>
+                        <input type="date" id="dataNascitaSolo" onchange="validaForm()" oninput="validaForm()">
+                    </div>
+                    <div>
+                        <label class="campo-label">Email *</label>
+                        <input type="email" id="emailUtenteSolo" placeholder="nome@esempio.it" autocomplete="email" oninput="validaForm()">
+                    </div>
+                </div>
+
+                <label class="campo-label">Tipo Documento *</label>
+                <select id="tipoDocumentoUtenteSolo" onchange="validaForm()">
+                    <option value="">-- Seleziona documento --</option>
+                    <option value="Carta Identità">Carta Identità</option>
+                    <option value="Passaporto">Passaporto</option>
+                    <option value="Patente">Patente</option>
+                </select>
+
+                <div class="riga-doppia">
+                    <div>
+                        <label class="campo-label">Numero Documento *</label>
+                        <input type="text" id="numeroDocumentoUtenteSolo" placeholder="Es. CA12345AA" style="text-transform: uppercase;" oninput="validaForm()">
+                    </div>
+                    <div>
+                        <label class="campo-label">Scadenza Documento *</label>
+                        <input type="date" id="scadenzaDocumentoUtenteSolo" onchange="validaForm()" oninput="validaForm()">
+                    </div>
+                </div>
             </div>
 
             <!-- CONTENITORE SE NON ISCRITTO (TUTTI I DATI) -->
             <div id="containerDatiCompleti">
-                <label class="campo-label">Numero di Telefono *</label>
-                <input type="tel" id="telefonoUtente" placeholder="Es. 3331234567" autocomplete="tel" oninput="validaForm()">
+                <div class="riga-doppia">
+                    <div>
+                        <label class="campo-label">Numero di Telefono *</label>
+                        <input type="tel" id="telefonoUtente" placeholder="Es. 3331234567" autocomplete="tel" oninput="validaForm()">
+                    </div>
+                    <div>
+                        <label class="campo-label">Email *</label>
+                        <input type="email" id="emailUtente" placeholder="nome@esempio.it" autocomplete="email" oninput="validaForm()">
+                    </div>
+                </div>
 
                 <div class="riga-doppia">
                     <div>
@@ -228,6 +266,25 @@
                         <input type="text" id="capResidenza" placeholder="10015" oninput="validaForm()">
                     </div>
                 </div>
+
+                <label class="campo-label">Tipo Documento *</label>
+                <select id="tipoDocumentoUtente" onchange="validaForm()">
+                    <option value="">-- Seleziona documento --</option>
+                    <option value="Carta Identità">Carta Identità</option>
+                    <option value="Passaporto">Passaporto</option>
+                    <option value="Patente">Patente</option>
+                </select>
+
+                <div class="riga-doppia">
+                    <div>
+                        <label class="campo-label">Numero Documento *</label>
+                        <input type="text" id="numeroDocumentoUtente" placeholder="Es. CA12345AA" style="text-transform: uppercase;" oninput="validaForm()">
+                    </div>
+                    <div>
+                        <label class="campo-label">Scadenza Documento *</label>
+                        <input type="date" id="scadenzaDocumentoUtente" onchange="validaForm()" oninput="validaForm()">
+                    </div>
+                </div>
             </div>
             
             <label class="delega-container">
@@ -261,19 +318,54 @@
                     <label class="campo-label">Codice Fiscale *</label>
                     <input type="text" id="codiceFiscaleDelegatoSolo" placeholder="Es. RSSMRA90A01E379X" style="text-transform: uppercase;" oninput="validaForm()">
 
-                    <label class="campo-label">Data di Nascita *</label>
-                    <input type="date" id="dataNascitaDelegatoSolo" onchange="validaForm()" oninput="validaForm()">
+                    <div class="riga-doppia">
+                        <div>
+                            <label class="campo-label">Data di Nascita *</label>
+                            <input type="date" id="dataNascitaDelegatoSolo" onchange="validaForm()" oninput="validaForm()">
+                        </div>
+                        <div>
+                            <label class="campo-label">Email *</label>
+                            <input type="email" id="emailDelegatoSolo" placeholder="nome@esempio.it" autocomplete="email" oninput="validaForm()">
+                        </div>
+                    </div>
+
+                    <label class="campo-label">Tipo Documento *</label>
+                    <select id="tipoDocumentoDelegatoSolo" onchange="validaForm()">
+                        <option value="">-- Seleziona documento --</option>
+                        <option value="Carta Identità">Carta Identità</option>
+                        <option value="Passaporto">Passaporto</option>
+                        <option value="Patente">Patente</option>
+                    </select>
+
+                    <div class="riga-doppia">
+                        <div>
+                            <label class="campo-label">Numero Documento *</label>
+                            <input type="text" id="numeroDocumentoDelegatoSolo" placeholder="Es. CA12345AA" style="text-transform: uppercase;" oninput="validaForm()">
+                        </div>
+                        <div>
+                            <label class="campo-label">Scadenza Documento *</label>
+                            <input type="date" id="scadenzaDocumentoDelegatoSolo" onchange="validaForm()" oninput="validaForm()">
+                        </div>
+                    </div>
                 </div>
 
                 <!-- CONTENITORE DELEGANTE DATI COMPLETI -->
                 <div id="containerDelegatoDatiCompleti">
-                    <label class="campo-label">Numero di Telefono *</label>
-                    <input type="tel" id="telefonoDelegato" placeholder="Es. 3331234567" autocomplete="tel">
+                    <div class="riga-doppia">
+                        <div>
+                            <label class="campo-label">Numero di Telefono *</label>
+                            <input type="tel" id="telefonoDelegato" placeholder="Es. 3331234567" autocomplete="tel" oninput="validaForm()">
+                        </div>
+                        <div>
+                            <label class="campo-label">Email *</label>
+                            <input type="email" id="emailDelegato" placeholder="nome@esempio.it" autocomplete="email" oninput="validaForm()">
+                        </div>
+                    </div>
 
                     <div class="riga-doppia">
                         <div>
                             <label class="campo-label">Data di Nascita *</label>
-                            <input type="date" id="dataNascitaDelegato">
+                            <input type="date" id="dataNascitaDelegato" onchange="validaForm()" oninput="validaForm()">
                         </div>
                         <div>
                             <label class="campo-label">Luogo di Nascita *</label>
@@ -303,6 +395,25 @@
                         <div>
                             <label class="campo-label">CAP *</label>
                             <input type="text" id="capResidenzaDelegato" placeholder="10015">
+                        </div>
+                    </div>
+
+                    <label class="campo-label">Tipo Documento *</label>
+                    <select id="tipoDocumentoDelegato" onchange="validaForm()">
+                        <option value="">-- Seleziona documento --</option>
+                        <option value="Carta Identità">Carta Identità</option>
+                        <option value="Passaporto">Passaporto</option>
+                        <option value="Patente">Patente</option>
+                    </select>
+
+                    <div class="riga-doppia">
+                        <div>
+                            <label class="campo-label">Numero Documento *</label>
+                            <input type="text" id="numeroDocumentoDelegato" placeholder="Es. CA12345AA" style="text-transform: uppercase;" oninput="validaForm()">
+                        </div>
+                        <div>
+                            <label class="campo-label">Scadenza Documento *</label>
+                            <input type="date" id="scadenzaDocumentoDelegato" onchange="validaForm()" oninput="validaForm()">
                         </div>
                     </div>
                 </div>
@@ -338,13 +449,13 @@
             <p style="margin:0; font-size: 15px; color: #78350f;">Ciao <span id="marioNome" style="font-weight:700;"></span>,</p>
             <div id="mioNumeroBiglietto" class="badge-numero">Il tuo biglietto è il N° -</div>
             <div class="numero-evidenza" id="personeDavanti">...</div>
-            <p style="font-size: 13px; color: #92400e; margin-bottom:0; line-height: 1.4;">Tieni questa pagina aperta.</p>
+            <p style="font-size: 13px; color: #92400e; margin-bottom:0; line-height: 1.4;">Tieni questa pagina aperta per rimanere sempre aggiornato. <br><br><strong>Quando verrai chiamato ti serviranno i seguenti documenti: <br>carta di identità <br>codice fiscale.</strong><br>Tienili a portata di mano!</p>
         </div>
 
         <!-- FASE 3: Turno Arrivato -->
         <div id="schermataChiamata">
             <h3 style="margin-top:0; color: #166534; font-size: 24px;">📢 È IL TUO TURNO!</h3>
-            <div class="turno-chiamata"><span id="nomeChiamato" style="font-weight: 800;"></span> è il tuo turno!<br><span style="font-size: 16px; font-weight: 500; color: #15803d;">Presentati al banco con il numero <span id="numeroChiamato" style="font-weight: 700;"></span></span></div>
+            <div class="turno-chiamata"><span id="nomeChiamato" style="font-weight: 800;"></span> <span style="font-size: 20px; font-weight: 200; color: #15803d;">prepara modulistica, documenti e presentati in cassa con il numero <span id="numeroChiamato" style="font-weight: 700;"></span></span></div>
         </div>
 
         <!-- FASE 4: Iscrizione Effettuata -->
@@ -357,6 +468,15 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
         import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+
+        function formattaDataIT(rawDate) {
+            if (!rawDate) return "";
+            const parti = rawDate.split('-');
+            if (parti.length === 3) {
+                return `${parti[2]}.${parti[1]}.${parti[0]}`;
+            }
+            return rawDate;
+        }
 
         window.toggleCampiIscritto = function(giaIscritto) {
             document.getElementById('containerSoloCF').style.display = giaIscritto ? 'block' : 'none';
@@ -395,42 +515,71 @@
             if (giaIscritto) {
                 const cfSolo = document.getElementById('codiceFiscaleSolo').value.trim();
                 const dataSolo = document.getElementById('dataNascitaSolo').value;
-                document.getElementById('btnInvia').disabled = (cfSolo.length < 16 || !dataSolo);
+                const emailSolo = document.getElementById('emailUtenteSolo').value.trim();
+                const tipoDocSolo = document.getElementById('tipoDocumentoUtenteSolo').value;
+                const numDocSolo = document.getElementById('numeroDocumentoUtenteSolo').value.trim();
+                const scadDocSolo = document.getElementById('scadenzaDocumentoUtenteSolo').value;
+
+                if (cfSolo.length < 16 || !dataSolo || !emailSolo || !tipoDocSolo || !numDocSolo || !scadDocSolo) {
+                    document.getElementById('btnInvia').disabled = true;
+                    return;
+                }
             } else {
                 const telefono = document.getElementById('telefonoUtente').value.trim();
+                const email = document.getElementById('emailUtente').value.trim();
                 const dataNascita = document.getElementById('dataNascita').value;
                 const citta = document.getElementById('cittaResidenza').value.trim();
                 const cap = document.getElementById('capResidenza').value.trim();
+                const tipoDoc = document.getElementById('tipoDocumentoUtente').value;
+                const numDoc = document.getElementById('numeroDocumentoUtente').value.trim();
+                const scadDoc = document.getElementById('scadenzaDocumentoUtente').value;
                 
-                if (!telefono || !dataNascita || !citta || !cap) {
+                if (!telefono || !email || !dataNascita || !citta || !cap || !tipoDoc || !numDoc || !scadDoc) {
+                    document.getElementById('btnInvia').disabled = true;
+                    return;
+                }
+            }
+
+            const conDelega = document.getElementById('checkDelega').checked;
+            if (conDelega) {
+                const nomeDel = document.getElementById('nomeDelegato').value.trim();
+                const cognomeDel = document.getElementById('cognomeDelegato').value.trim();
+                const giaIscrittoDelRadio = document.querySelector('input[name="giaIscrittoDelegato"]:checked');
+                const giaIscrittoDel = giaIscrittoDelRadio ? giaIscrittoDelRadio.value === 'si' : false;
+
+                if (!nomeDel || !cognomeDel) {
                     document.getElementById('btnInvia').disabled = true;
                     return;
                 }
 
-                const conDelega = document.getElementById('checkDelega').checked;
-                if (conDelega) {
-                    const nomeDel = document.getElementById('nomeDelegato').value.trim();
-                    const cognomeDel = document.getElementById('cognomeDelegato').value.trim();
-                    const giaIscrittoDelRadio = document.querySelector('input[name="giaIscrittoDelegato"]:checked');
-                    const giaIscrittoDel = giaIscrittoDelRadio ? giaIscrittoDelRadio.value === 'si' : false;
+                if (giaIscrittoDel) {
+                    const cfDelSolo = document.getElementById('codiceFiscaleDelegatoSolo').value.trim();
+                    const dataDelSolo = document.getElementById('dataNascitaDelegatoSolo').value;
+                    const emailDelSolo = document.getElementById('emailDelegatoSolo').value.trim();
+                    const tipoDocDelSolo = document.getElementById('tipoDocumentoDelegatoSolo').value;
+                    const numDocDelSolo = document.getElementById('numeroDocumentoDelegatoSolo').value.trim();
+                    const scadDocDelSolo = document.getElementById('scadenzaDocumentoDelegatoSolo').value;
 
-                    if (!nomeDel || !cognomeDel) {
+                    if (cfDelSolo.length < 16 || !dataDelSolo || !emailDelSolo || !tipoDocDelSolo || !numDocDelSolo || !scadDocDelSolo) {
                         document.getElementById('btnInvia').disabled = true;
                         return;
                     }
+                } else {
+                    const telDel = document.getElementById('telefonoDelegato').value.trim();
+                    const emailDel = document.getElementById('emailDelegato').value.trim();
+                    const dataDel = document.getElementById('dataNascitaDelegato').value;
+                    const tipoDocDel = document.getElementById('tipoDocumentoDelegato').value;
+                    const numDocDel = document.getElementById('numeroDocumentoDelegato').value.trim();
+                    const scadDocDel = document.getElementById('scadenzaDocumentoDelegato').value;
 
-                    if (giaIscrittoDel) {
-                        const cfDelSolo = document.getElementById('codiceFiscaleDelegatoSolo').value.trim();
-                        const dataDelSolo = document.getElementById('dataNascitaDelegatoSolo').value;
-                        if (cfDelSolo.length < 16 || !dataDelSolo) {
-                            document.getElementById('btnInvia').disabled = true;
-                            return;
-                        }
+                    if (!telDel || !emailDel || !dataDel || !tipoDocDel || !numDocDel || !scadDocDel) {
+                        document.getElementById('btnInvia').disabled = true;
+                        return;
                     }
                 }
-
-                document.getElementById('btnInvia').disabled = false;
             }
+
+            document.getElementById('btnInvia').disabled = false;
         };
 
         window.validaRiserva = function() {
@@ -510,32 +659,24 @@
 
             if (giaIscritto) {
                 datiUtente.codiceFiscale = document.getElementById('codiceFiscaleSolo').value.trim().toUpperCase();
-                const rawDataNascitaSolo = document.getElementById('dataNascitaSolo').value;
-                let dataNascitaSolo = rawDataNascitaSolo;
-                if (rawDataNascitaSolo) {
-                    const parti = rawDataNascitaSolo.split('-');
-                    if (parti.length === 3) {
-                        dataNascitaSolo = `${parti[2]}.${parti[1]}.${parti[0]}`;
-                    }
-                }
-                datiUtente.dataNascita = dataNascitaSolo;
+                datiUtente.dataNascita = formattaDataIT(document.getElementById('dataNascitaSolo').value);
+                datiUtente.email = document.getElementById('emailUtenteSolo').value.trim().toLowerCase();
+                datiUtente.tipoDocumento = document.getElementById('tipoDocumentoUtenteSolo').value;
+                datiUtente.numeroDocumento = document.getElementById('numeroDocumentoUtenteSolo').value.trim().toUpperCase();
+                datiUtente.scadenzaDocumento = formattaDataIT(document.getElementById('scadenzaDocumentoUtenteSolo').value);
             } else {
                 datiUtente.telefono = document.getElementById('telefonoUtente').value.trim();
-                const rawDataNascita = document.getElementById('dataNascita').value;
-                let dataNascita = rawDataNascita;
-                if (rawDataNascita) {
-                    const parti = rawDataNascita.split('-');
-                    if (parti.length === 3) {
-                        dataNascita = `${parti[2]}.${parti[1]}.${parti[0]}`;
-                    }
-                }
-                datiUtente.dataNascita = dataNascita;
+                datiUtente.email = document.getElementById('emailUtente').value.trim().toLowerCase();
+                datiUtente.dataNascita = formattaDataIT(document.getElementById('dataNascita').value);
                 datiUtente.luogoNascita = document.getElementById('luogoNascita').value.trim();
                 datiUtente.sesso = document.querySelector('input[name="sessoUtente"]:checked').value;
                 datiUtente.codiceFiscale = document.getElementById('codiceFiscale').value.trim().toUpperCase();
                 datiUtente.indirizzo = document.getElementById('indirizzo').value.trim();
                 datiUtente.citta = document.getElementById('cittaResidenza').value.trim();
                 datiUtente.cap = document.getElementById('capResidenza').value.trim();
+                datiUtente.tipoDocumento = document.getElementById('tipoDocumentoUtente').value;
+                datiUtente.numeroDocumento = document.getElementById('numeroDocumentoUtente').value.trim().toUpperCase();
+                datiUtente.scadenzaDocumento = formattaDataIT(document.getElementById('scadenzaDocumentoUtente').value);
             }
 
             const conDelega = document.getElementById('checkDelega').checked;
@@ -554,32 +695,24 @@
 
                 if (giaIscrittoDel) {
                     datiDelegato.codiceFiscale = document.getElementById('codiceFiscaleDelegatoSolo').value.trim().toUpperCase();
-                    const rawDataNascitaDelSolo = document.getElementById('dataNascitaDelegatoSolo').value;
-                    let dataNascitaDelSolo = rawDataNascitaDelSolo;
-                    if (rawDataNascitaDelSolo) {
-                        const parti = rawDataNascitaDelSolo.split('-');
-                        if (parti.length === 3) {
-                            dataNascitaDelSolo = `${parti[2]}.${parti[1]}.${parti[0]}`;
-                        }
-                    }
-                    datiDelegato.dataNascita = dataNascitaDelSolo;
+                    datiDelegato.dataNascita = formattaDataIT(document.getElementById('dataNascitaDelegatoSolo').value);
+                    datiDelegato.email = document.getElementById('emailDelegatoSolo').value.trim().toLowerCase();
+                    datiDelegato.tipoDocumento = document.getElementById('tipoDocumentoDelegatoSolo').value;
+                    datiDelegato.numeroDocumento = document.getElementById('numeroDocumentoDelegatoSolo').value.trim().toUpperCase();
+                    datiDelegato.scadenzaDocumento = formattaDataIT(document.getElementById('scadenzaDocumentoDelegatoSolo').value);
                 } else {
                     datiDelegato.telefono = document.getElementById('telefonoDelegato').value.trim();
-                    const rawDataNascitaDel = document.getElementById('dataNascitaDelegato').value;
-                    let dataNascitaDel = rawDataNascitaDel;
-                    if (rawDataNascitaDel) {
-                        const parti = rawDataNascitaDel.split('-');
-                        if (parti.length === 3) {
-                            dataNascitaDel = `${parti[2]}.${parti[1]}.${parti[0]}`;
-                        }
-                    }
-                    datiDelegato.dataNascita = dataNascitaDel;
+                    datiDelegato.email = document.getElementById('emailDelegato').value.trim().toLowerCase();
+                    datiDelegato.dataNascita = formattaDataIT(document.getElementById('dataNascitaDelegato').value);
                     datiDelegato.luogoNascita = document.getElementById('luogoNascitaDelegato').value.trim();
                     datiDelegato.sesso = document.querySelector('input[name="sessoDelegato"]:checked').value;
                     datiDelegato.codiceFiscale = document.getElementById('codiceFiscaleDelegato').value.trim().toUpperCase();
                     datiDelegato.indirizzo = document.getElementById('indirizzoDelegato').value.trim();
                     datiDelegato.citta = document.getElementById('cittaResidenzaDelegato').value.trim();
                     datiDelegato.cap = document.getElementById('capResidenzaDelegato').value.trim();
+                    datiDelegato.tipoDocumento = document.getElementById('tipoDocumentoDelegato').value;
+                    datiDelegato.numeroDocumento = document.getElementById('numeroDocumentoDelegato').value.trim().toUpperCase();
+                    datiDelegato.scadenzaDocumento = formattaDataIT(document.getElementById('scadenzaDocumentoDelegato').value);
                 }
 
                 datiUtente.delegato = `${cognomeDel} ${nomeDel}`;
@@ -660,6 +793,7 @@
         function attivaModalitaAttesa(idMioTicket, nome) {
             document.getElementById('schermataForm').style.display = 'none';
             document.getElementById('schermataPiena').style.display = 'none';
+			document.getElementById('testoAvvisoCompilazione').style.display = 'none';
             document.getElementById('marioNome').innerText = nome;
             document.getElementById('nomeUtenteIscritto').innerText = nome;
             document.getElementById('schermataAttesa').style.display = 'block';
