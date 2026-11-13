@@ -1080,7 +1080,7 @@
                                         <option value="">-- Seleziona --</option>
                                         <option value="Passaporto">Passaporto</option>
                                         <option value="Patente">Patente</option>
-                                        <option value="Carta di identità">Carta di identità</option>
+                                        <option value="Carta di Identità">Carta di Identità</option>
                                     </select>
                                 </div>
                                 <div class="form-group col-medium">
@@ -1154,7 +1154,7 @@
 											<option value="">-- Seleziona --</option>
 											<option value="Passaporto">Passaporto</option>
 											<option value="Patente">Patente</option>
-											<option value="Carta di identità">Carta di identità</option>
+											<option value="Carta di Identità">Carta di Identità</option>
 										</select>
 									</div>
 									<div class="form-group col-medium">
@@ -1225,7 +1225,7 @@
 											<option value="">-- Seleziona --</option>
 											<option value="Passaporto">Passaporto</option>
 											<option value="Patente">Patente</option>
-											<option value="Carta di identità">Carta di identità</option>
+											<option value="Carta di Identità">Carta di Identità</option>
 										</select>
 									</div>
 									<div class="form-group col-medium">
@@ -1853,7 +1853,7 @@
             const valStr = String(valore || "").trim();
             if (valStr === "1") return "Passaporto";
             if (valStr === "2") return "Patente";
-            if (valStr === "3") return "Carta di identità";
+            if (valStr === "3") return "Carta di Identità";
             return valStr;
         }
 
@@ -5171,18 +5171,24 @@
 				: `<div style="background-color: #cce5ff; color: #004085; border: 1px solid #b8daff; padding: 6px 10px; border-radius: 4px; margin-bottom: 10px; font-weight: bold; text-align: center; font-size: 13px;">🆕 Nuovo Iscritto</div>`;
 
 			const dataNascita = formattaDataPerInputDate(fonte.dataNascita || fonte.data_nascita || "");
-
+			const scadenzaDoc = formattaDataPerInputDate(fonte.scadenzaDocumento || "");
+			
 			containerDettaglio.innerHTML = `
 				${badgeStatoAnagrafica}
 				<p><strong>N. Ticket:</strong> ${datiTicketSelezionatoCache.numero || ''}</p>
 				<p><strong>Cognome:</strong> ${cognomeTicket || 'N/D'}</p>
 				<p><strong>Nome:</strong> ${nomeTicket || 'N/D'}</p>
 				<p><strong>Telefono:</strong> ${fonte.telefono || 'Non specificato'}</p>
+				<p><strong>Email:</strong> ${fonte.email || 'Non specificato'}</p>
 				<p><strong>Codice Fiscale:</strong> ${fonte.codiceFiscale || fonte.codice_fiscale || 'Non specificato'}</p>
 				<p><strong>Data di Nascita:</strong> ${dataNascita || 'Non specificato'}</p>
 				<p><strong>Luogo di Nascita:</strong> ${fonte.luogoNascita || fonte.luogo_nascita || 'Non specificato'}</p>
 				<p><strong>Indirizzo:</strong> ${fonte.indirizzo || 'Non specificato'}</p>
 				<p><strong>Città:</strong> ${(fonte.citta || fonte.cittaResidenza) || 'Non specificato'}</p>
+				<p><strong>CAP:</strong> ${(fonte.cap || fonte.capResidenza) || 'Non specificato'}</p>
+				<p><strong>Tipo Documento:</strong> ${fonte.tipoDocumento || 'Non specificato'}</p>
+				<p><strong>N. Documento:</strong> ${fonte.numeroDocumento || 'Non specificato'}</p>
+				<p><strong>Scadenza Doc.:</strong> ${scadenzaDoc || 'Non specificato'}</p>
 			`;
 		};
 		
@@ -5224,13 +5230,17 @@
 						cognome: cognomeTicket,
 						nome: nomeTicket,
 						telefono: fonte.telefono || "",
+						mail: fonte.email || "",
 						codice_fiscale: fonte.codiceFiscale || fonte.codice_fiscale || "",
 						sesso: fonte.sesso || "",
 						luogo_nascita: fonte.luogoNascita || fonte.luogo_nascita || "",
 						data_nascita: dataNascitaFormattata,
 						indirizzo: fonte.indirizzo || "",
 						citta: fonte.citta || fonte.cittaResidenza || "",
-						cap: fonte.cap || fonte.capResidenza || ""
+						cap: fonte.cap || fonte.capResidenza || "",
+						tipo_documento: fonte.tipoDocumento || "",
+						numero_documento: fonte.numeroDocumento || "",
+						scadenza_documento: formattaDataPerInputDate(fonte.scadenzaDocumento || "")
 					};
 				}
 
@@ -5255,15 +5265,20 @@
 					document.querySelectorAll('.campo-diverso-ticket').forEach(el => el.classList.remove('campo-diverso-ticket'));
 
 					const dataNascitaTicketFormattata = formattaDataPerInputDate(datiTicketGrezzi.dataNascita || datiTicketGrezzi.data_nascita || "");
-
+					const scadenzaDocTicketFormattata = formattaDataPerInputDate(datiTicketGrezzi.scadenzaDocumento || "");
+					
 					const campiDaConfrontare = {
 						'editTelefono': datiTicketGrezzi.telefono,
+						'editMail': datiTicketGrezzi.email,
 						'editCodiceFiscale': datiTicketGrezzi.codiceFiscale || datiTicketGrezzi.codice_fiscale,
 						'editLuogoNascita': datiTicketGrezzi.luogoNascita || datiTicketGrezzi.luogo_nascita,
 						'editDataNascita': dataNascitaTicketFormattata,
 						'editIndirizzo': datiTicketGrezzi.indirizzo,
 						'editCitta': datiTicketGrezzi.citta || datiTicketGrezzi.cittaResidenza,
-						'editCap': datiTicketGrezzi.cap || datiTicketGrezzi.capResidenza
+						'editCap': datiTicketGrezzi.cap || datiTicketGrezzi.capResidenza,
+						'editTipoDocumento': datiTicketGrezzi.tipoDocumento,
+						'editNumeroDocumento': datiTicketGrezzi.numeroDocumento,
+						'editScadenzaDocumento': scadenzaDocTicketFormattata
 					};
 					
 					const sessoDb = document.querySelector('input[name="editSesso"]:checked')?.value || "";
@@ -5372,7 +5387,11 @@
 				assegnaSeValido('editIndirizzo', personaTrovataDaTicketCache.indirizzo);
 				assegnaSeValido('editCitta', personaTrovataDaTicketCache.citta || personaTrovataDaTicketCache.cittaResidenza);
 				assegnaSeValido('editCap', personaTrovataDaTicketCache.cap || personaTrovataDaTicketCache.capResidenza);
-				
+				assegnaSeValido('editMail', personaTrovataDaTicketCache.mail);
+				assegnaSeValido('editTipoDocumento', personaTrovataDaTicketCache.tipo_documento);
+				assegnaSeValido('editNumeroDocumento', personaTrovataDaTicketCache.numero_documento);
+				assegnaSeValido('editScadenzaDocumento', personaTrovataDaTicketCache.scadenza_documento);
+
 				if (dataNascitaFormattata) {
 					calcolaEImpostaEta(dataNascitaFormattata);
 				}
