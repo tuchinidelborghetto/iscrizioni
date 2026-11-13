@@ -135,7 +135,8 @@
         .btn-rimuovi { background: #64748b; box-shadow: none; }
         .btn-chiama { background: #dc2626; color: #ffffff; box-shadow: 0 2px 6px rgba(220, 38, 38, 0.2); }
         .btn-promuovi { background: #15803d; font-size: 12px; box-shadow: 0 2px 6px rgba(21, 128, 61, 0.2); }
-        
+        .btn-delay { background: #d97706; color: #ffffff; box-shadow: 0 2px 6px rgba(217, 119, 6, 0.2); }
+		
         .azioni-gruppo { display: flex; gap: 8px; width: 100%; }
         @media (min-width: 480px) { .azioni-gruppo { width: auto; } }
     </style>
@@ -287,6 +288,35 @@
                     renderizzaListaRiserve(cacheDatiCoda);
                 });
             }
+			
+			if (e.target && e.target.classList.contains('azione-delay')) {
+				const idPersona = e.target.getAttribute('data-id');
+
+				// Considera sia chi è in 'attesa' sia chi è già in 'delay' (escludendo sé stesso, chiamati, iscritti e riserve)
+				const arrayInAttesa = Object.keys(cacheDatiCoda)
+					.filter(id => {
+						if (id === idPersona || cacheDatiCoda[id] === null) return false;
+						const st = cacheDatiCoda[id].stato || 'attesa';
+						return st === 'attesa' || st === 'delay';
+					})
+					.map(id => ({ id, ...cacheDatiCoda[id] }))
+					.sort((a, b) => a.timestamp - b.timestamp);
+
+				// Prende i primi 5 in coda
+				const primiCinque = arrayInAttesa.slice(0, 5);
+				let nuovoTimestamp = Date.now();
+
+				if (primiCinque.length > 0) {
+					const elementoTarget = primiCinque[primiCinque.length - 1];
+					nuovoTimestamp = elementoTarget.timestamp + 1000;
+				}
+
+				update(ref(db, 'coda/' + idPersona), {
+					stato: 'delay',
+					timestamp: nuovoTimestamp
+				});
+			}
+			
         });
 
         onValue(limiteRef, (snapshot) => {
@@ -359,12 +389,12 @@
             }
 
             const personeInAttesaCount = arrayCodaAttiva.reduce((acc, persona) => {
-                const stato = persona.stato || 'attesa';
-                if (stato === 'attesa' || stato === 'chiamato') {
-                    return acc + (persona.delega ? 2 : 1);
-                }
-                return acc;
-            }, 0);
+				const stato = persona.stato || 'attesa';
+				if (stato === 'attesa' || stato === 'chiamato' || stato === 'delay') {
+					return acc + (persona.delega ? 2 : 1);
+				}
+				return acc;
+			}, 0);
             document.getElementById('valoreInAttesa').innerText = personeInAttesaCount;
 
             if (arrayCodaAttiva.length === 0) {
@@ -404,16 +434,23 @@
                 let pulsantiHTML = '';
 
                 if (stato === 'chiamato') {
-                    classeStato = 'item-chiamato';
-                    testoStato = '📢 Chiamato';
-                    pulsantiHTML = `<button class="azione-conferma" data-id="${persona.id}">✅ Conferma</button>`;
-                } else if (stato === 'iscritto') {
-                    classeStato = 'item-iscritto';
-                    testoStato = '🟢 Iscritto';
-                    pulsantiHTML = `<button class="btn-rimuovi azione-rimuovi" data-id="${persona.id}">🗑️</button>`;
-                } else {
-                    pulsantiHTML = `<button class="btn-chiama azione-chiama" data-id="${persona.id}">📢 Chiama</button>`;
-                }
+					classeStato = 'item-chiamato';
+					testoStato = '📢 Chiamato';
+					pulsantiHTML = `
+						<button class="btn-delay azione-delay" data-id="${persona.id}">⏳ Non arrivato</button>
+						<button class="azione-conferma" data-id="${persona.id}">✅ Conferma</button>						
+					`;
+				} else if (stato === 'iscritto') {
+					classeStato = 'item-iscritto';
+					testoStato = '🟢 Iscritto';
+					pulsantiHTML = `<button class="btn-rimuovi azione-rimuovi" data-id="${persona.id}">🗑️</button>`;
+				} else if (stato === 'delay') {
+					classeStato = 'item-delay';
+					testoStato = '⏳ Posticipato (Delay)';
+					pulsantiHTML = `<button class="btn-chiama azione-chiama" data-id="${persona.id}">📢 Chiama</button>`;
+				} else {
+					pulsantiHTML = `<button class="btn-chiama azione-chiama" data-id="${persona.id}">📢 Chiama</button>`;
+				}
 
                 div.className = `item-coda ${classeStato}`;
                 

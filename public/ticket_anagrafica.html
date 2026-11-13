@@ -447,7 +447,11 @@
         <!-- FASE 2: In Attesa -->
         <div id="schermataAttesa">
             <p style="margin:0; font-size: 15px; color: #78350f;">Ciao <span id="marioNome" style="font-weight:700;"></span>,</p>
-            <div id="mioNumeroBiglietto" class="badge-numero">Il tuo biglietto è il N° -</div>
+            <div id="avvisoDelay" style="display: none; background: #fee2e2; border: 1.5px solid #fca5a5; color: #991b1b; padding: 12px; border-radius: 12px; margin: 12px 0; font-size: 13px; line-height: 1.4;">
+				<strong>⏳ Non sei arrivato in tempo alla cassa!</strong><br>
+				Sei stato rimesso in coda e verrai richiamato a breve.
+			</div>
+			<div id="mioNumeroBiglietto" class="badge-numero">Il tuo biglietto è il N° -</div>
             <div class="numero-evidenza" id="personeDavanti">...</div>
             <p style="font-size: 13px; color: #92400e; margin-bottom:0; line-height: 1.4;">Tieni questa pagina aperta per rimanere sempre aggiornato. <br><br><strong>Quando verrai chiamato ti serviranno i seguenti documenti: <br>carta di identità <br>codice fiscale.</strong><br>Tienili a portata di mano!</p>
         </div>
@@ -801,7 +805,7 @@
             onValue(codaRef, (snapshot) => {
                 const data = snapshot.val();
                 if (!data || !data[idMioTicket]) {
-                    document.body.innerHTML = `<div class="card"><h2>Operazione Conclusa</h2><p>Pratica completata al banco. Grazie!</p></div>`;
+                    document.body.innerHTML = `<div class="card"><h2>Operazione Conclusa</h2><p>Pratica completata in cassa. Grazie!</p></div>`;
                     localStorage.clear(); sessionStorage.clear(); return;
                 }
                 const mioOggetto = data[idMioTicket];
@@ -833,13 +837,19 @@
                     document.getElementById('numeroChiamato').innerText = mioOggetto.numero || numeroMioBiglietto;
                     return;
                 }
+				
+				// Se lo stato è 'attesa' o 'delay', mostra la schermata di attesa e nasconde quella di chiamata
+				document.getElementById('schermataChiamata').style.display = 'none';
+				document.getElementById('schermataAttesa').style.display = 'block';
+				document.getElementById('avvisoDelay').style.display = (mioStato === 'delay') ? 'block' : 'none';
 
                 let personeDavanti = 0;
                 arrayAttiva.forEach(item => {
-                    if (item.timestamp < mioOggetto.timestamp && (item.stato === 'attesa' || item.stato === 'chiamato')) {
-                        personeDavanti += item.delega ? 2 : 1;
-                    }
-                });
+					const st = item.stato || 'attesa';
+					if (item.timestamp < mioOggetto.timestamp && (st === 'attesa' || st === 'chiamato' || st === 'delay')) {
+						personeDavanti += item.delega ? 2 : 1;
+					}
+				});
 
                 const numeroDb = mioOggetto.numero !== undefined ? mioOggetto.numero : numeroMioBiglietto;
                 document.getElementById('mioNumeroBiglietto').innerText = `Il tuo biglietto è il N° ${numeroDb}`;
