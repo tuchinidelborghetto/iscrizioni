@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tuchini del Borghetto - Emissione Ticket Multipli 2027</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            text-align: center; 
+            padding: 20px 16px; 
+            background: #f4f7fc; 
+            color: #1f2937; 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            min-height: 100vh; 
+        }
+        .card { 
+            background: white; 
+            padding: 30px 22px; 
+            border-radius: 24px; 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06); 
+            max-width: 480px; 
+            width: 100%; 
+            margin: auto; 
+            border: 1px solid rgba(0,0,0,0.02);
+            text-align: left;
+        }
+        
+        .logo-aziendale { max-width: 140px; height: auto; margin-bottom: 12px; display: block; margin-left: auto; margin-right: auto; }
+        h2 { font-size: 22px; color: #111827; font-weight: 700; margin-top: 0; margin-bottom: 6px; text-align: center; }
+        .sottotitolo { font-size: 14px; color: #6b7280; margin-bottom: 20px; line-height: 1.4; text-align: center; }
+
+        .stato-coda-pill {
+            display: block;
+            text-align: center;
+            background: #eff6ff;
+            color: #1d4ed8;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 8px 12px;
+            border-radius: 12px;
+            margin-bottom: 18px;
+            border: 1px solid #dbeafe;
+        }
+        .stato-coda-pill.piena {
+            background: #fef3c7;
+            color: #b45309;
+            border-color: #fde68a;
+        }
+
+        label.campo-label { font-size: 12px; font-weight: 700; color: #4b5563; margin-top: 12px; display: block; }
+        input[type="text"], input[type="tel"] { 
+            width: 100%; 
+            padding: 14px; 
+            margin-top: 4px; 
+            font-size: 16px; 
+            border-radius: 12px; 
+            border: 1.5px solid #e5e7eb; 
+            outline: none; 
+            background: #f9fafb;
+            transition: all 0.2s ease;
+            color: #1f2937;
+        }
+        input:focus { 
+            border-color: #2563eb; 
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); 
+        }
+
+        .riga-doppia { display: flex; gap: 10px; }
+        .riga-doppia > div { flex: 1; }
+        
+        .delega-container { 
+            margin-top: 18px; 
+            font-size: 15px; 
+            font-weight: 600;
+            color: #374151;
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            cursor: pointer; 
+            background: #f9fafb;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1.5px solid #e5e7eb;
+        }
+        .delega-container input { width: 22px; height: 22px; margin: 0; cursor: pointer; accent-color: #2563eb; }
+
+        #containerDelegato { 
+            display: none; 
+            margin-top: 14px; 
+            background: #fefce8; 
+            padding: 16px; 
+            border-radius: 16px; 
+            border: 2px solid #fde047; 
+        }
+
+        button { 
+            width: 100%;
+            background: #2563eb; 
+            color: white; 
+            border: none; 
+            font-weight: 700; 
+            font-size: 16px;
+            cursor: pointer; 
+            min-height: 54px; 
+            border-radius: 14px;
+            margin-top: 22px;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3); 
+            transition: background 0.2s, transform 0.1s; 
+        }
+        button:active { background: #1d4ed8; transform: scale(0.98); }
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+        button.btn-riserva {
+            background: #d97706;
+            box-shadow: 0 4px 14px rgba(217, 119, 6, 0.3);
+        }
+        button.btn-riserva:active { background: #b45309; }
+
+        button.btn-nuovo {
+            background: #16a34a;
+            box-shadow: 0 4px 14px rgba(22, 163, 74, 0.3);
+            margin-top: 24px;
+            font-size: 17px;
+        }
+        button.btn-nuovo:active { background: #15803d; }
+
+        /* SCHERMATA TICKET GIGANTE */
+        #schermataTicketGenerato {
+            display: none;
+            background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+            border: 2px solid #93c5fd;
+            padding: 28px 18px;
+            border-radius: 22px;
+            text-align: center;
+        }
+        #schermataTicketGenerato.riserva-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%);
+            border-color: #fcd34d;
+        }
+        .etichetta-ticket {
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #1d4ed8;
+            margin-bottom: 4px;
+        }
+        .riserva-box .etichetta-ticket {
+            color: #b45309;
+        }
+        .numero-gigante {
+            font-size: 84px;
+            font-weight: 900;
+            line-height: 1;
+            color: #1e3a8a;
+            margin: 12px 0 18px 0;
+            letter-spacing: -3px;
+        }
+        .riserva-box .numero-gigante {
+            color: #92400e;
+        }
+        .riepilogo-persona {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 14px;
+            font-size: 16px;
+            color: #111827;
+            line-height: 1.5;
+        }
+        .riepilogo-delega {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed #d1d5db;
+            font-size: 14px;
+            color: #92400e;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <img src="logotuchini.png" alt="Logo" class="logo-aziendale">
+        
+        <h2>Iscrizioni 2027</h2>
+        <p class="sottotitolo">Emissione ticket postazione (utenti senza smartphone)</p>
+
+        <!-- FASE 1: Inserimento Rapido -->
+        <div id="schermataForm">
+            <div id="bannerStatoCoda" class="stato-coda-pill">Caricamento stato coda...</div>
+
+            <div class="riga-doppia">
+                <div>
+                    <label class="campo-label">Nome *</label>
+                    <input type="text" id="nomeUtente" placeholder="NOME" autocomplete="off" oninput="validaForm()">
+                </div>
+                <div>
+                    <label class="campo-label">Cognome *</label>
+                    <input type="text" id="cognomeUtente" placeholder="COGNOME" autocomplete="off" oninput="validaForm()">
+                </div>
+            </div>
+
+            <label class="campo-label">Numero di Telefono *</label>
+            <input type="tel" id="telefonoUtente" placeholder="Es. 3331234567" autocomplete="off" oninput="validaForm()">
+            
+            <label class="delega-container" id="boxCheckboxDelega">
+                <input type="checkbox" id="checkDelega" onchange="toggleDelega()">
+                <span>Iscrizione con delega</span>
+            </label>
+
+            <div id="containerDelegato">
+                <div class="riga-doppia">
+                    <div>
+                        <label class="campo-label">Nome Delegante *</label>
+                        <input type="text" id="nomeDelegato" placeholder="NOME" autocomplete="off" oninput="validaForm()">
+                    </div>
+                    <div>
+                        <label class="campo-label">Cognome Delegante *</label>
+                        <input type="text" id="cognomeDelegato" placeholder="COGNOME" autocomplete="off" oninput="validaForm()">
+                    </div>
+                </div>
+            </div>
+
+            <button id="btnInvia" onclick="generaTicket()" disabled>Genera Ticket</button>
+        </div>
+
+        <!-- FASE 2: Ticket Gigante Generato -->
+        <div id="schermataTicketGenerato">
+            <div id="etichettaTipoTicket" class="etichetta-ticket">Ticket Emesso</div>
+            <div id="numeroTicketGigante" class="numero-gigante">-</div>
+            
+            <div class="riepilogo-persona">
+                <div id="riepilogoNominativo" style="font-weight: 800; font-size: 19px;"></div>
+                <div id="riepilogoTelefono" style="font-size: 14px; color: #4b5563; margin-top: 2px;"></div>
+                <div id="riepilogoDelega" class="riepilogo-delega" style="display: none;"></div>
+            </div>
+
+            <p style="font-size: 13px; color: #4b5563; margin: 16px 0 0 0; line-height: 1.4;">
+                Comunica il numero all'utente.<br>I dati anagrafici verranno acquisiti direttamente in cassa.
+            </p>
+
+            <button class="btn-nuovo" onclick="preparaNuovoTicket()">+ Genera Nuovo Ticket</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+        import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCKfb2IDqE-y4Ln_1tUIYm09VVMqRRruvQ",
+            authDomain: "ticketdispensertuchini.firebaseapp.com",
+            databaseURL: "https://ticketdispensertuchini-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "ticketdispensertuchini",
+            storageBucket: "ticketdispensertuchini.firebasestorage.app",
+            messagingSenderId: "582164145424",
+            appId: "1:582164145424:web:41a6df5056265e19ddf195"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const codaRef = ref(db, 'coda');
+        const limiteRef = ref(db, 'config/limiteMassimo');
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const minutiRitardo = parseInt(urlParams.get('ritardo') || '0', 10);
+
+        let limiteMassimoCorrente = 10;
+        let postiOccupatiCorrenti = 0;
+        let codaPiena = false;
+
+        // Monitoraggio in tempo reale di limiteMassimo e posti occupati
+        onValue(limiteRef, (snap) => {
+            limiteMassimoCorrente = snap.val() || 10;
+            aggiornaStatoCodaUI();
+        });
+
+        onValue(codaRef, (snap) => {
+            const data = snap.val();
+            let occupati = 0;
+            if (data) {
+                Object.keys(data).forEach(id => {
+                    if (data[id] && (data[id].stato || 'attesa') !== 'riserva') {
+                        occupati += data[id].delega ? 2 : 1;
+                    }
+                });
+            }
+            postiOccupatiCorrenti = occupati;
+            aggiornaStatoCodaUI();
+        });
+
+        function aggiornaStatoCodaUI() {
+            const banner = document.getElementById('bannerStatoCoda');
+            const btn = document.getElementById('btnInvia');
+            codaPiena = postiOccupatiCorrenti >= limiteMassimoCorrente;
+
+            if (codaPiena) {
+                banner.className = 'stato-coda-pill piena';
+                banner.innerText = `⚠️ Coda al completo (${postiOccupatiCorrenti}/${limiteMassimoCorrente}) — Inserimento in Lista di Riserva`;
+                btn.className = 'btn-riserva';
+                btn.innerText = 'Genera Ticket Riserva';
+            } else {
+                banner.className = 'stato-coda-pill';
+                banner.innerText = `Posti in coda: ${postiOccupatiCorrenti} / ${limiteMassimoCorrente}`;
+                btn.className = '';
+                btn.innerText = 'Genera Ticket';
+            }
+            validaForm();
+        }
+
+        window.toggleDelega = function() {
+            const check = document.getElementById('checkDelega').checked;
+            document.getElementById('containerDelegato').style.display = check ? 'block' : 'none';
+            if (!check) {
+                document.getElementById('nomeDelegato').value = '';
+                document.getElementById('cognomeDelegato').value = '';
+            }
+            validaForm();
+        };
+
+        window.validaForm = function() {
+            const nome = document.getElementById('nomeUtente').value.trim();
+            const cognome = document.getElementById('cognomeUtente').value.trim();
+            const telefono = document.getElementById('telefonoUtente').value.trim();
+            const conDelega = document.getElementById('checkDelega').checked;
+
+            if (!nome || !cognome || !telefono) {
+                document.getElementById('btnInvia').disabled = true;
+                return;
+            }
+
+            if (conDelega) {
+                const nomeDel = document.getElementById('nomeDelegato').value.trim();
+                const cognomeDel = document.getElementById('cognomeDelegato').value.trim();
+                if (!nomeDel || !cognomeDel) {
+                    document.getElementById('btnInvia').disabled = true;
+                    return;
+                }
+            }
+
+            document.getElementById('btnInvia').disabled = false;
+        };
+
+        window.generaTicket = function() {
+            const btn = document.getElementById('btnInvia');
+            btn.disabled = true;
+            btn.innerText = "Emissione in corso...";
+
+            const nome = document.getElementById('nomeUtente').value.trim();
+            const cognome = document.getElementById('cognomeUtente').value.trim();
+            const telefono = document.getElementById('telefonoUtente').value.trim();
+            const conDelega = document.getElementById('checkDelega').checked;
+
+            let delegatoTesto = "";
+            if (conDelega) {
+                const nomeDel = document.getElementById('nomeDelegato').value.trim();
+                const cognomeDel = document.getElementById('cognomeDelegato').value.trim();
+                delegatoTesto = `${cognomeDel} ${nomeDel}`;
+            }
+
+            onValue(codaRef, (snapshot) => {
+                const data = snapshot.val();
+                let timestampCalcolato = Date.now();
+                let prossimoNumero = 1;
+                let postiAttuali = 0;
+
+                if (data) {
+                    let arrayAttiva = Object.keys(data)
+                        .filter(id => data[id] !== null && (data[id].stato || 'attesa') !== 'riserva')
+                        .map(id => ({ id, ...data[id] }))
+                        .sort((a, b) => a.timestamp - b.timestamp);
+
+                    arrayAttiva.forEach(item => {
+                        postiAttuali += item.delega ? 2 : 1;
+                    });
+
+                    if (minutiRitardo > 0 && arrayAttiva.length > 0) {
+                        timestampCalcolato = arrayAttiva[0].timestamp + (minutiRitardo * 60 * 1000);
+                    }
+
+                    let maxNum = 0;
+                    Object.keys(data).forEach(id => {
+                        const item = data[id];
+                        if (item && item.numero && item.numero > maxNum) maxNum = item.numero;
+                    });
+                    prossimoNumero = maxNum > 0 ? maxNum + 1 : Object.keys(data).length + 1;
+                }
+
+                const isRiserva = postiAttuali >= limiteMassimoCorrente;
+                const statoTicket = isRiserva ? 'riserva' : 'attesa';
+
+                push(codaRef, {
+                    numero: prossimoNumero,
+                    nome: nome,
+                    cognome: cognome,
+                    telefono: telefono,
+                    delega: conDelega,
+                    delegato: delegatoTesto,
+                    senzaTelefono: true,
+                    timestamp: timestampCalcolato,
+                    stato: statoTicket
+                }).then(() => {
+                    mostraTicketGigante({
+                        numero: prossimoNumero,
+                        nome: nome,
+                        cognome: cognome,
+                        telefono: telefono,
+                        delega: conDelega,
+                        delegato: delegatoTesto,
+                        isRiserva: isRiserva
+                    });
+                }).catch((err) => {
+                    alert("Errore durante il salvataggio: " + err.message);
+                    aggiornaStatoCodaUI();
+                });
+
+            }, { onlyOnce: true });
+        };
+
+        function mostraTicketGigante(info) {
+            document.getElementById('schermataForm').style.display = 'none';
+            
+            const boxTicket = document.getElementById('schermataTicketGenerato');
+            const etichetta = document.getElementById('etichettaTipoTicket');
+            
+            if (info.isRiserva) {
+                boxTicket.classList.add('riserva-box');
+                etichetta.innerText = "Ticket Lista di Riserva";
+            } else {
+                boxTicket.classList.remove('riserva-box');
+                etichetta.innerText = "Ticket Emesso";
+            }
+
+            document.getElementById('numeroTicketGigante').innerText = `N° ${info.numero}`;
+            document.getElementById('riepilogoNominativo').innerText = `${info.cognome} ${info.nome}`;
+            document.getElementById('riepilogoTelefono').innerText = `Tel: ${info.telefono}`;
+
+            const divDelega = document.getElementById('riepilogoDelega');
+            if (info.delega && info.delegato) {
+                divDelega.style.display = 'block';
+                divDelega.innerText = `Con delega per: ${info.delegato}`;
+            } else {
+                divDelega.style.display = 'none';
+                divDelega.innerText = '';
+            }
+
+            boxTicket.style.display = 'block';
+        }
+
+        window.preparaNuovoTicket = function() {
+            // Svuota tutti i campi
+            document.getElementById('nomeUtente').value = '';
+            document.getElementById('cognomeUtente').value = '';
+            document.getElementById('telefonoUtente').value = '';
+            document.getElementById('checkDelega').checked = false;
+            document.getElementById('nomeDelegato').value = '';
+            document.getElementById('cognomeDelegato').value = '';
+            document.getElementById('containerDelegato').style.display = 'none';
+
+            // Ripristina schermata form
+            document.getElementById('schermataTicketGenerato').style.display = 'none';
+            document.getElementById('schermataForm').style.display = 'block';
+            aggiornaStatoCodaUI();
+            document.getElementById('nomeUtente').focus();
+        };
+    </script>
+</body>
+</html>
