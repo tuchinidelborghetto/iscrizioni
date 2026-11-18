@@ -309,7 +309,7 @@
 				<div class="colonna-cassa" style="max-width: 350px; width: 100%;">
 					<h3>📢 Numeri Chiamati</h3>
 					<div id="listaChiamatiUnica" class="lista-box-chiamati">
-						<div class="nessun-turno">Nessun turno</div>
+						<div class="nessun-turno">Nessun numero</div>
 					</div>
 				</div>
 			</div>
@@ -508,7 +508,7 @@
 			containerUnico.innerHTML = '';
 
 			if (!data) {
-				containerUnico.innerHTML = '<div class="nessun-turno">Nessun turno</div>';
+				containerUnico.innerHTML = '<div class="nessun-turno">Nessun numero</div>';
 				ultimiChiamatiNotificati.clear();
 				return;
 			}
@@ -519,7 +519,7 @@
 			const chiamati = arrayCoda.filter(item => item.stato === 'chiamato');
 
 			if (chiamati.length === 0) {
-				containerUnico.innerHTML = '<div class="nessun-turno">Nessun turno</div>';
+				containerUnico.innerHTML = '<div class="nessun-turno">Nessun numero</div>';
 				ultimiChiamatiNotificati.clear();
 				return;
 			}
