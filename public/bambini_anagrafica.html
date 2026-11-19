@@ -1453,6 +1453,9 @@
 		let dizionarioCaricato = false;
 		
         const provider = new GoogleAuthProvider();
+        provider.setCustomParameters({
+            prompt: 'select_account'
+        });
 		
 		// Imposta 'adulti' oppure 'anniverdirossi' a seconda del gestionale desiderato
 		const TIPO_GESTIONALE = 'anniverdirossi'; // o 'adulti'
@@ -2004,23 +2007,21 @@
         };
 
         window.eseguiLogout = async function() {
-			try {
-				// Tenta la disconnessione ufficiale da Firebase
-				await signOut(auth);
-			} catch (error) {
-				console.warn("Errore durante il signOut di Firebase (procedo comunque con la forzatura):", error);
-			} finally {
-				// 1. Mostra forzatamente la schermata di login
-				const loginOverlay = document.getElementById('loginOverlay');
-				if (loginOverlay) {
-					loginOverlay.style.display = 'flex';
-				}
-				
-				// 2. Ricarica la pagina per azzerare completamente la sessione e la cache in memoria
-				window.location.reload();
-			}
-		};
-
+            try {
+                await signOut(auth);
+                // Svuota eventuali residui locali di Firebase Auth prima di ricaricare
+                sessionStorage.clear();
+            } catch (error) {
+                console.warn("Errore durante il signOut di Firebase:", error);
+            } finally {
+                const loginOverlay = document.getElementById('loginOverlay');
+                if (loginOverlay) {
+                    loginOverlay.style.display = 'flex';
+                }
+                window.location.reload();
+            }
+        };
+        
         async function verificaAutorizzazioneUtente(user) {
             const errBox = document.getElementById('loginError');
             const emailUser = user.email.trim().toLowerCase();
