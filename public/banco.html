@@ -325,6 +325,7 @@
                 limiteMaxCorrente = parseInt(val);
                 const elLimite = document.getElementById('valoreLimite');
                 if (elLimite) elLimite.innerText = limiteMaxCorrente;
+                renderizzaCodaBanco(cacheDatiCoda);
             } else {
                 set(limiteRef, 10);
             }
