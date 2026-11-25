@@ -424,8 +424,8 @@
 
         <!-- LISTA DI RISERVA -->
         <div id="schermataPiena">
-            <h3 style="margin-top:0; color: #b45309; text-align: center; font-size: 18px;">⚠️ Coda Al Completo</h3>
-            <p style="font-size: 13px; line-height: 1.4; margin-bottom: 16px;">Siamo al completo. Puoi iscriverti alla <strong>lista di riserva</strong>:</p>
+            <h3 style="margin-top:0; color: #b45309; text-align: center; font-size: 18px;">⚠️ Raggiunto il numero massimo di iscritti</h3>
+            <p style="font-size: 13px; line-height: 1.4; margin-bottom: 16px;">Siamo al completo. Puoi iscriverti alla <strong>lista di riserva</strong>. Se dovessero liberarsi dei posti ti contatteremo!</p>
             
             <div class="riga-doppia">
                 <div>
@@ -441,7 +441,7 @@
             <label class="campo-label">Numero di Telefono *</label>
             <input type="tel" id="telefonoUtenteRiserva" placeholder="Numero di telefono" autocomplete="tel" oninput="validaRiserva()">
 
-            <button id="btnInviaRiserva" onclick="registraInRiserva()" style="background: #d97706; margin-top: 18px;" disabled>Iscriviti alla Riserva</button>
+            <button id="btnInviaRiserva" onclick="registraInRiserva()" style="background: #d97706; margin-top: 18px;" disabled>Inserisci nominativo</button>
         </div>
 
         <!-- FASE 2: In Attesa -->
@@ -813,7 +813,7 @@
 
                 if (mioStato === 'riserva') {
                     document.getElementById('mioNumeroBiglietto').innerText = `In Lista di Riserva`;
-                    document.getElementById('personeDavanti').innerHTML = `<span style="font-size: 15px; color: #b45309;">Verrai spostato appena si libera un posto.</span>`;
+                    document.getElementById('personeDavanti').innerHTML = `<span style="font-size: 15px; color: #b45309;">Verrai chiamato nel caso in cui si liberi un posto.</span>`;
                     return;
                 }
 
