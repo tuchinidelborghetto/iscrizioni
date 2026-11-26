@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Recupera Numero Ticket - Tuchini del Borghetto</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            text-align: center; 
+            padding: 20px 16px; 
+            background: #f4f7fc; 
+            color: #1f2937; 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            min-height: 100vh; 
+        }
+        .card { 
+            background: white; 
+            padding: 30px 22px; 
+            border-radius: 24px; 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06); 
+            max-width: 480px; 
+            width: 100%; 
+            margin: auto; 
+            border: 1px solid rgba(0,0,0,0.02);
+            text-align: left;
+        }
+        .logo-aziendale { 
+            max-width: 140px; 
+            height: auto; 
+            margin-bottom: 12px; 
+            display: block; 
+            margin-left: auto; 
+            margin-right: auto; 
+        }
+        h2 { 
+            font-size: 22px; 
+            color: #111827; 
+            font-weight: 700; 
+            margin-top: 0; 
+            margin-bottom: 6px; 
+            text-align: center; 
+        }
+        .sottotitolo { 
+            font-size: 14px; 
+            color: #6b7280; 
+            margin-bottom: 24px; 
+            line-height: 1.4; 
+            text-align: center; 
+        }
+        label.campo-label { 
+            font-size: 12px; 
+            font-weight: 700; 
+            color: #4b5563; 
+            margin-top: 12px; 
+            display: block; 
+        }
+        input[type="text"] { 
+            width: 100%; 
+            padding: 14px; 
+            margin-top: 6px; 
+            font-size: 16px; 
+            border-radius: 12px; 
+            border: 1.5px solid #e5e7eb; 
+            outline: none; 
+            background: #f9fafb;
+            transition: all 0.2s ease;
+            color: #1f2937;
+        }
+        input:focus { 
+            border-color: #2563eb; 
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); 
+        }
+        button { 
+            width: 100%;
+            background: #2563eb; 
+            color: white; 
+            border: none; 
+            font-weight: 600; 
+            font-size: 16px;
+            cursor: pointer; 
+            min-height: 52px; 
+            border-radius: 14px;
+            margin-top: 16px;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3); 
+            transition: background 0.2s, transform 0.1s; 
+        }
+        button:active { background: #1d4ed8; transform: scale(0.98); }
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        #risultatiContainer {
+            margin-top: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* CONTENITORE SWIPE-TO-DELETE */
+        .swipe-wrapper {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            background: #dc2626;
+            user-select: none;
+            touch-action: pan-y;
+        }
+        .swipe-bg-delete {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 22px;
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+            gap: 6px;
+            pointer-events: none;
+        }
+        .ticket-card {
+            position: relative;
+            z-index: 2;
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            transition: transform 0.22s ease, opacity 0.22s ease;
+            will-change: transform;
+            cursor: grab;
+        }
+        .ticket-card.dragging {
+            transition: none;
+            cursor: grabbing;
+        }
+        .ticket-info {
+            text-align: left;
+            flex: 1;
+        }
+        .ticket-nominativo {
+            font-size: 16px;
+            font-weight: 700;
+            color: #111827;
+        }
+        .ticket-delega {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 3px;
+        }
+        .ticket-stato {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 3px 8px;
+            border-radius: 20px;
+            margin-top: 6px;
+        }
+        .stato-attesa { background: #fef3c7; color: #92400e; }
+        .stato-chiamato { background: #dcfce7; color: #166534; }
+        .stato-delay { background: #fee2e2; color: #991b1b; }
+        .stato-iscritto { background: #dbeafe; color: #1e40af; }
+        .stato-riserva { background: #f3e8ff; color: #6b21a8; }
+
+        .ticket-numero-box {
+            background: #2563eb;
+            color: white;
+            font-size: 22px;
+            font-weight: 800;
+            padding: 10px 16px;
+            border-radius: 14px;
+            min-width: 78px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(37, 99, 235, 0.25);
+        }
+        .ticket-numero-box.riserva-box {
+            background: #d97706;
+            font-size: 13px;
+            padding: 10px 12px;
+        }
+        .nessun-risultato {
+            text-align: center;
+            padding: 18px;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            border-radius: 14px;
+            font-size: 14px;
+        }
+        .nota-privacy {
+            margin-top: 18px;
+            font-size: 12px;
+            color: #9ca3af;
+            text-align: center;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <img src="logotuchini.png" alt="Logo Tuchini" class="logo-aziendale">
+        <h2>Cerca il tuo Ticket</h2>
+        <p class="sottotitolo">Inserisci il cognome per verificare il biglietto. Scorri verso sinistra su una riga per eliminare il ticket dal database.</p>
+
+        <label class="campo-label" for="inputCognome">Cognome *</label>
+        <input type="text" id="inputCognome" placeholder="Es. Rossi" autocomplete="family-name" onkeyup="if(event.key === 'Enter') cercaTicket()">
+
+        <button id="btnCerca" onclick="cercaTicket()">Cerca Ticket</button>
+
+        <div id="risultatiContainer"></div>
+
+        <p class="nota-privacy">Inserisci almeno 2 lettere del cognome • Trascina a sinistra sulla riga per eliminare.</p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+        import { getDatabase, ref, get, remove } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCKfb2IDqE-y4Ln_1tUIYm09VVMqRRruvQ",
+            authDomain: "ticketdispensertuchini.firebaseapp.com",
+            databaseURL: "https://ticketdispensertuchini-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "ticketdispensertuchini",
+            storageBucket: "ticketdispensertuchini.firebasestorage.app",
+            messagingSenderId: "582164145424",
+            appId: "1:582164145424:web:41a6df5056265e19ddf195"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const codaRef = ref(db, 'coda');
+
+        function normalizzaTesto(str) {
+            return (str || "")
+                .toString()
+                .trim()
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/[̀-ͯ]/g, "");
+        }
+
+        function formattaStato(stato) {
+            switch (stato) {
+                case 'chiamato': return { testo: '📢 È il tuo turno!', classe: 'stato-chiamato' };
+                case 'delay':    return { testo: '⏳ Rimesso in coda', classe: 'stato-delay' };
+                case 'iscritto': return { testo: '🟢 Iscrizione completata', classe: 'stato-iscritto' };
+                case 'riserva':  return { testo: '⚠️ Lista di riserva', classe: 'stato-riserva' };
+                default:         return { testo: '🕒 In attesa', classe: 'stato-attesa' };
+            }
+        }
+
+        function attivaSwipeDelete(wrapperEl, cardEl, ticketId, nominativo, numeroLabel) {
+            let startX = 0;
+            let currentX = 0;
+            let isDragging = false;
+            const SOGLIA_ELIMINAZIONE = -110; // pixel verso sinistra
+
+            const onStart = (clientX) => {
+                startX = clientX;
+                currentX = 0;
+                isDragging = true;
+                cardEl.classList.add('dragging');
+            };
+
+            const onMove = (clientX) => {
+                if (!isDragging) return;
+                const diff = clientX - startX;
+                // Consente solo lo scorrimento verso sinistra (valori negativi)
+                currentX = Math.min(0, Math.max(diff, -180));
+                cardEl.style.transform = `translateX(${currentX}px)`;
+            };
+
+            const onEnd = async () => {
+                if (!isDragging) return;
+                isDragging = false;
+                cardEl.classList.remove('dragging');
+
+                if (currentX <= SOGLIA_ELIMINAZIONE) {
+                    // Blocca la card aperta mentre chiede conferma
+                    cardEl.style.transform = `translateX(-130px)`;
+
+                    const conferma = confirm(`Vuoi eliminare definitivamente il ticket ${numeroLabel} di ${nominativo} dal database?`);
+                    if (conferma) {
+                        try {
+                            await remove(ref(db, `coda/${ticketId}`));
+                            cardEl.style.transform = `translateX(-110%)`;
+                            cardEl.style.opacity = '0';
+                            setTimeout(() => {
+                                wrapperEl.remove();
+                                const container = document.getElementById('risultatiContainer');
+                                if (container && container.children.length === 0) {
+                                    container.innerHTML = `<div class="nessun-risultato">Ticket eliminato. Nessun altro risultato visualizzato.</div>`;
+                                }
+                            }, 220);
+                        } catch (err) {
+                            alert("Errore durante l'eliminazione dal database: " + err.message);
+                            cardEl.style.transform = 'translateX(0px)';
+                        }
+                    } else {
+                        cardEl.style.transform = 'translateX(0px)';
+                    }
+                } else {
+                    cardEl.style.transform = 'translateX(0px)';
+                }
+            };
+
+            // Eventi Touch (Smartphone / Tablet)
+            cardEl.addEventListener('touchstart', (e) => onStart(e.touches[0].clientX), { passive: true });
+            cardEl.addEventListener('touchmove', (e) => onMove(e.touches[0].clientX), { passive: true });
+            cardEl.addEventListener('touchend', onEnd);
+
+            // Eventi Mouse (PC / Desktop)
+            cardEl.addEventListener('mousedown', (e) => onStart(e.clientX));
+            window.addEventListener('mousemove', (e) => { if (isDragging) onMove(e.clientX); });
+            window.addEventListener('mouseup', () => { if (isDragging) onEnd(); });
+        }
+
+        window.cercaTicket = async function() {
+            const input = document.getElementById('inputCognome');
+            const container = document.getElementById('risultatiContainer');
+            const btn = document.getElementById('btnCerca');
+
+            const queryNorm = normalizzaTesto(input.value);
+            if (queryNorm.length < 2) {
+                container.innerHTML = `<div class="nessun-risultato">Inserisci almeno 2 caratteri del cognome.</div>`;
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Ricerca in corso...";
+            container.innerHTML = "";
+
+            try {
+                const snapshot = await get(codaRef);
+                const data = snapshot.val();
+
+                if (!data) {
+                    container.innerHTML = `<div class="nessun-risultato">Nessun ticket presente in coda al momento.</div>`;
+                    return;
+                }
+
+                const arrayAttiva = Object.keys(data)
+                    .filter(id => data[id] && (data[id].stato || 'attesa') !== 'riserva')
+                    .map(id => ({ id, ...data[id] }))
+                    .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+
+                const trovati = [];
+
+                Object.keys(data).forEach(id => {
+                    const item = data[id];
+                    if (!item) return;
+
+                    const cognomePrincipale = normalizzaTesto(item.cognome);
+                    const cognomeDelegante = item.z_datiDelega ? normalizzaTesto(item.z_datiDelega.cognome) : "";
+
+                    if (cognomePrincipale.includes(queryNorm) || (cognomeDelegante && cognomeDelegante.includes(queryNorm))) {
+                        const numeroFallback = arrayAttiva.findIndex(p => p.id === id) + 1;
+                        const numeroTicket = item.numero !== undefined && item.numero !== null ? item.numero : numeroFallback;
+                        trovati.push({
+                            id,
+                            ...item,
+                            numeroVisualizzato: numeroTicket
+                        });
+                    }
+                });
+
+                if (trovati.length === 0) {
+                    container.innerHTML = `<div class="nessun-risultato">Nessun ticket trovato per "<strong>${input.value.trim()}</strong>".</div>`;
+                    return;
+                }
+
+                trovati.sort((a, b) => (a.numeroVisualizzato || 0) - (b.numeroVisualizzato || 0));
+
+                trovati.forEach(t => {
+                    const stato = t.stato || 'attesa';
+                    const badge = formattaStato(stato);
+                    const isRiserva = stato === 'riserva';
+                    const numeroLabel = isRiserva ? 'RISERVA' : `N° ${t.numeroVisualizzato}`;
+                    const nominativoCompleto = `${t.cognome || ''} ${t.nome || ''}`.trim();
+
+                    const infoDelega = t.delega && t.delegato
+                        ? `<div class="ticket-delega">Con delega per: <strong>${t.delegato}</strong></div>`
+                        : "";
+
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'swipe-wrapper';
+                    wrapper.innerHTML = `
+                        <div class="swipe-bg-delete">🗑️ Elimina</div>
+                        <div class="ticket-card">
+                            <div class="ticket-info">
+                                <div class="ticket-nominativo">${nominativoCompleto}</div>
+                                ${infoDelega}
+                                <span class="ticket-stato ${badge.classe}">${badge.testo}</span>
+                            </div>
+                            <div class="ticket-numero-box ${isRiserva ? 'riserva-box' : ''}">
+                                ${numeroLabel}
+                            </div>
+                        </div>
+                    `;
+
+                    container.appendChild(wrapper);
+                    const cardEl = wrapper.querySelector('.ticket-card');
+                    attivaSwipeDelete(wrapper, cardEl, t.id, nominativoCompleto, numeroLabel);
+                });
+
+            } catch (err) {
+                container.innerHTML = `<div class="nessun-risultato">Errore durante la ricerca: ${err.message}</div>`;
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Cerca Ticket";
+            }
+        };
+    </script>
+</body>
+</html>
