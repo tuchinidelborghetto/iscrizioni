@@ -163,6 +163,15 @@
             color: #6b7280;
             margin-top: 3px;
         }
+        .ticket-posizione {
+            font-size: 13px;
+            font-weight: 700;
+            color: #1e3a8a;
+            margin-top: 5px;
+        }
+        .ticket-posizione.prossimo {
+            color: #16a34a;
+        }
         .ticket-stato {
             display: inline-block;
             font-size: 11px;
@@ -217,7 +226,7 @@
     <div class="card">
         <img src="logotuchini.png" alt="Logo Tuchini" class="logo-aziendale">
         <h2>Cerca il tuo Ticket</h2>
-        <p class="sottotitolo">Inserisci il cognome per verificare il biglietto. Scorri verso sinistra su una riga per eliminare il ticket dal database.</p>
+        <p class="sottotitolo">Inserisci il cognome per verificare il biglietto e la posizione in coda. Scorri verso sinistra su una riga per eliminare il ticket dal database.</p>
 
         <label class="campo-label" for="inputCognome">Cognome *</label>
         <input type="text" id="inputCognome" placeholder="Es. Rossi" autocomplete="family-name" onkeyup="if(event.key === 'Enter') cercaTicket()">
@@ -270,7 +279,7 @@
             let startX = 0;
             let currentX = 0;
             let isDragging = false;
-            const SOGLIA_ELIMINAZIONE = -110; // pixel verso sinistra
+            const SOGLIA_ELIMINAZIONE = -110;
 
             const onStart = (clientX) => {
                 startX = clientX;
@@ -282,7 +291,6 @@
             const onMove = (clientX) => {
                 if (!isDragging) return;
                 const diff = clientX - startX;
-                // Consente solo lo scorrimento verso sinistra (valori negativi)
                 currentX = Math.min(0, Math.max(diff, -180));
                 cardEl.style.transform = `translateX(${currentX}px)`;
             };
@@ -293,7 +301,6 @@
                 cardEl.classList.remove('dragging');
 
                 if (currentX <= SOGLIA_ELIMINAZIONE) {
-                    // Blocca la card aperta mentre chiede conferma
                     cardEl.style.transform = `translateX(-130px)`;
 
                     const conferma = confirm(`Vuoi eliminare definitivamente il ticket ${numeroLabel} di ${nominativo} dal database?`);
@@ -321,12 +328,10 @@
                 }
             };
 
-            // Eventi Touch (Smartphone / Tablet)
             cardEl.addEventListener('touchstart', (e) => onStart(e.touches[0].clientX), { passive: true });
             cardEl.addEventListener('touchmove', (e) => onMove(e.touches[0].clientX), { passive: true });
             cardEl.addEventListener('touchend', onEnd);
 
-            // Eventi Mouse (PC / Desktop)
             cardEl.addEventListener('mousedown', (e) => onStart(e.clientX));
             window.addEventListener('mousemove', (e) => { if (isDragging) onMove(e.clientX); });
             window.addEventListener('mouseup', () => { if (isDragging) onEnd(); });
@@ -361,6 +366,11 @@
                     .map(id => ({ id, ...data[id] }))
                     .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
 
+                const arrayRiserva = Object.keys(data)
+                    .filter(id => data[id] && (data[id].stato || 'attesa') === 'riserva')
+                    .map(id => ({ id, ...data[id] }))
+                    .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+
                 const trovati = [];
 
                 Object.keys(data).forEach(id => {
@@ -373,10 +383,39 @@
                     if (cognomePrincipale.includes(queryNorm) || (cognomeDelegante && cognomeDelegante.includes(queryNorm))) {
                         const numeroFallback = arrayAttiva.findIndex(p => p.id === id) + 1;
                         const numeroTicket = item.numero !== undefined && item.numero !== null ? item.numero : numeroFallback;
+                        const st = item.stato || 'attesa';
+
+                        let infoPosizione = "";
+                        let isProssimo = false;
+
+                        if (st === 'riserva') {
+                            const posRiserva = arrayRiserva.findIndex(p => p.id === id) + 1;
+                            infoPosizione = posRiserva > 0 ? `Posizione in riserva: ${posRiserva}°` : "";
+                        } else if (st === 'attesa' || st === 'delay') {
+                            let personeDavanti = 0;
+                            arrayAttiva.forEach(other => {
+                                const otherSt = other.stato || 'attesa';
+                                if ((other.timestamp || 0) < (item.timestamp || 0) && (otherSt === 'attesa' || otherSt === 'chiamato' || otherSt === 'delay')) {
+                                    personeDavanti += other.delega ? 2 : 1;
+                                }
+                            });
+                            if (personeDavanti === 0) {
+                                infoPosizione = "È il prossimo! 🎯";
+                                isProssimo = true;
+                            } else {
+                                infoPosizione = `Posizione in coda: ${personeDavanti + 1}° (${personeDavanti} ${personeDavanti === 1 ? 'persona' : 'persone'} davanti)`;
+                            }
+                        } else if (st === 'chiamato') {
+                            infoPosizione = "Deve presnetarsi ora in cassa!";
+                            isProssimo = true;
+                        }
+
                         trovati.push({
                             id,
                             ...item,
-                            numeroVisualizzato: numeroTicket
+                            numeroVisualizzato: numeroTicket,
+                            infoPosizione,
+                            isProssimo
                         });
                     }
                 });
@@ -399,6 +438,10 @@
                         ? `<div class="ticket-delega">Con delega per: <strong>${t.delegato}</strong></div>`
                         : "";
 
+                    const rigaPosizione = t.infoPosizione
+                        ? `<div class="ticket-posizione ${t.isProssimo ? 'prossimo' : ''}">${t.infoPosizione}</div>`
+                        : "";
+
                     const wrapper = document.createElement('div');
                     wrapper.className = 'swipe-wrapper';
                     wrapper.innerHTML = `
@@ -407,6 +450,7 @@
                             <div class="ticket-info">
                                 <div class="ticket-nominativo">${nominativoCompleto}</div>
                                 ${infoDelega}
+                                ${rigaPosizione}
                                 <span class="ticket-stato ${badge.classe}">${badge.testo}</span>
                             </div>
                             <div class="ticket-numero-box ${isRiserva ? 'riserva-box' : ''}">
