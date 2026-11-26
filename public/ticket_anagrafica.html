@@ -471,7 +471,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
-        import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+        import { getDatabase, ref, push, set, onValue, get, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
 
         function formattaDataIT(rawDate) {
             if (!rawDate) return "";
@@ -594,23 +594,6 @@
             btn.disabled = (!nome || !cognome || !telefono);
         };
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const tokenUrl = urlParams.get('t');
-        const timestampUrl = parseInt(urlParams.get('ts') || '0');
-        const debugUrl = urlParams.get('debug');
-        const minutiRitardo = parseInt(urlParams.get('ritardo') || '0', 10);
-        
-        const giaRegistrato = localStorage.getItem('coda_id_utente');
-        const tokenSessioneLocale = sessionStorage.getItem('qr_verificato');        
-
-        let accessoConsentito = (debugUrl === '1' || giaRegistrato || tokenSessioneLocale === 'true' || (tokenUrl === 'tuchini2027' && Date.now() - timestampUrl < 30000));
-        if (tokenUrl === 'tuchini2027') sessionStorage.setItem('qr_verificato', 'true');
-
-        if (!accessoConsentito) {
-            document.body.innerHTML = `<div class="card"><h2 style="color: #dc2626;">⚠️ Accesso non consentito</h2><p>Inquadra il QR code ufficiale.</p></div>`;
-            throw new Error("Accesso bloccato.");
-        }
-
         const firebaseConfig = {
             apiKey: "AIzaSyCKfb2IDqE-y4Ln_1tUIYm09VVMqRRruvQ",
             authDomain: "ticketdispensertuchini.firebaseapp.com",
@@ -625,9 +608,19 @@
         const codaRef = ref(db, 'coda');
         const limiteRef = ref(db, 'config/limiteMassimo');
 
-        if (giaRegistrato) {
-            attivaModalitaAttesa(giaRegistrato, localStorage.getItem('coda_nome_utente'));
-        } else {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tokenUrl = urlParams.get('t');
+        const timestampUrl = parseInt(urlParams.get('ts') || '0', 10);
+        const qidUrl = urlParams.get('qid');
+
+        const giaRegistrato = localStorage.getItem('coda_id_utente');
+        const tokenSessioneLocale = sessionStorage.getItem('qr_verificato');
+
+        function bloccaAccesso(motivo) {
+            document.body.innerHTML = `<div class="card"><h2 style="color: #dc2626;">⚠️ Accesso non consentito</h2><p>${motivo}</p></div>`;
+        }
+
+        function caricaFormODisponibilita() {
             onValue(limiteRef, (limiteSnapshot) => {
                 const limiteMax = limiteSnapshot.val() || 10;
                 onValue(codaRef, (codaSnapshot) => {
@@ -650,7 +643,41 @@
             }, { onlyOnce: true });
         }
 
+        if (giaRegistrato) {
+            attivaModalitaAttesa(giaRegistrato, localStorage.getItem('coda_nome_utente'));
+        } else if (tokenSessioneLocale === 'true') {
+            caricaFormODisponibilita();
+        } else {
+            const diffTempo = Date.now() - timestampUrl;
+            const qrValido = (tokenUrl === 'tuchini2027' && qidUrl && diffTempo >= 0 && diffTempo < 20000);
+
+            if (!qrValido) {
+                bloccaAccesso("Inquadra il QR code ufficiale in sede per accedere.");
+                throw new Error("Accesso bloccato.");
+            }
+
+            const qrRef = ref(db, `qr_usati/${qidUrl}`);
+            get(qrRef).then((snap) => {
+                if (snap.exists()) {
+                    bloccaAccesso("Questo QR code è già stato utilizzato. Attendi il prossimo QR code sullo schermo (ogni 15 secondi).");
+                    return;
+                }
+
+                set(qrRef, serverTimestamp()).then(() => {
+                    sessionStorage.setItem('qr_verificato', 'true');
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                    caricaFormODisponibilita();
+                }).catch(() => {
+                    bloccaAccesso("Errore nella verifica del QR code. Riprova.");
+                });
+            });
+        }
+
         window.registraInCoda = function() {
+            const btnInvia = document.getElementById('btnInvia');
+            btnInvia.disabled = true;
+            btnInvia.innerText = "Registrazione in corso...";
+
             const nome = document.getElementById('nomeUtente').value.trim();
             const cognome = document.getElementById('cognomeUtente').value.trim();
             const giaIscritto = document.querySelector('input[name="giaIscrittoUtente"]:checked').value === 'si';
@@ -725,43 +752,78 @@
                 datiUtente.delegato = "";
             }
 
-            onValue(codaRef, (snapshot) => {
-                const data = snapshot.val();
-                let timestampCalcolato = Date.now();
-                let prossimoNumero = 1;
+            Promise.all([get(limiteRef), get(codaRef)]).then(([limiteSnap, codaSnap]) => {
+                const limiteMax = limiteSnap.val() || 10;
+                const data = codaSnap.val() || {};
 
-                if (data) {
-                    let arrayAttiva = Object.keys(data)
-                        .filter(id => data[id] !== null && (data[id].stato || 'attesa') !== 'riserva')
-                        .map(id => ({ id, ...data[id] }))
-                        .sort((a, b) => a.timestamp - b.timestamp);
+                let postiOccupati = 0;
+                let cfDuplicato = false;
+                const cfUtente = datiUtente.codiceFiscale;
+                const cfDelegato = conDelega ? datiUtente.z_datiDelega.codiceFiscale : null;
 
-                    if (minutiRitardo > 0 && arrayAttiva.length > 0) {
-                        timestampCalcolato = arrayAttiva[0].timestamp + (minutiRitardo * 60 * 1000);
+                let maxNum = 0;
+                Object.keys(data).forEach(id => {
+                    const item = data[id];
+                    if (!item) return;
+
+                    if (item.numero && item.numero > maxNum) maxNum = item.numero;
+
+                    const st = item.stato || 'attesa';
+                    if (st !== 'riserva') {
+                        postiOccupati += item.delega ? 2 : 1;
                     }
 
-                    let maxNum = 0;
-                    Object.keys(data).forEach(id => {
-                        const item = data[id];
-                        if (item && item.numero && item.numero > maxNum) maxNum = item.numero;
-                    });
-                    prossimoNumero = maxNum > 0 ? maxNum + 1 : Object.keys(data).length + 1;
-                }
-
-                const nuovoTicket = push(codaRef, {
-                    numero: prossimoNumero,
-                    ...datiUtente,
-                    timestamp: timestampCalcolato,
-                    stato: 'attesa'
+                    if (item.codiceFiscale === cfUtente || (item.z_datiDelega && item.z_datiDelega.codiceFiscale === cfUtente)) {
+                        cfDuplicato = true;
+                    }
+                    if (cfDelegato && (item.codiceFiscale === cfDelegato || (item.z_datiDelega && item.z_datiDelega.codiceFiscale === cfDelegato))) {
+                        cfDuplicato = true;
+                    }
                 });
 
-                const nomeCompletoUI = `${cognome} ${nome}`;
-                localStorage.setItem('coda_id_utente', nuovoTicket.key);
-                localStorage.setItem('coda_nome_utente', nomeCompletoUI);
-                attivaModalitaAttesa(nuovoTicket.key, nomeCompletoUI);
-            }, { onlyOnce: true });
-        }
+                if (cfDuplicato) {
+                    alert("Attenzione: questo Codice Fiscale risulta già inserito in coda!");
+                    btnInvia.disabled = false;
+                    btnInvia.innerText = "Prendi il Numero";
+                    return;
+                }
 
+                const postiRichiesti = conDelega ? 2 : 1;
+                if (postiOccupati + postiRichiesti > limiteMax) {
+                    alert("Spiacenti, gli ultimi posti disponibili sono appena terminati. Verrai reindirizzato alla lista di riserva.");
+                    document.getElementById('schermataForm').style.display = 'none';
+                    document.getElementById('schermataPiena').style.display = 'block';
+                    btnInvia.disabled = false;
+                    btnInvia.innerText = "Prendi il Numero";
+                    return;
+                }
+
+                const prossimoNumero = maxNum + 1;
+                const nuovoTicketRef = push(codaRef);
+                const ticketId = nuovoTicketRef.key;
+
+                set(nuovoTicketRef, {
+                    numero: prossimoNumero,
+                    ...datiUtente,
+                    timestamp: serverTimestamp(),
+                    stato: 'attesa'
+                }).then(() => {
+                    const nomeCompletoUI = `${cognome} ${nome}`;
+                    localStorage.setItem('coda_id_utente', ticketId);
+                    localStorage.setItem('coda_nome_utente', nomeCompletoUI);
+                    attivaModalitaAttesa(ticketId, nomeCompletoUI);
+                }).catch((err) => {
+                    alert("Salvataggio rifiutato dal server: " + err.message);
+                    btnInvia.disabled = false;
+                    btnInvia.innerText = "Prendi il Numero";
+                });
+
+            }).catch((err) => {
+                alert("Errore di lettura dati: " + err.message);
+                btnInvia.disabled = false;
+                btnInvia.innerText = "Prendi il Numero";
+            });
+        };
         window.registraInRiserva = function() {
             const nome = document.getElementById('nomeUtenteRiserva').value.trim();
             const cognome = document.getElementById('cognomeUtenteRiserva').value.trim();
@@ -784,7 +846,7 @@
                     nome: nome,
                     cognome: cognome,
                     telefono, delega: false, delegato: "",
-                    timestamp: Date.now(), stato: 'riserva'
+                    timestamp: serverTimestamp(), stato: 'riserva'
                 });
 
                 const nomeCompletoUI = `${cognome} ${nome}`;

@@ -340,7 +340,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
 
-        const URL_BASE = "https://iscrizionituchini.web.app//ticket_anagrafica.html";
+        const URL_BASE = "https://iscrizionituchini.web.app/ticket_anagrafica.html";
         const INTERVALLO_SECONDI = 15;
         let secondiRimasti = INTERVALLO_SECONDI;
         let qrCodeInstance = null;
@@ -348,7 +348,8 @@
 
         function aggiornaQRCode() {
             const timestampCorrente = Date.now();
-            const urlSicuro = `${URL_BASE}?t=tuchini2027&ts=${timestampCorrente}`;
+            const qid = Math.random().toString(36).substring(2, 10) + timestampCorrente.toString(36);
+            const urlSicuro = `${URL_BASE}?t=tuchini2027&ts=${timestampCorrente}&qid=${qid}`;
             const qrContainer = document.getElementById('qrImgContainer');
             
             if (!qrCodeInstance) {
